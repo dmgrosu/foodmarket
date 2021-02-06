@@ -36,4 +36,9 @@ public class AppUserService implements UserDetailsService {
                         .map(appRole -> new SimpleGrantedAuthority(appRole.getRole().name()))
                         .collect(Collectors.toList()));
     }
+
+    public AppUser registerNewUser(AppUser appUser) {
+        return appUserDao.save(appUser);
+    }
+
 }

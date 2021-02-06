@@ -7,16 +7,17 @@ import md.ramaiana.foodmarket.model.Role;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.HashSet;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
@@ -48,5 +49,15 @@ class AppUserServiceTest {
         // ASSERT
         assertThat(actualUser.getUsername()).isEqualTo("someEmail");
         assertThat(actualUser.getAuthorities()).extracting("role").contains("USER");
+    }
+
+    @Test
+    void test_registerNewUser_daoCalled() {
+        // ACT
+        appUserService.registerNewUser(AppUser.builder()
+                .email("someEmail")
+                .build());
+        // ASSERT
+        Mockito.verify(userDaoMock, times(1)).save(any(AppUser.class));
     }
 }
