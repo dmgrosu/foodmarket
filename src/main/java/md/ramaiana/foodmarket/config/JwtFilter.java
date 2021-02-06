@@ -46,13 +46,10 @@ public class JwtFilter extends OncePerRequestFilter {
         if (userEmail == null || userId == null) {
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
         } else {
-
             request.setAttribute("userId", userId);
             request.setAttribute("username", userEmail);
-
             Authentication authentication = tokenService.getAuthentication(token);
             SecurityContextHolder.getContext().setAuthentication(authentication);
-
             filterChain.doFilter(request, response);
         }
     }
@@ -64,4 +61,5 @@ public class JwtFilter extends OncePerRequestFilter {
         }
         return null;
     }
+
 }
