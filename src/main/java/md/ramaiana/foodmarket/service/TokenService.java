@@ -6,6 +6,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import md.ramaiana.foodmarket.model.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -35,13 +36,13 @@ public class TokenService {
         this.appUserService = appUserService;
     }
 
-    public String createToken(String userId, String email) {
+    public String createToken(AppUser appUser) {
         try {
             Algorithm algorithm = Algorithm.HMAC256(TOKEN_SECRET);
             Date now = new Date();
             return "Bearer " + JWT.create()
-                    .withClaim("username", email)
-                    .withClaim("userId", userId)
+                    .withClaim("username", appUser.getUsername())
+                    .withClaim("userId", appUser.getId())
                     .withClaim("createdAt", now)
                     .withExpiresAt(new Date(now.getTime() + TOKEN_VALIDITY))
                     .sign(algorithm);

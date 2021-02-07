@@ -1,5 +1,8 @@
 package md.ramaiana.foodmarket.model;
 
+import lombok.Getter;
+
+@Getter
 public enum Role {
     ADMIN("admin"),
     USER("user");

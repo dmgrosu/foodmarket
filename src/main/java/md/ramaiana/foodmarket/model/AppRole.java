@@ -8,7 +8,7 @@ import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
 /**
- * @author Dmitri Grosu (dmitri.grosu@codefactorygroup.com), 2/6/21
+ * @author Dmitri Grosu, 2/6/21
  */
 @Getter
 @AllArgsConstructor

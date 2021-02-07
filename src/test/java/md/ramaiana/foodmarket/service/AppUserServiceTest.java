@@ -12,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -29,23 +30,21 @@ class AppUserServiceTest {
     private AppUserService appUserService;
 
     @Test
-    void loadUserByUsername() {
+    void test_loadUserByUsername_foundUserReturned() {
         // ARRANGE
         Set<AppRole> someRoles = new HashSet<>();
         someRoles.add(AppRole.builder()
                 .userId(123)
                 .role(Role.USER)
                 .build());
-        when(userDaoMock.findByEmail(eq("someEmail"))).thenReturn(AppUser.builder()
+        when(userDaoMock.findByEmail(eq("someEmail"))).thenReturn(Optional.of(AppUser.builder()
                 .id(123)
                 .email("someEmail")
                 .passwd("passwd")
                 .roles(someRoles)
-                .build());
-
+                .build()));
         // ACT
         UserDetails actualUser = appUserService.loadUserByUsername("someEmail");
-
         // ASSERT
         assertThat(actualUser.getUsername()).isEqualTo("someEmail");
         assertThat(actualUser.getAuthorities()).extracting("role").contains("USER");

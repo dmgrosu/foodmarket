@@ -1,27 +1,19 @@
 package md.ramaiana.foodmarket.dao;
 
-import md.ramaiana.foodmarket.model.AppRole;
+import md.ramaiana.foodmarket.config.DataJdbcConfig;
 import md.ramaiana.foodmarket.model.AppUser;
 import md.ramaiana.foodmarket.model.Role;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.jdbc.DataJdbcTest;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.jdbc.repository.config.EnableJdbcRepositories;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.context.annotation.Import;
 
-import javax.annotation.Resource;
-
-import java.util.HashSet;
-import java.util.Set;
+import java.time.OffsetDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 @DataJdbcTest
+@Import(DataJdbcConfig.class)
 class AppUserDaoTest {
 
     @Autowired
@@ -32,7 +24,7 @@ class AppUserDaoTest {
         // ARRANGE
         AppUser expectedUser = someUserSaved("userEmail", "passwd");
         // ACT
-        AppUser actualUser = appUserDao.findByEmail("userEmail");
+        AppUser actualUser = appUserDao.findByEmail("userEmail").get();
         // ASSERT
         assertThat(actualUser).isNotNull();
         assertThat(actualUser.getEmail()).isEqualTo(expectedUser.getEmail());
@@ -63,15 +55,12 @@ class AppUserDaoTest {
     @Test
     void test_saveUser_userWithIdReturned() {
         // ARRANGE
-        Set<AppRole> roles = new HashSet<>();
-        roles.add(AppRole.builder()
-                .role(Role.USER)
-                .build());
         AppUser someUser = AppUser.builder()
                 .email("email")
                 .passwd("passwd")
-                .roles(roles)
+                .createdAt(OffsetDateTime.now())
                 .build();
+        someUser.addRole(Role.USER);
         // ACT
         AppUser actualUser = appUserDao.save(someUser);
         // ASSERT
@@ -80,15 +69,12 @@ class AppUserDaoTest {
     }
 
     private AppUser someUserSaved(String email, String passwd) {
-        Set<AppRole> roles = new HashSet<>();
-        roles.add(AppRole.builder()
-                .role(Role.USER)
-                .build());
         AppUser someUser = AppUser.builder()
                 .email(email)
                 .passwd(passwd)
-                .roles(roles)
+                .createdAt(OffsetDateTime.now())
                 .build();
+        someUser.addRole(Role.USER);
         return appUserDao.save(someUser);
     }
 
