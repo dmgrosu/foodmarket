@@ -17,7 +17,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * @author Dmitri Grosu (dmitri.grosu@codefactorygroup.com), 2/6/21
+ * @author Dmitri Grosu (dmitri.grosu@gmail.com), 2/6/21
  */
 @AllArgsConstructor
 @Getter

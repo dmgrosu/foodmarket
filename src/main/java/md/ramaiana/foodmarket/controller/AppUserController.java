@@ -1,6 +1,5 @@
 package md.ramaiana.foodmarket.controller;
 
-import md.ramaiana.foodmarket.model.AppRole;
 import md.ramaiana.foodmarket.model.AppUser;
 import md.ramaiana.foodmarket.model.Role;
 import md.ramaiana.foodmarket.model.dto.UserDto;
@@ -20,8 +19,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.OffsetDateTime;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * @author Dmitri Grosu, 2/7/21
