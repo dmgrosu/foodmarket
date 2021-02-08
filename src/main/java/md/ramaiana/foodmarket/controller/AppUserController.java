@@ -1,5 +1,8 @@
 package md.ramaiana.foodmarket.controller;
 
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.util.JsonFormat;
+import lombok.extern.slf4j.Slf4j;
 import md.ramaiana.foodmarket.model.AppUser;
 import md.ramaiana.foodmarket.model.Role;
 import md.ramaiana.foodmarket.proto.Authorization.LoginRequest;
@@ -25,6 +28,7 @@ import java.time.OffsetDateTime;
 /**
  * @author Dmitri Grosu, 2/7/21
  */
+@Slf4j
 @RestController
 @RequestMapping("/auth")
 public class AppUserController {
@@ -33,6 +37,7 @@ public class AppUserController {
     private final TokenService tokenService;
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
+    private final JsonFormat.Printer printer;
 
     @Autowired
     public AppUserController(AppUserService appUserService,
@@ -43,10 +48,11 @@ public class AppUserController {
         this.tokenService = tokenService;
         this.authenticationManager = authenticationManager;
         this.passwordEncoder = passwordEncoder;
+        this.printer = JsonFormat.printer().omittingInsignificantWhitespace();
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) throws InvalidProtocolBufferException {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword())
         );
@@ -58,7 +64,7 @@ public class AppUserController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> signUp(@RequestBody SignUpRequest signUpRequest) {
+    public ResponseEntity<?> signUp(@RequestBody SignUpRequest signUpRequest) throws InvalidProtocolBufferException {
         if (appUserService.userEmailExists(signUpRequest.getEmail())) {
             return ResponseEntity.badRequest().body("User email is not unique!");
         }
@@ -72,13 +78,13 @@ public class AppUserController {
         return ResponseEntity.ok(buildSuccessfulLoginResponse(savedUser));
     }
 
-    private LoginResponse buildSuccessfulLoginResponse(AppUser appUser) {
+    private String buildSuccessfulLoginResponse(AppUser appUser) throws InvalidProtocolBufferException {
         UserProto userProto = buildProtoFromAppUser(appUser);
         String token = tokenService.createToken(appUser);
-        return LoginResponse.newBuilder()
+        return printer.print(LoginResponse.newBuilder()
                 .setUser(userProto)
                 .setToken(token)
-                .build();
+                .build());
     }
 
     private UserProto buildProtoFromAppUser(AppUser appUser) {

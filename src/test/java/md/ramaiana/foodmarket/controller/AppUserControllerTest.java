@@ -1,9 +1,11 @@
 package md.ramaiana.foodmarket.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.protobuf.util.JsonFormat;
+import md.ramaiana.foodmarket.config.WebConfig;
 import md.ramaiana.foodmarket.model.AppUser;
 import md.ramaiana.foodmarket.model.Role;
-import md.ramaiana.foodmarket.model.dto.UserDto;
+import md.ramaiana.foodmarket.proto.Authorization.LoginRequest;
 import md.ramaiana.foodmarket.service.AppUserService;
 import md.ramaiana.foodmarket.service.TokenService;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpHeaders;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -25,10 +27,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@Import(WebConfig.class)
 class AppUserControllerTest {
 
     @Autowired
@@ -55,15 +59,15 @@ class AppUserControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(givenUserDtoInJson("someEmail", "somePasswd")))
                 .andExpect(status().isOk())
-                .andExpect(header().exists(HttpHeaders.AUTHORIZATION))
-                .andExpect(jsonPath("$.email").value("someEmail"))
-                .andExpect(jsonPath("$.userId").isNotEmpty());
+                .andExpect(jsonPath("$.user.email").value("someEmail"))
+                .andExpect(jsonPath("$.user.id").isNotEmpty())
+                .andExpect(jsonPath("$.token").isNotEmpty());
+
     }
 
     @Test
     void test_register_tokenReturned() throws Exception {
         // ARRANGE
-        String jsonString = givenUserDtoInJson("email", "passwd");
         when(appUserServiceMock.userEmailExists(eq("email"))).thenReturn(false);
         when(appUserServiceMock.registerNewUser(any(AppUser.class)))
                 .thenReturn(AppUser.builder()
@@ -75,22 +79,22 @@ class AppUserControllerTest {
         // ACT & ASSERT
         mockMvc.perform(post("/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(jsonString))
+                .content(givenUserDtoInJson("email", "passwd")))
                 .andExpect(status().isOk())
-                .andExpect(header().exists(HttpHeaders.AUTHORIZATION))
-                .andExpect(jsonPath("$.email").value("email"))
-                .andExpect(jsonPath("$.userId").isNotEmpty());
+                .andExpect(jsonPath("$.user.email").value("email"))
+                .andExpect(jsonPath("$.user.id").isNotEmpty())
+                .andExpect(jsonPath("$.token").isNotEmpty());
+
     }
 
     @Test
     void test_register_emailExists_badRequest() throws Exception {
         // ARRANGE
-        String jsonString = givenUserDtoInJson("email", "passwd");
         when(appUserServiceMock.userEmailExists(eq("email"))).thenReturn(true);
         // ACT & ASSERT
         mockMvc.perform(post("/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(jsonString))
+                .content(givenUserDtoInJson("email", "passwd")))
                 .andExpect(status().isBadRequest());
     }
 
@@ -112,11 +116,11 @@ class AppUserControllerTest {
     }
 
     private String givenUserDtoInJson(String email, String passwd) throws Exception {
-        UserDto someUserDto = UserDto.builder()
-                .email(email)
-                .passwd(passwd)
+        LoginRequest loginRequest = LoginRequest.newBuilder()
+                .setEmail(email)
+                .setPassword(passwd)
                 .build();
-        return objectMapper.writeValueAsString(someUserDto);
+        return JsonFormat.printer().print(loginRequest);
     }
 
 }
