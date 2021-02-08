@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.OffsetDateTime;
@@ -20,6 +21,8 @@ public class Client {
     Integer id;
     String name;
     String idno;
-    OffsetDateTime created_at;
-    OffsetDateTime deleted_at;
+    @Column("created_at")
+    OffsetDateTime createdAt;
+    @Column("deleted_at")
+    OffsetDateTime deletedAt;
 }

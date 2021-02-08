@@ -12,6 +12,6 @@ import java.util.Optional;
 @Repository
 public interface ClientDao extends CrudRepository<Client, Integer> {
 
-    Optional<Client> findByIdnoAndDeleted_atIsNull(String idno);
+    Optional<Client> findByIdnoAndDeletedAtIsNull(String idno);
 
 }

@@ -19,7 +19,7 @@ public class ClientService {
     }
 
     public Client findClientByIdno(String idno) throws ClientNotFoundException {
-        return clientDao.findByIdnoAndDeleted_atIsNull(idno)
+        return clientDao.findByIdnoAndDeletedAtIsNull(idno)
                 .orElseThrow(() -> new ClientNotFoundException(String.format("Client with IDNO [%s] not found", idno)));
     }
 

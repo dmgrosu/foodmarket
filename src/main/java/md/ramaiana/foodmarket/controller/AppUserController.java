@@ -2,11 +2,13 @@ package md.ramaiana.foodmarket.controller;
 
 import md.ramaiana.foodmarket.model.AppUser;
 import md.ramaiana.foodmarket.model.Role;
-import md.ramaiana.foodmarket.model.dto.UserDto;
+import md.ramaiana.foodmarket.proto.Authorization.LoginRequest;
+import md.ramaiana.foodmarket.proto.Authorization.LoginResponse;
+import md.ramaiana.foodmarket.proto.Authorization.SignUpRequest;
+import md.ramaiana.foodmarket.proto.Authorization.UserProto;
 import md.ramaiana.foodmarket.service.AppUserService;
 import md.ramaiana.foodmarket.service.TokenService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -44,42 +46,47 @@ public class AppUserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody UserDto userDto) {
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(userDto.getEmail(), userDto.getPasswd())
+                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword())
         );
         if (authentication.isAuthenticated()) {
             AppUser appUser = (AppUser) authentication.getPrincipal();
-            String token = tokenService.createToken(appUser);
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.AUTHORIZATION, token)
-                    .body(UserDto.builder()
-                            .userId(appUser.getId())
-                            .email(appUser.getEmail())
-                            .build());
+            return ResponseEntity.ok(buildSuccessfulLoginResponse(appUser));
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody UserDto userDto) {
-        if (appUserService.userEmailExists(userDto.getEmail())) {
+    public ResponseEntity<?> signUp(@RequestBody SignUpRequest signUpRequest) {
+        if (appUserService.userEmailExists(signUpRequest.getEmail())) {
             return ResponseEntity.badRequest().body("User email is not unique!");
         }
         AppUser appUser = AppUser.builder()
-                .email(userDto.getEmail())
-                .passwd(passwordEncoder.encode(userDto.getPasswd()))
+                .email(signUpRequest.getEmail())
+                .passwd(passwordEncoder.encode(signUpRequest.getPassword()))
                 .createdAt(OffsetDateTime.now())
                 .build();
         appUser.addRole(Role.USER);
         AppUser savedUser = appUserService.registerNewUser(appUser);
-        String token = tokenService.createToken(savedUser);
-        return ResponseEntity.ok()
-                .header(HttpHeaders.AUTHORIZATION, token)
-                .body(UserDto.builder()
-                        .userId(savedUser.getId())
-                        .email(savedUser.getEmail())
-                        .build());
+        return ResponseEntity.ok(buildSuccessfulLoginResponse(savedUser));
+    }
+
+    private LoginResponse buildSuccessfulLoginResponse(AppUser appUser) {
+        UserProto userProto = buildProtoFromAppUser(appUser);
+        String token = tokenService.createToken(appUser);
+        return LoginResponse.newBuilder()
+                .setUser(userProto)
+                .setToken(token)
+                .build();
+    }
+
+    private UserProto buildProtoFromAppUser(AppUser appUser) {
+        return UserProto.newBuilder()
+                .setEmail(appUser.getEmail())
+                .setId(appUser.getId())
+                .setClientId(appUser.getClientId() != null ? appUser.getClientId() : 0)
+                .build();
     }
 
 }

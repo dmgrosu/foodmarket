@@ -29,8 +29,8 @@ create table if not exists "client"
             primary key auto_increment,
     name       text      not null,
     idno       char(13)  not null,
-    created_at timestamp not null default now(),
-    deleted_at timestamp 
+    "created_at" timestamp not null default now(),
+    "deleted_at" timestamp
 );
 
 create table if not exists "good_group"
@@ -77,11 +77,11 @@ create table if not exists "app_user"
             primary key auto_increment,
     email      text      not null,
     passwd     text      not null,
-    client_id  integer
+    "client_id"  integer
         constraint app_user_client_id_fk
             references "client",
-    created_at timestamp not null default now(),
-    deleted_at timestamp 
+    "created_at" timestamp not null default now(),
+    "deleted_at" timestamp
 );
 
 create table if not exists "app_user_role"

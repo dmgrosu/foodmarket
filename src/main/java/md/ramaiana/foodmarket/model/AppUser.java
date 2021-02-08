@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.MappedCollection;
 import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.security.core.GrantedAuthority;
@@ -28,10 +29,14 @@ public class AppUser implements UserDetails {
     Integer id;
     String email;
     String passwd;
+    @Column("created_at")
     OffsetDateTime createdAt;
+    @Column("deleted_at")
     OffsetDateTime deletedAt;
     @MappedCollection(idColumn = "user_id")
     Set<AppRole> roles;
+    @Column("client_id")
+    Integer clientId;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

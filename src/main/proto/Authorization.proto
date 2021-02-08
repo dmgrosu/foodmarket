@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+option java_package = "md.ramaiana.foodmarket.proto";
+option java_outer_classname = "Authorization";
+
+message LoginRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message LoginResponse {
+  UserProto user = 1;
+  string token = 2;
+}
+
+message SignUpRequest {
+  string email = 1;
+  string password = 2;
+  int32 clientId = 3;
+}
+
+message UserProto {
+  int32 id = 1;
+  string email = 2;
+  int32 clientId = 3;
+}
