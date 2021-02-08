@@ -1,20 +1,16 @@
 package md.ramaiana.foodmarket.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.protobuf.util.JsonFormat;
-import md.ramaiana.foodmarket.config.WebConfig;
 import md.ramaiana.foodmarket.model.AppUser;
 import md.ramaiana.foodmarket.model.Role;
 import md.ramaiana.foodmarket.proto.Authorization.LoginRequest;
 import md.ramaiana.foodmarket.service.AppUserService;
 import md.ramaiana.foodmarket.service.TokenService;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -32,7 +28,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@Import(WebConfig.class)
 class AppUserControllerTest {
 
     @Autowired
@@ -43,12 +38,6 @@ class AppUserControllerTest {
     private TokenService tokenServiceMock;
     @MockBean
     private AuthenticationManager authenticationManagerMock;
-    private ObjectMapper objectMapper;
-
-    @BeforeEach
-    void setUp() {
-        objectMapper = new ObjectMapper();
-    }
 
     @Test
     void test_login_tokenReturned() throws Exception {

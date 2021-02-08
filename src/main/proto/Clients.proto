@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+option java_package = "md.ramaiana.foodmarket.proto";
+option java_outer_classname = "Clients";
+
+message ClientResponse {
+  Client client = 1;
+  string error = 2;
+}
+
+message Client {
+  int32 id = 1;
+  string name = 2;
+  string idno = 3;
+}

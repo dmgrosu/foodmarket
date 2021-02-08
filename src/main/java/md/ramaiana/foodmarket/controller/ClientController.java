@@ -1,7 +1,11 @@
 package md.ramaiana.foodmarket.controller;
 
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.util.JsonFormat;
 import lombok.extern.slf4j.Slf4j;
 import md.ramaiana.foodmarket.model.Client;
+import md.ramaiana.foodmarket.proto.Clients;
+import md.ramaiana.foodmarket.proto.Clients.ClientResponse;
 import md.ramaiana.foodmarket.service.ClientNotFoundException;
 import md.ramaiana.foodmarket.service.ClientService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,21 +24,39 @@ import org.springframework.web.bind.annotation.RestController;
 public class ClientController {
 
     private final ClientService clientService;
+    private final JsonFormat.Printer printer;
 
     @Autowired
     public ClientController(ClientService clientService) {
         this.clientService = clientService;
+        this.printer = JsonFormat.printer().omittingInsignificantWhitespace();
     }
 
     @GetMapping("/findByIdno")
-    public ResponseEntity<?> getIdByIdno(@RequestParam("idno") String idno) {
+    public ResponseEntity<?> getIdByIdno(@RequestParam("idno") String idno) throws InvalidProtocolBufferException {
         try {
             Client client = clientService.findClientByIdno(idno);
-            return ResponseEntity.ok(client.getId());
+            return ResponseEntity.ok(printer.print(buildProtoFromDomain(client)));
         } catch (ClientNotFoundException e) {
             log.warn(e.getMessage());
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.ok(printer.print(buildErrorResponse(e.getMessage())));
         }
+    }
+
+    private ClientResponse buildProtoFromDomain(Client client) {
+        return ClientResponse.newBuilder()
+                .setClient(Clients.Client.newBuilder()
+                        .setId(client.getId())
+                        .setName(client.getName())
+                        .setIdno(client.getIdno())
+                        .build())
+                .build();
+    }
+
+    private ClientResponse buildErrorResponse(String error) {
+        return ClientResponse.newBuilder()
+                .setError(error)
+                .build();
     }
 
 }
