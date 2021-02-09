@@ -4,11 +4,13 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;
 import lombok.extern.slf4j.Slf4j;
 import md.ramaiana.foodmarket.model.AppUser;
+import md.ramaiana.foodmarket.model.Client;
 import md.ramaiana.foodmarket.model.Role;
 import md.ramaiana.foodmarket.proto.Authorization.LoginRequest;
 import md.ramaiana.foodmarket.proto.Authorization.LoginResponse;
 import md.ramaiana.foodmarket.proto.Authorization.SignUpRequest;
 import md.ramaiana.foodmarket.proto.Authorization.UserProto;
+import md.ramaiana.foodmarket.proto.Clients;
 import md.ramaiana.foodmarket.service.AppUserService;
 import md.ramaiana.foodmarket.service.TokenService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,10 +90,25 @@ public class AppUserController {
     }
 
     private UserProto buildProtoFromAppUser(AppUser appUser) {
+        Client userClient = appUser.getClient();
+        if (userClient == null) {
+            return UserProto.newBuilder()
+                    .setEmail(appUser.getEmail())
+                    .setId(appUser.getId())
+                    .build();
+        }
         return UserProto.newBuilder()
                 .setEmail(appUser.getEmail())
                 .setId(appUser.getId())
-                .setClientId(appUser.getClientId() != null ? appUser.getClientId() : 0)
+                .setClient(buildClientProtoFromClient(userClient))
+                .build();
+    }
+
+    private Clients.Client buildClientProtoFromClient(Client client) {
+        return Clients.Client.newBuilder()
+                .setId(client.getId())
+                .setIdno(client.getIdno())
+                .setName(client.getName())
                 .build();
     }
 

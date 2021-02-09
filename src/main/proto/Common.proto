@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option java_package = "md.ramaiana.foodmarket.proto";
+option java_outer_classname = "Common";
+
+message ErrorResponse {
+  ErrorCode code = 1;
+  string description = 2;
+}
+
+enum ErrorCode {
+  OK = 0;
+  CLIENT_NOT_FOUND = 1;
+  CLIENT_BLOCKED = 2;
+  GOOD_NOT_FOUND = 3;
+
+}

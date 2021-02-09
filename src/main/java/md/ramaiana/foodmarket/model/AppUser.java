@@ -2,8 +2,10 @@ package md.ramaiana.foodmarket.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.PersistenceConstructor;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.MappedCollection;
 import org.springframework.data.relational.core.mapping.Table;
@@ -21,7 +23,7 @@ import java.util.stream.Collectors;
  * @author Dmitri Grosu (dmitri.grosu@gmail.com), 2/6/21
  */
 @AllArgsConstructor
-@Getter
+@Data
 @Builder
 @Table("app_user")
 public class AppUser implements UserDetails {
@@ -37,6 +39,19 @@ public class AppUser implements UserDetails {
     Set<AppRole> roles;
     @Column("client_id")
     Integer clientId;
+    @Transient
+    Client client;
+
+    @PersistenceConstructor
+    public AppUser(Integer id, String email, String passwd, OffsetDateTime createdAt, OffsetDateTime deletedAt, Set<AppRole> roles, Integer clientId) {
+        this.id = id;
+        this.email = email;
+        this.passwd = passwd;
+        this.createdAt = createdAt;
+        this.deletedAt = deletedAt;
+        this.roles = roles;
+        this.clientId = clientId;
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -82,6 +97,10 @@ public class AppUser implements UserDetails {
         roles.add(AppRole.builder()
                 .role(role)
                 .build());
+    }
+
+    public boolean hasClient() {
+        return clientId != null && clientId != 0;
     }
 
 }

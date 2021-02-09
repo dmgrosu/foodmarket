@@ -66,6 +66,7 @@ class AppUserDaoTest {
         // ASSERT
         assertThat(actualUser).isNotNull();
         assertThat(actualUser.getId()).isNotNull();
+        assertThat(actualUser.getClient()).isNull();
     }
 
     private AppUser someUserSaved(String email, String passwd) {
