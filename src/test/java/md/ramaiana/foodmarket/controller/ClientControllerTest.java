@@ -39,9 +39,9 @@ class ClientControllerTest {
         mockMvc.perform(get("/client/findByIdno")
                 .param("idno", someIdno))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.client.id").value(123))
-                .andExpect(jsonPath("$.client.name").value("someClientName"))
-                .andExpect(jsonPath("$.client.idno").value("123456"));
+                .andExpect(jsonPath("$.id").value(123))
+                .andExpect(jsonPath("$.name").value("someClientName"))
+                .andExpect(jsonPath("$.idno").value("123456"));
     }
 
     @Test
@@ -54,6 +54,7 @@ class ClientControllerTest {
         mockMvc.perform(get("/client/findByIdno")
                 .param("idno", someIdno))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.error").value("Client not found"));
+                .andExpect(jsonPath("$.code").value("CLIENT_NOT_FOUND"))
+                .andExpect(jsonPath("$.description").value("Client not found"));
     }
 }

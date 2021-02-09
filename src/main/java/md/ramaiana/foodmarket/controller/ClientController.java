@@ -5,7 +5,7 @@ import com.google.protobuf.util.JsonFormat;
 import lombok.extern.slf4j.Slf4j;
 import md.ramaiana.foodmarket.model.Client;
 import md.ramaiana.foodmarket.proto.Clients;
-import md.ramaiana.foodmarket.proto.Clients.ClientResponse;
+import md.ramaiana.foodmarket.proto.Common;
 import md.ramaiana.foodmarket.service.ClientNotFoundException;
 import md.ramaiana.foodmarket.service.ClientService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,23 +39,22 @@ public class ClientController {
             return ResponseEntity.ok(printer.print(buildProtoFromDomain(client)));
         } catch (ClientNotFoundException e) {
             log.warn(e.getMessage());
-            return ResponseEntity.ok(printer.print(buildErrorResponse(e.getMessage())));
+            return ResponseEntity.ok(printer.print(buildNotFoundResponse(e.getMessage())));
         }
     }
 
-    private ClientResponse buildProtoFromDomain(Client client) {
-        return ClientResponse.newBuilder()
-                .setClient(Clients.Client.newBuilder()
-                        .setId(client.getId())
-                        .setName(client.getName())
-                        .setIdno(client.getIdno())
-                        .build())
+    private Clients.Client buildProtoFromDomain(Client client) {
+        return Clients.Client.newBuilder()
+                .setId(client.getId())
+                .setName(client.getName())
+                .setIdno(client.getIdno())
                 .build();
     }
 
-    private ClientResponse buildErrorResponse(String error) {
-        return ClientResponse.newBuilder()
-                .setError(error)
+    private Common.ErrorResponse buildNotFoundResponse(String error) {
+        return Common.ErrorResponse.newBuilder()
+                .setCode(Common.ErrorCode.CLIENT_NOT_FOUND)
+                .setDescription(error)
                 .build();
     }
 
