@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+option java_package = "md.ramaiana.foodmarket.proto";
+option java_outer_classname = "Orders";
+
+import "Goods.proto";
+import "Clients.proto";
+
+message Order {
+  int32 id = 1;
+  float totalSum = 2;
+  Client client = 3;
+  repeated Good goods = 4;
+}
