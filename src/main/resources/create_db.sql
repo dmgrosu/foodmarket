@@ -18,7 +18,8 @@ create table if not exists rama_fm.good_group
     parent_group_id integer,
     erp_code        text,
     created_at      timestamp with time zone not null default now(),
-    deleted_at      timestamp with time zone
+    deleted_at      timestamp with time zone,
+    updated_at      timestamp with time zone
 );
 
 create unique index good_group_erp_code_uindex
@@ -43,7 +44,8 @@ create table if not exists rama_fm.good
     bar_code   text,
     weight     numeric,
     created_at timestamp with time zone not null default now(),
-    deleted_at timestamp with time zone
+    deleted_at timestamp with time zone,
+    updated_at timestamp with time zone
 );
 
 create unique index good_erp_code_uindex
@@ -69,32 +71,33 @@ create unique index client_idno_uindex
 
 create table if not exists rama_fm."order"
 (
-    id         serial                   not null
+    id                serial    not null
         constraint order_pk
             primary key,
-    client_id  integer
+    client_id         integer
         constraint order_client_id_fk
             references rama_fm.client (id),
-    total_sum  numeric                           default 0 not null,
-    created_at timestamp with time zone not null default now(),
-    deleted_at timestamp with time zone
+    total_sum         numeric            default 0 not null,
+    created_at        timestamp not null default now(),
+    deleted_at        timestamp,
+    processed_at      timestamp,
+    processing_result text
 );
 
 create table if not exists rama_fm.order_good
 (
-    id         serial                   not null
+    id       serial            not null
         constraint order_good_pk
             primary key,
-    order_id   integer                  not null
+    order_id integer           not null
         constraint order_good_order_id_fk
             references rama_fm.order (id),
-    good_id    integer                  not null
+    good_id  integer           not null
         constraint order_good_good_id_fk
             references rama_fm.good (id),
-    quantity   numeric default 0        not null,
-    sum        numeric default 0        not null,
-    created_at timestamp with time zone not null default now(),
-    deleted_at timestamp with time zone
+    quantity numeric default 0 not null,
+    sum      numeric default 0 not null,
+    weight   numeric
 );
 
 create table if not exists rama_fm."app_user"
