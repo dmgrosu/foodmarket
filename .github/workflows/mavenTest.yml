@@ -21,6 +21,6 @@ jobs:
       with:
         java-version: 1.8
     - name: Install protoc
-      run: apt install -y protobuf-compiler
+      run: sudo apt install -y protobuf-compiler
     - name: Test with Maven
       run: mvn -B test --file pom.xml
