@@ -13,6 +13,8 @@ import org.springframework.context.annotation.Import;
 
 import java.time.OffsetDateTime;
 
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+
 @DataJdbcTest
 @Import(DataJdbcConfig.class)
 class OrderGoodDaoTest {
@@ -30,35 +32,51 @@ class OrderGoodDaoTest {
 
     @Test
     void test_create() {
-        Order someOrder = someOrder();
-        Good someGood = someGood();
-        orderGoodDao.save(OrderGood.builder()
-                .orderId(someOrder.getId())
-                .goodId(someGood.getId())
+        // ARRANGE
+        Order someExistingOrder = someExistingOrder();
+        Good someExistingGood = someExistingGood();
+        // ACT
+        OrderGood saved = orderGoodDao.save(OrderGood.builder()
+                .orderId(someExistingOrder.getId())
+                .goodId(someExistingGood.getId())
                 .quantity(1000f)
                 .sum(10000f)
                 .weight(50f)
                 .build());
+        // ASSERT
+        assertThat(orderGoodDao.existsById(saved.getId())).isTrue();
     }
 
     @Test
     void test_read() {
-        Good existingGood = someGood();
-        orderGoodDao.existsById(existingGood.getId());
+        // ARRANGE
+        OrderGood someExistingOrderGood = someExistingOrderGood();
+        // ACT
+        boolean exists = orderGoodDao.existsById(someExistingOrderGood.getId());
+        // ASSERT
+        assertThat(exists).isTrue();
     }
 
     @Test
     void test_update() {
-        Good someGood = someGood();
-        goodDao.save(someGood);
-        someGood.setName("Bread");
-        goodDao.save(someGood);
+        // ARRANGE
+        OrderGood someExistingOrderGood = someExistingOrderGood();
+        // ACT
+        someExistingOrderGood.setWeight(150f);
+        OrderGood updatedOrder = orderGoodDao.save(someExistingOrderGood);
+        // ASSERT
+        assertThat(updatedOrder.getWeight() == 150f).isTrue();
     }
 
     @Test
     void test_delete() {
-        Good someGood = someGood();
-        goodDao.deleteById(someGood.getId());
+        // ARRANGE
+        OrderGood someExistingGood = someExistingOrderGood();
+        // ACT
+        orderGoodDao.deleteById(someExistingGood.getId());
+        // ASSERT
+        assertThat(orderGoodDao.existsById(someExistingGood.getId())).isFalse();
+
     }
 
     private Client someSavedClient(String idno, String name) {
@@ -69,7 +87,7 @@ class OrderGoodDaoTest {
                 .build());
     }
 
-    private Order someOrder() {
+    private Order someExistingOrder() {
         Client someSavedClient = someSavedClient("123123", "Kirill");
         return orderDao.save(Order.builder()
                 .clientId(someSavedClient.getId())
@@ -81,7 +99,7 @@ class OrderGoodDaoTest {
                 .build());
     }
 
-    private Good someGood() {
+    private Good someExistingGood() {
         return goodDao.save(Good.builder()
                 .name("Water")
                 .price(10f)
@@ -91,6 +109,18 @@ class OrderGoodDaoTest {
                 .barCode("qwerty")
                 .weight(20f)
                 .createdAt(OffsetDateTime.now())
+                .build());
+    }
+
+    private OrderGood someExistingOrderGood() {
+        Good someExistingGood = someExistingGood();
+        Order someExistingOrder = someExistingOrder();
+        return orderGoodDao.save(OrderGood.builder()
+                .orderId(someExistingOrder.getId())
+                .goodId(someExistingGood.getId())
+                .quantity(1000f)
+                .sum(10000f)
+                .weight(50f)
                 .build());
     }
 }

@@ -5,9 +5,11 @@ import lombok.Builder;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.MappedCollection;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 
 /**
  * @author Kirill Grosu (grosukirill009@gmail.com), 2/11/2021
@@ -31,4 +33,6 @@ public class Order {
     OffsetDateTime processedAt;
     @Column("processing_result")
     String processingResult;
+    @MappedCollection(idColumn = "good_id")
+    List<OrderGood> goods;
 }

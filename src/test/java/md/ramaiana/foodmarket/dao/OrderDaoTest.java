@@ -10,6 +10,8 @@ import org.springframework.context.annotation.Import;
 
 import java.time.OffsetDateTime;
 
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+
 /**
  * @author Kirill Grosu (grosukirill009@gmail.com, 2/11/2021
  */
@@ -23,8 +25,10 @@ class OrderDaoTest {
 
     @Test
     void test_create() {
+        // ARRANGE
         Client someSavedClient = someSavedClient("123123", "Kirill");
-        orderDao.save(Order.builder()
+        // ACT
+        Order saved = orderDao.save(Order.builder()
                 .clientId(someSavedClient.getId())
                 .createdAt(OffsetDateTime.now())
                 .deletedAt(null)
@@ -32,27 +36,40 @@ class OrderDaoTest {
                 .processingResult("done")
                 .totalSum(150.3f)
                 .build());
+        // ASSERT
+        assertThat(orderDao.existsById(saved.getId())).isTrue();
     }
 
     @Test
     void test_read() {
+        // ARRANGE
         Order existingOrder = someOrder();
-        orderDao.existsById(existingOrder.getId());
+        // ACT
+        boolean exists = orderDao.existsById(existingOrder.getId());
+        // ASSERT
+        assertThat(exists).isTrue();
     }
 
     @Test
     void test_update() {
+        // ARRANGE
         Order someOrder = someOrder();
-        orderDao.save(someOrder);
+        // ACT
         someOrder.setProcessingResult("Reviewing");
         someOrder.setProcessedAt(OffsetDateTime.now());
-        orderDao.save(someOrder);
+        Order updatedOrder =  orderDao.save(someOrder);
+        // ASSERT
+        assertThat(updatedOrder.getProcessingResult().equals("Reviewing")).isTrue();
     }
 
     @Test
     void test_delete() {
+        // ARRANGE
         Order someOrder = someOrder();
+        // ACT
         orderDao.deleteById(someOrder.getId());
+        // ASSERT
+        assertThat(orderDao.existsById(someOrder.getId())).isFalse();
     }
 
     private Client someSavedClient(String idno, String name) {
