@@ -4,9 +4,9 @@ create table if not exists "brand"
         constraint brand_pk
             primary key auto_increment,
     name       text      not null,
-    erp_code   text,
-    created_at timestamp not null default now(),
-    deleted_at timestamp
+    "erp_code"   text,
+    "created_at" timestamp not null default now(),
+    "deleted_at" timestamp
 );
 
 create table if not exists "good_group"
@@ -15,11 +15,11 @@ create table if not exists "good_group"
         constraint good_group_pk
             primary key auto_increment,
     name            text      not null,
-    parent_group_id integer,
-    erp_code        text,
-    created_at      timestamp not null default now(),
-    deleted_at      timestamp,
-    updated_at      timestamp
+    "parent_group_id" integer,
+    "erp_code"        text,
+    "created_at"      timestamp not null default now(),
+    "deleted_at"      timestamp,
+    "updated_at"      timestamp
 );
 
 create table if not exists "good"

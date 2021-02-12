@@ -31,7 +31,6 @@ class OrderDaoTest {
         Order saved = orderDao.save(Order.builder()
                 .clientId(someSavedClient.getId())
                 .createdAt(OffsetDateTime.now())
-                .deletedAt(null)
                 .processedAt(OffsetDateTime.now())
                 .processingResult("done")
                 .totalSum(150.3f)
