@@ -7,8 +7,8 @@ message Good {
   int32 id = 1;
   string name = 2;
   double price = 3;
-  Group group = 4;
-  Brand brand = 5;
+  int32 groupId = 4;
+  int32 brandId = 5;
   // quantity in one package
   float package = 6;
   string barCode = 7;
@@ -26,5 +26,24 @@ message Brand {
 message Group {
   int32 id = 1;
   string name = 2;
-  Group group = 3;
+  repeated Group groups = 3;
+  repeated Good goods = 4;
+}
+
+message BrandListResponse {
+  repeated Brand brands = 1;
+}
+
+message GroupListResponse {
+  repeated Group groups = 1;
+}
+
+message GoodsFilterRequest {
+  int32 brandId = 1;
+  int32 groupId = 2;
+  string nameSearch = 3;
+}
+
+message GoodsListResponse {
+  repeated Good goods = 1;
 }

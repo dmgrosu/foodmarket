@@ -5,6 +5,7 @@ import md.ramaiana.foodmarket.config.DataJdbcConfig;
 import md.ramaiana.foodmarket.model.Brand;
 import md.ramaiana.foodmarket.model.Good;
 import md.ramaiana.foodmarket.model.GoodGroup;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.jdbc.DataJdbcTest;
@@ -82,6 +83,21 @@ class GoodDaoTest {
         assertThat(goodDao.existsById(someExistingGood.getId())).isFalse();
     }
 
+    @Test
+    void test_saveGood_saved() {
+        // ARRANGE
+        Good givenGood = Good.builder()
+                .name("someName")
+                .erpCode("1234455")
+                .price(123.55f)
+                .createdAt(OffsetDateTime.now())
+                .build();
+        // ACT
+        Good actualGood = goodDao.save(givenGood);
+        // ASSERT
+        Assertions.assertThat(actualGood.getId()).isNotNull();
+    }
+
     private Brand someBrand() {
         return brandDao.save(Brand.builder()
                 .name("OM")
@@ -115,4 +131,6 @@ class GoodDaoTest {
                 .createdAt(OffsetDateTime.now())
                 .build());
     }
+
+
 }
