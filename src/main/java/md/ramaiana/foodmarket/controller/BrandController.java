@@ -14,6 +14,11 @@ import md.ramaiana.foodmarket.proto.Goods;
 import java.util.ArrayList;
 import java.util.List;
 
+
+/**
+ * @author Kirill Grosu (grosukirill009@gmail.com), 2/14/2021
+ * */
+
 @RestController
 @RequestMapping("/brand")
 public class BrandController {
