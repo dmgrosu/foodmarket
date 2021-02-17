@@ -13,4 +13,6 @@ import java.util.List;
 public interface GoodGroupDao extends PagingAndSortingRepository<GoodGroup, Integer> {
 
     List<GoodGroup> getAllByParentGroupIdNullAndDeletedAtNull();
+
+    List<GoodGroup> getAllByParentGroupIdAndDeletedAtNull(Integer groupId);
 }

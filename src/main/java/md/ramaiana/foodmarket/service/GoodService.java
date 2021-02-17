@@ -49,12 +49,16 @@ public class GoodService {
         } else if (name != null) {
             return goodDao.getAllByName(name); // tested
         } else {
-//            List<GoodGroup> groups = goodGroupDao.getAllByParentGroupIdNullAndDeletedAtNull();
-//            List<Good> goods = goodDao.getAllByGroupIdNullAndDeletedAtNull();
-//            groups.forEach(groupList::addGroup);
-//            goods.forEach(groupList::addGood);
-            return null;
+            return goodDao.getAllByGroupIdNullAndDeletedAtNull(); // tested
         }
 
+    }
+
+    public List<GoodGroup> findGroupsFiltered(Integer parentGroupId) {
+        if (parentGroupId != null){
+            return goodGroupDao.getAllByParentGroupIdAndDeletedAtNull(parentGroupId); // tested
+        } else {
+            return goodGroupDao.getAllByParentGroupIdNullAndDeletedAtNull(); // tested
+        }
     }
 }

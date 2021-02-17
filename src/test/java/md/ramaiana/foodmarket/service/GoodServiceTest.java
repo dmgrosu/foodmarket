@@ -1,6 +1,7 @@
 package md.ramaiana.foodmarket.service;
 
 import md.ramaiana.foodmarket.dao.GoodDao;
+import md.ramaiana.foodmarket.dao.GoodGroupDao;
 import md.ramaiana.foodmarket.model.Brand;
 import md.ramaiana.foodmarket.model.Good;
 import md.ramaiana.foodmarket.model.GoodGroup;
@@ -12,16 +13,17 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
 class GoodServiceTest {
     @Mock
     private GoodDao goodDaoMock;
+
+    @Mock
+    private GoodGroupDao goodGroupDaoMock;
 
     @InjectMocks
     private GoodService goodService;
@@ -95,7 +97,6 @@ class GoodServiceTest {
         verify(goodDaoMock, times(1))
                 .getAllByGroupIdAndBrandId(groupId, brandId);
     }
-
 
 
     @Test
@@ -243,5 +244,79 @@ class GoodServiceTest {
         //ASSERT
         verify(goodDaoMock, times(1))
                 .getAllByName(someGoodName);
+    }
+
+    @Test
+    void test_findGoodsFiltered_withNoParams_returnedList() {
+        //ARRANGE
+        String someGoodName = "someName";
+        Brand someBrand = Brand.builder()
+                .id(2)
+                .name("someName")
+                .build();
+        GoodGroup someGroup = GoodGroup.builder()
+                .id(1)
+                .name("someName")
+                .build();
+        List<Good> goods = new ArrayList<>();
+        goods.add(Good.builder()
+                .id(3)
+                .name("someName")
+                .brandId(someBrand.getId())
+                .groupId(someGroup.getId())
+                .price(15f)
+                .build());
+        when(goodDaoMock.getAllByGroupIdNullAndDeletedAtNull())
+                .thenReturn(goods);
+        //ACT
+        goodService.findGoodsFiltered(null, null, null);
+        //ASSERT
+        verify(goodDaoMock, times(1))
+                .getAllByGroupIdNullAndDeletedAtNull();
+    }
+
+    @Test
+    void test_findGroupsFiltered_withParentGroupIdParam_returnedList() {
+        //ARRANGE
+        GoodGroup parentGroup = GoodGroup.builder()
+                .id(5)
+                .name("someParentGroupName")
+                .build();
+        GoodGroup someGroup = GoodGroup.builder()
+                .id(1)
+                .name("someName")
+                .parentGroupId(parentGroup.getId())
+                .build();
+        List<GoodGroup> groups = new ArrayList<>();
+        groups.add(someGroup);
+        when(goodGroupDaoMock.getAllByParentGroupIdAndDeletedAtNull(5))
+                .thenReturn(groups);
+        //ACT
+        List<GoodGroup> returnedGroups = goodService.findGroupsFiltered(5);
+        //ASSERT
+        verify(goodGroupDaoMock, times(1))
+                .getAllByParentGroupIdAndDeletedAtNull(5);
+
+        assertThat(returnedGroups.get(0).getId()).isEqualTo(1);
+    }
+
+    @Test
+    void test_findGroupsFiltered_withNoParams_returnedList() {
+        //ARRANGE
+        GoodGroup parentGroup = GoodGroup.builder()
+                .id(5)
+                .name("someParentGroupName")
+                .build();
+        List<GoodGroup> groups = new ArrayList<>();
+        groups.add(parentGroup);
+        when(goodGroupDaoMock.getAllByParentGroupIdNullAndDeletedAtNull())
+                .thenReturn(groups);
+        //ACT
+        List<GoodGroup> returnedGroups = goodService.findGroupsFiltered(null);
+        //ASSERT
+        verify(goodGroupDaoMock, times(1))
+                .getAllByParentGroupIdNullAndDeletedAtNull();
+
+        assertThat(returnedGroups.get(0).getId()).isEqualTo(5);
     }
 }
