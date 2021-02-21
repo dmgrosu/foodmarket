@@ -3,9 +3,9 @@ import ThemeProvider from "@material-ui/styles/ThemeProvider";
 import {createMuiTheme} from "@material-ui/core";
 import {connect} from "react-redux";
 import {Route, Switch, withRouter} from "react-router-dom";
-import HomePage from "./components/home/HomePage";
 import SignIn from "./components/auth/SignIn";
 import SignUp from "./components/auth/SignUp";
+import Home from "./components/Home";
 
 const theme = createMuiTheme({
     palette: {
@@ -31,7 +31,7 @@ const App = (props) => {
     return (
         <ThemeProvider theme={theme}>
             <Switch>
-                <Route exact path='/' component={HomePage} />
+                <Route exact path='/' component={Home} />
                 <Route path='/signIn' component={SignIn}/>
                 <Route path='/signUp' component={SignUp}/>
             </Switch>

@@ -12,19 +12,8 @@ import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import {makeStyles} from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
-
-function Copyright() {
-    return (
-        <Typography variant="body2" color="textSecondary" align="center">
-            {'Copyright © '}
-            <Link color="inherit" href="https://material-ui.com/">
-                Your Website
-            </Link>{' '}
-            {new Date().getFullYear()}
-            {'.'}
-        </Typography>
-    );
-}
+import Navbar from "../Navbar";
+import Copyright from "../Copyright";
 
 const useStyles = makeStyles((theme) => ({
     paper: {
@@ -50,16 +39,17 @@ const SignUp = () => {
     const classes = useStyles();
 
     return (
-        <Container component="main" maxWidth="xs">
-            <CssBaseline/>
-            <div className={classes.paper}>
-                <Avatar className={classes.avatar}>
-                    <LockOutlinedIcon/>
-                </Avatar>
-                <Typography component="h1" variant="h5">
-                    Sign up
-                </Typography>
-                <form className={classes.form} noValidate>
+        <div>
+            <Navbar/>
+            <Container component="main" maxWidth="xs">
+                <CssBaseline/>
+                <div className={classes.paper}>
+                    <Avatar className={classes.avatar}>
+                        <LockOutlinedIcon/>
+                    </Avatar>
+                    <Typography component="h1" variant="h5">
+                        Sign up
+                    </Typography>
                     <Grid container spacing={2}>
                         <Grid item xs={12} sm={6}>
                             <TextField
@@ -130,12 +120,12 @@ const SignUp = () => {
                             </Link>
                         </Grid>
                     </Grid>
-                </form>
-            </div>
-            <Box mt={5}>
-                <Copyright/>
-            </Box>
-        </Container>
+                </div>
+                <Box mt={5}>
+                    <Copyright/>
+                </Box>
+            </Container>
+        </div>
     );
 }
 
