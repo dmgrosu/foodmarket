@@ -1,7 +1,6 @@
 import React from "react";
 import ThemeProvider from "@material-ui/styles/ThemeProvider";
 import {createMuiTheme} from "@material-ui/core";
-import {connect} from "react-redux";
 import {Route, Switch, withRouter} from "react-router-dom";
 import SignIn from "./components/auth/SignIn";
 import SignUp from "./components/auth/SignUp";
@@ -24,14 +23,11 @@ const theme = createMuiTheme({
     }
 });
 
-const App = (props) => {
-
-    const {token} = props.auth;
-
+const App = () => {
     return (
         <ThemeProvider theme={theme}>
             <Switch>
-                <Route exact path='/' component={Home} />
+                <Route exact path='/' component={Home}/>
                 <Route path='/signIn' component={SignIn}/>
                 <Route path='/signUp' component={SignUp}/>
             </Switch>
@@ -39,8 +35,4 @@ const App = (props) => {
     );
 }
 
-const mapStateToProps = state => ({
-    auth: state.authReducer
-});
-
-export default withRouter(connect(mapStateToProps, {})(App));
+export default withRouter(App);

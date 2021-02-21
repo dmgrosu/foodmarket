@@ -2,6 +2,7 @@ import React from 'react';
 import {AppBar, Button, IconButton, Toolbar, Typography} from "@material-ui/core";
 import {makeStyles} from "@material-ui/core/styles";
 import {MenuIcon} from "@material-ui/data-grid";
+import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -15,7 +16,7 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-const Navbar = () => {
+const Navbar = ({authorized}) => {
 
     const classes = useStyles();
 
@@ -28,9 +29,17 @@ const Navbar = () => {
                 <Typography variant="h6" className={classes.title}>
                     Ramaiana food market
                 </Typography>
-                <Button color="inherit" href="/signIn">
+                {!authorized && <Button color="inherit" href="/signIn">
                     Login
-                </Button>
+                </Button>}
+                {authorized && <div>
+                    <IconButton>
+                        <ShoppingCartIcon/>
+                    </IconButton>
+                    <Button color="inherit" href="/signIn">
+                        Logout
+                    </Button>
+                </div>}
             </Toolbar>
         </AppBar>
     )
