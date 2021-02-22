@@ -15,7 +15,7 @@ import Copyright from "../Copyright";
 import {connect} from "react-redux";
 import {withStyles} from "@material-ui/styles";
 import {signUpStart} from "../../store/actions/authActions";
-import {IconButton, MenuItem, Select} from "@material-ui/core";
+import {CircularProgress, IconButton, MenuItem, Select} from "@material-ui/core";
 import axios from "axios";
 
 const styles = (theme) => ({
@@ -29,9 +29,13 @@ const styles = (theme) => ({
         margin: theme.spacing(1),
         backgroundColor: theme.palette.secondary.main,
     },
-    form: {
-        width: '100%', // Fix IE 11 issue.
-        marginTop: theme.spacing(3),
+    buttonProgress: {
+        color: theme.palette.primary,
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        marginTop: -20,
+        marginLeft: -20,
     },
     submit: {
         margin: theme.spacing(3, 0, 2),
@@ -122,22 +126,23 @@ class SignUp extends Component {
                                 />
                             </Grid>}
                             {orgForm === 1 && <Grid item xs={10}>
-                                    <TextField
-                                        variant="outlined"
-                                        fullWidth
-                                        id="idno"
-                                        label="IDNO"
-                                        name="idno"
-                                        value={idno}
-                                        onChange={(e) => this.setState({idno: e.target.value})}
-                                    />
-                                </Grid>}
-                            {orgForm === 1 && <Grid item xs={2}>
+                                <TextField
+                                    variant="outlined"
+                                    fullWidth
+                                    id="idno"
+                                    label="IDNO"
+                                    name="idno"
+                                    value={idno}
+                                    onChange={(e) => this.setState({idno: e.target.value})}
+                                />
+                            </Grid>}
+                            {orgForm === 1 && <Grid item xs={2} spacing={1}>
                                 <IconButton aria-label="search"
                                             disabled={!idno || searching}
                                             onClick={() => this.findEntity()}
                                 >
                                     <SearchIcon fontSize="large"/>
+                                    {searching && <CircularProgress size={36} className={classes.buttonProgress}/>}
                                 </IconButton>
                             </Grid>}
                             <Grid item xs={12}>
