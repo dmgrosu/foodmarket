@@ -27,11 +27,10 @@ export const loginStart = (email, password) => {
     };
 };
 
-export const signUpStart = (firstName, lastName, email, password) => {
+export const signUpStart = (email, password, clientId) => {
     return dispatch => {
         dispatch(() => ({type: SIGNUP_START}));
-        console.log(email, password);
-        axios.post("/auth/register", {email: email, password: password})
+        axios.post("/auth/register", {email: email, password: password, clientId: clientId})
             .then(resp => {
                 dispatch(() => ({
                     type: SIGNUP_SUCCESS,

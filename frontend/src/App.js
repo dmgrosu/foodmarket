@@ -5,6 +5,7 @@ import {Route, Switch, withRouter} from "react-router-dom";
 import SignIn from "./components/auth/SignIn";
 import SignUp from "./components/auth/SignUp";
 import Home from "./components/Home";
+import {SnackbarProvider} from "notistack";
 
 const theme = createMuiTheme({
     palette: {
@@ -26,11 +27,13 @@ const theme = createMuiTheme({
 const App = () => {
     return (
         <ThemeProvider theme={theme}>
-            <Switch>
-                <Route exact path='/' component={Home}/>
-                <Route path='/signIn' component={SignIn}/>
-                <Route path='/signUp' component={SignUp}/>
-            </Switch>
+            <SnackbarProvider maxSnack={3} anchorOrigin={{vertical: 'bottom', horizontal: 'right'}}>
+                <Switch>
+                    <Route exact path='/' component={Home}/>
+                    <Route path='/signIn' component={SignIn}/>
+                    <Route path='/signUp' component={SignUp}/>
+                </Switch>
+            </SnackbarProvider>
         </ThemeProvider>
     );
 }

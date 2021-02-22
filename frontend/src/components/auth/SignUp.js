@@ -15,8 +15,10 @@ import Copyright from "../Copyright";
 import {connect} from "react-redux";
 import {withStyles} from "@material-ui/styles";
 import {signUpStart} from "../../store/actions/authActions";
-import {CircularProgress, IconButton, MenuItem, Select} from "@material-ui/core";
+import {CircularProgress, IconButton} from "@material-ui/core";
 import axios from "axios";
+import {withSnackbar} from "notistack";
+
 
 const styles = (theme) => ({
     paper: {
@@ -49,15 +51,65 @@ class SignUp extends Component {
         lastName: '',
         email: '',
         password: '',
-        orgForm: 0,
+        confirmPassword: '',
         idno: '',
         entityFound: null,
-        searching: false
+        searching: false,
+        errors: [],
     }
 
     signUp = () => {
-        const {firstName, lastName, email, password} = this.state;
-        this.props.signUpStart(firstName, lastName, email, password);
+        const {email, password, entityFound} = this.state;
+        const clientId = entityFound && !entityFound.code ? entityFound.id : 0;
+        if (this.validateInput()) {
+            this.props.signUpStart(email, password, clientId);
+        }
+    }
+
+    validateInput = () => {
+        const {email, password, confirmPassword} = this.state;
+        const errors = [];
+        const emailRegEx = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        if (!email) {
+            errors.push({
+                field: 'email',
+                code: 'EMAIL_EMPTY',
+                description: 'Email required!'
+            })
+        } else if (!emailRegEx.test(email)) {
+            errors.push({
+                field: 'email',
+                code: 'EMAIL_INVALID',
+                description: 'Email is invalid!'
+            })
+        }
+        const passRegexp = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/;
+        if (!password) {
+            errors.push({
+                field: 'password',
+                code: 'PASSWORD_EMPTY',
+                description: 'Password required!'
+            })
+        } else if (password !== confirmPassword) {
+            errors.push({
+                field: 'confirmPassword',
+                code: 'PASSWORD_NOT_MATCH',
+                description: 'Password does not match!'
+            })
+        } else if (!passRegexp.test(password)) {
+            errors.push({
+                field: 'password',
+                code: 'PASSWORD_NOT_STRONG',
+                description: 'Password is not strong!'
+            })
+        }
+        if (errors.length > 0) {
+            this.setState({
+                errors: errors
+            })
+            return false;
+        }
+        return true;
     }
 
     findEntity = () => {
@@ -67,17 +119,42 @@ class SignUp extends Component {
         const {idno} = this.state;
         axios.get("/client/findByIdno", {params: {idno: idno}})
             .then(resp => {
-                this.setState({
-                    entityFound: resp.data,
-                    searching: false
-                })
+                if (resp.status === 200) {
+                    this.setState({
+                        entityFound: resp.data,
+                        searching: false
+                    })
+                } else {
+                    this.props.enqueueSnackbar("Error searching for Client", {variant: "error"});
+                }
             })
+            .catch(() => {
+                this.setState({
+                    searching: false,
+                });
+                this.props.enqueueSnackbar("Error searching for Client", {variant: "error"});
+            })
+    }
+
+    getClientInfo = () => {
+        const {entityFound} = this.state;
+        if (!entityFound) {
+            return "";
+        }
+        if (entityFound.code) {
+            return entityFound.code;
+        } else {
+            return "Found Client: " + entityFound.name + ", with IDNO: " + entityFound.idno;
+        }
     }
 
     render = () => {
 
-        const {classes} = this.props;
-        const {firstName, lastName, email, password, orgForm, idno, searching, entityFound} = this.state;
+        const {classes, auth} = this.props;
+        const {
+            firstName, lastName, email, password,
+            idno, searching, entityFound, confirmPassword, errors
+        } = this.state;
 
         return (
             <div>
@@ -88,21 +165,37 @@ class SignUp extends Component {
                         <Avatar className={classes.avatar}>
                             <LockOutlinedIcon/>
                         </Avatar>
-                        <Typography component="h1" variant="h5">
+                        <Typography component="h1" variant="h5" gutterBottom>
                             Sign up
                         </Typography>
                         <Grid container spacing={2}>
-                            <Grid item xs={12}>
-                                <Select value={orgForm}
-                                        fullWidth
-                                        variant="outlined"
-                                        onChange={(e) => this.setState({orgForm: e.target.value})}
-                                >
-                                    <MenuItem value={0}>Person</MenuItem>
-                                    <MenuItem value={1}>Entity</MenuItem>
-                                </Select>
+                            <Grid item xs={10}>
+                                <TextField
+                                    variant="outlined"
+                                    fullWidth
+                                    id="idno"
+                                    label="IDNO"
+                                    name="idno"
+                                    value={idno}
+                                    disabled={searching}
+                                    onChange={(e) => this.setState({idno: e.target.value})}
+                                />
                             </Grid>
-                            {orgForm === 0 && <Grid item xs={12} sm={6}>
+                            <Grid item xs={2}>
+                                <IconButton aria-label="search"
+                                            disabled={!idno || searching || auth.isLoading}
+                                            onClick={() => this.findEntity()}
+                                >
+                                    <SearchIcon fontSize="large"/>
+                                    {searching && <CircularProgress size={36} className={classes.buttonProgress}/>}
+                                </IconButton>
+                            </Grid>
+                            {entityFound && <Grid item xs={12}>
+                                <Typography color={entityFound.code ? "error" : "primary"}>
+                                    {this.getClientInfo()}
+                                </Typography>
+                            </Grid>}
+                            <Grid item xs={12} sm={6}>
                                 <TextField
                                     name="firstName"
                                     variant="outlined"
@@ -111,10 +204,11 @@ class SignUp extends Component {
                                     label="First Name"
                                     autoFocus
                                     value={firstName}
-                                    onChange={(e) => this.setState({firstName: e.target.value})}
+                                    disabled={auth.isLoading}
+                                    onChange={(e) => this.changeValue('firstName', e.target.value)}
                                 />
-                            </Grid>}
-                            {orgForm === 0 && <Grid item xs={12} sm={6}>
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
                                 <TextField
                                     variant="outlined"
                                     fullWidth
@@ -122,29 +216,10 @@ class SignUp extends Component {
                                     label="Last Name"
                                     name="lastName"
                                     value={lastName}
-                                    onChange={(e) => this.setState({lastName: e.target.value})}
+                                    disabled={auth.isLoading}
+                                    onChange={(e) => this.changeValue('lastName', e.target.value)}
                                 />
-                            </Grid>}
-                            {orgForm === 1 && <Grid item xs={10}>
-                                <TextField
-                                    variant="outlined"
-                                    fullWidth
-                                    id="idno"
-                                    label="IDNO"
-                                    name="idno"
-                                    value={idno}
-                                    onChange={(e) => this.setState({idno: e.target.value})}
-                                />
-                            </Grid>}
-                            {orgForm === 1 && <Grid item xs={2} spacing={1}>
-                                <IconButton aria-label="search"
-                                            disabled={!idno || searching}
-                                            onClick={() => this.findEntity()}
-                                >
-                                    <SearchIcon fontSize="large"/>
-                                    {searching && <CircularProgress size={36} className={classes.buttonProgress}/>}
-                                </IconButton>
-                            </Grid>}
+                            </Grid>
                             <Grid item xs={12}>
                                 <TextField
                                     variant="outlined"
@@ -153,8 +228,11 @@ class SignUp extends Component {
                                     id="email"
                                     label="Email Address"
                                     name="email"
+                                    error={this.getErrorForField("email") !== false}
+                                    helperText={this.getErrorForField("email")}
                                     value={email}
-                                    onChange={(e) => this.setState({email: e.target.value})}
+                                    disabled={auth.isLoading}
+                                    onChange={(e) => this.changeValue('email', e.target.value)}
                                 />
                             </Grid>
                             <Grid item xs={12}>
@@ -166,8 +244,27 @@ class SignUp extends Component {
                                     label="Password"
                                     type="password"
                                     id="password"
+                                    error={this.getErrorForField("password") !== false}
+                                    helperText={this.getErrorForField("password")}
                                     value={password}
-                                    onChange={(e) => this.setState({password: e.target.value})}
+                                    disabled={auth.isLoading}
+                                    onChange={(e) => this.changeValue('password', e.target.value)}
+                                />
+                            </Grid>
+                            <Grid item xs={12}>
+                                <TextField
+                                    variant="outlined"
+                                    required
+                                    fullWidth
+                                    name="confirmPassword"
+                                    label="Confirm password"
+                                    error={this.getErrorForField("confirmPassword") !== false}
+                                    helperText={this.getErrorForField("confirmPassword")}
+                                    type="password"
+                                    id="confirmPassword"
+                                    value={confirmPassword}
+                                    disabled={auth.isLoading}
+                                    onChange={(e) => this.changeValue('confirmPassword', e.target.value)}
                                 />
                             </Grid>
                         </Grid>
@@ -177,9 +274,11 @@ class SignUp extends Component {
                             color="primary"
                             onClick={() => this.signUp()}
                             className={classes.submit}
+                            disabled={auth.isLoading}
                         >
                             Sign Up
                         </Button>
+                        {auth.isLoading && <CircularProgress size={24} className={classes.buttonProgress}/>}
                         <Grid container justify="flex-end">
                             <Grid item>
                                 <Link to="/signIn" variant="body2">
@@ -196,6 +295,26 @@ class SignUp extends Component {
         );
     }
 
+    getErrorForField(fieldName) {
+        const {errors} = this.state;
+        if (errors.length === 0) {
+            return false;
+        }
+        for (let i = 0; i < errors.length; i++) {
+            const error = errors[i];
+            if (error.field === fieldName) {
+                return error.description;
+            }
+        }
+        return false;
+    }
+
+    changeValue(field, newValue) {
+        this.setState(state => ({
+            [field]: newValue,
+            errors: state.errors.filter(err => err.field !== field)
+        }));
+    }
 }
 
 const mapStateToProps = state => ({
@@ -204,4 +323,4 @@ const mapStateToProps = state => ({
 
 export default connect(mapStateToProps, {
     signUpStart
-})(withStyles(styles)(SignUp));
+})(withStyles(styles)(withSnackbar(SignUp)));
