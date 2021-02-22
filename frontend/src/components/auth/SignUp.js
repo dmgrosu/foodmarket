@@ -7,6 +7,7 @@ import {Link} from 'react-router-dom';
 import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
+import SearchIcon from '@material-ui/icons/Search';
 import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
 import Navbar from "../Navbar";
@@ -14,6 +15,8 @@ import Copyright from "../Copyright";
 import {connect} from "react-redux";
 import {withStyles} from "@material-ui/styles";
 import {signUpStart} from "../../store/actions/authActions";
+import {IconButton, MenuItem, Select} from "@material-ui/core";
+import axios from "axios";
 
 const styles = (theme) => ({
     paper: {
@@ -41,13 +44,36 @@ class SignUp extends Component {
         firstName: '',
         lastName: '',
         email: '',
-        password: ''
+        password: '',
+        orgForm: 0,
+        idno: '',
+        entityFound: null,
+        searching: false
     }
 
-    render() {
+    signUp = () => {
+        const {firstName, lastName, email, password} = this.state;
+        this.props.signUpStart(firstName, lastName, email, password);
+    }
+
+    findEntity = () => {
+        this.setState({
+            searching: true
+        });
+        const {idno} = this.state;
+        axios.get("/client/findByIdno", {params: {idno: idno}})
+            .then(resp => {
+                this.setState({
+                    entityFound: resp.data,
+                    searching: false
+                })
+            })
+    }
+
+    render = () => {
 
         const {classes} = this.props;
-        const {firstName, lastName, email, password} = this.state;
+        const {firstName, lastName, email, password, orgForm, idno, searching, entityFound} = this.state;
 
         return (
             <div>
@@ -62,12 +88,20 @@ class SignUp extends Component {
                             Sign up
                         </Typography>
                         <Grid container spacing={2}>
-                            <Grid item xs={12} sm={6}>
+                            <Grid item xs={12}>
+                                <Select value={orgForm}
+                                        fullWidth
+                                        variant="outlined"
+                                        onChange={(e) => this.setState({orgForm: e.target.value})}
+                                >
+                                    <MenuItem value={0}>Person</MenuItem>
+                                    <MenuItem value={1}>Entity</MenuItem>
+                                </Select>
+                            </Grid>
+                            {orgForm === 0 && <Grid item xs={12} sm={6}>
                                 <TextField
-                                    autoComplete="fname"
                                     name="firstName"
                                     variant="outlined"
-                                    required
                                     fullWidth
                                     id="firstName"
                                     label="First Name"
@@ -75,20 +109,37 @@ class SignUp extends Component {
                                     value={firstName}
                                     onChange={(e) => this.setState({firstName: e.target.value})}
                                 />
-                            </Grid>
-                            <Grid item xs={12} sm={6}>
+                            </Grid>}
+                            {orgForm === 0 && <Grid item xs={12} sm={6}>
                                 <TextField
                                     variant="outlined"
-                                    required
                                     fullWidth
                                     id="lastName"
                                     label="Last Name"
                                     name="lastName"
-                                    autoComplete="lname"
                                     value={lastName}
                                     onChange={(e) => this.setState({lastName: e.target.value})}
                                 />
-                            </Grid>
+                            </Grid>}
+                            {orgForm === 1 && <Grid item xs={10}>
+                                    <TextField
+                                        variant="outlined"
+                                        fullWidth
+                                        id="idno"
+                                        label="IDNO"
+                                        name="idno"
+                                        value={idno}
+                                        onChange={(e) => this.setState({idno: e.target.value})}
+                                    />
+                                </Grid>}
+                            {orgForm === 1 && <Grid item xs={2}>
+                                <IconButton aria-label="search"
+                                            disabled={!idno || searching}
+                                            onClick={() => this.findEntity()}
+                                >
+                                    <SearchIcon fontSize="large"/>
+                                </IconButton>
+                            </Grid>}
                             <Grid item xs={12}>
                                 <TextField
                                     variant="outlined"
@@ -97,7 +148,6 @@ class SignUp extends Component {
                                     id="email"
                                     label="Email Address"
                                     name="email"
-                                    autoComplete="email"
                                     value={email}
                                     onChange={(e) => this.setState({email: e.target.value})}
                                 />
@@ -111,7 +161,6 @@ class SignUp extends Component {
                                     label="Password"
                                     type="password"
                                     id="password"
-                                    autoComplete="current-password"
                                     value={password}
                                     onChange={(e) => this.setState({password: e.target.value})}
                                 />
@@ -140,11 +189,6 @@ class SignUp extends Component {
                 </Container>
             </div>
         );
-    }
-
-    signUp = () => {
-        const {firstName, lastName, email, password} = this.state;
-        this.props.signUpStart(firstName, lastName, email, password);
     }
 
 }
