@@ -29,10 +29,6 @@ public class GoodService {
         this.brandDao = brandDao;
     }
 
-    public List<Good> getAllGoods() {
-        return goodDao.getAllByDeletedAtNull();
-    }
-
     public List<Good> findGoodsFiltered(Integer groupId, Integer brandId, String name) {
         if (groupId != null && brandId != null && name != null) {
             return goodDao.getAllByGroupIdAndBrandIdAndNameLike(groupId, brandId, name); // tested

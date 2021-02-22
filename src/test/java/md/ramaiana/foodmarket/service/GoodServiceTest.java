@@ -29,15 +29,6 @@ class GoodServiceTest {
     private GoodService goodService;
 
     @Test
-    void test_getAllGoods() {
-        //ARRANGE
-        //ACT
-        goodService.getAllGoods();
-        //ASSERT
-        verify(goodDaoMock, times(1)).getAllByDeletedAtNull();
-    }
-
-    @Test
     void test_findGoodsFiltered_allParams_returnedList() {
         //ARRANGE
         Integer brandId = 2;
