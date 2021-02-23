@@ -1,6 +1,5 @@
 package md.ramaiana.foodmarket.controller;
 
-import md.ramaiana.foodmarket.model.Brand;
 import md.ramaiana.foodmarket.model.Good;
 import md.ramaiana.foodmarket.model.GoodGroup;
 import md.ramaiana.foodmarket.service.GoodService;
@@ -34,15 +33,15 @@ public class GoodControllerTest {
 
     @WithMockUser("spring")
     @Test
-    void test_getFilteredGoods_withGroupId() throws Exception{
+    void test_getFilteredGoods_withGroupId() throws Exception {
         //ARRANGE
         List<Good> givenGoods = givenGoodsWithGroupId(2);
         List<GoodGroup> givenGroups = givenGroupsWithId(2);
-        when(goodServiceMock.findGoodsFiltered(eq(8),eq(null), eq(null)))
+        when(goodServiceMock.findGoodsFiltered(eq(8), eq(null), eq(null)))
                 .thenReturn(givenGoods);
         when(goodServiceMock.findGroupsFiltered(eq(8)))
                 .thenReturn(givenGroups);
-        //ACT
+        //ACT & ASSERT
         mockMvc.perform(get("/good/getAll")
                 .param("group_id", "8")
                 .param("brand_id", (String) null)
@@ -53,20 +52,19 @@ public class GoodControllerTest {
                 .andExpect(jsonPath("$.goods[1].name").value("SomeOtherGood"))
                 .andExpect(jsonPath("$.groups[0].name").value("someGroupName"))
                 .andExpect(jsonPath("$.groups[1].name").value("someOtherGroupName"));
-        //ASSERT
     }
 
     @WithMockUser("spring")
     @Test
-    void test_getFilteredGoods_withGroupIdAndBrandId() throws Exception{
+    void test_getFilteredGoods_withGroupIdAndBrandId() throws Exception {
         //ARRANGE
         List<Good> givenGoods = givenGoodsWithGroupIdAndBrandId(8, 5);
         List<GoodGroup> givenGroups = givenGroupsWithId(8);
-        when(goodServiceMock.findGoodsFiltered(eq(8),eq(5), eq(null)))
+        when(goodServiceMock.findGoodsFiltered(eq(8), eq(5), eq(null)))
                 .thenReturn(givenGoods);
         when(goodServiceMock.findGroupsFiltered(eq(8)))
                 .thenReturn(givenGroups);
-        //ACT
+        //ACT & ASSERT
         mockMvc.perform(get("/good/getAll")
                 .param("group_id", "8")
                 .param("brand_id", "5")
@@ -77,20 +75,19 @@ public class GoodControllerTest {
                 .andExpect(jsonPath("$.goods[1].name").value("SomeOtherGood"))
                 .andExpect(jsonPath("$.groups[0].name").value("someGroupName"))
                 .andExpect(jsonPath("$.groups[1].name").value("someOtherGroupName"));
-        //ASSERT
     }
 
     @WithMockUser("spring")
     @Test
-    void test_getFilteredGoods_withGroupIdAndBrandIdAndName() throws Exception{
+    void test_getFilteredGoods_withGroupIdAndBrandIdAndName() throws Exception {
         //ARRANGE
         List<Good> givenGoods = givenGoodsWithGroupIdAndBrandIdAndName(8, 5, "someName");
         List<GoodGroup> givenGroups = givenGroupsWithId(8);
-        when(goodServiceMock.findGoodsFiltered(eq(8),eq(5), eq("someName")))
+        when(goodServiceMock.findGoodsFiltered(eq(8), eq(5), eq("someName")))
                 .thenReturn(givenGoods);
         when(goodServiceMock.findGroupsFiltered(eq(8)))
                 .thenReturn(givenGroups);
-        //ACT
+        //ACT & ASSERT
         mockMvc.perform(get("/good/getAll")
                 .param("group_id", "8")
                 .param("brand_id", "5")
@@ -101,20 +98,19 @@ public class GoodControllerTest {
                 .andExpect(jsonPath("$.goods[1].name").value("someName other"))
                 .andExpect(jsonPath("$.groups[0].name").value("someGroupName"))
                 .andExpect(jsonPath("$.groups[1].name").value("someOtherGroupName"));
-        //ASSERT
     }
 
     @WithMockUser("spring")
     @Test
-    void test_getFilteredGoods_withGroupIdAndName() throws Exception{
+    void test_getFilteredGoods_withGroupIdAndName() throws Exception {
         //ARRANGE
         List<Good> givenGoods = givenGoodsWithGroupIdAndName(5, "someName");
         List<GoodGroup> givenGroups = givenGroupsWithId(2);
-        when(goodServiceMock.findGoodsFiltered(eq(5),eq(null), eq("someName")))
+        when(goodServiceMock.findGoodsFiltered(eq(5), eq(null), eq("someName")))
                 .thenReturn(givenGoods);
         when(goodServiceMock.findGroupsFiltered(eq(5)))
                 .thenReturn(givenGroups);
-        //ACT
+        //ACT & ASSERT
         mockMvc.perform(get("/good/getAll")
                 .param("group_id", "5")
                 .param("brand_id", (String) null)
@@ -126,8 +122,6 @@ public class GoodControllerTest {
                 .andExpect(jsonPath("$.goods[1].name").value("someName other"))
                 .andExpect(jsonPath("$.groups[0].name").value("someGroupName"))
                 .andExpect(jsonPath("$.groups[1].id").value(16));
-
-        //ASSERT
     }
 
     @WithMockUser("spring")
@@ -136,11 +130,11 @@ public class GoodControllerTest {
         //ARRANGE
         List<Good> givenGoods = givenGoodsWithBrandId(5);
         List<GoodGroup> givenGroups = givenGroupsWithId(null);
-        when(goodServiceMock.findGoodsFiltered(eq(null),eq(5), eq(null)))
+        when(goodServiceMock.findGoodsFiltered(eq(null), eq(5), eq(null)))
                 .thenReturn(givenGoods);
         when(goodServiceMock.findGroupsFiltered(eq(null)))
                 .thenReturn(givenGroups);
-        //ACT
+        //ACT & ASSERT
         mockMvc.perform(get("/good/getAll")
                 .param("group_id", (String) null)
                 .param("brand_id", "5")
@@ -150,10 +144,7 @@ public class GoodControllerTest {
                 .andExpect(jsonPath("$.goods").isArray())
                 .andExpect(jsonPath("$.goods[0].name").value("someName"))
                 .andExpect(jsonPath("$.goods[1].name").value("otherName"));
-        //ASSERT
     }
-
-
 
     @WithMockUser("spring")
     @Test
@@ -161,11 +152,11 @@ public class GoodControllerTest {
         //ARRANGE
         List<Good> givenGoods = givenGoodsWithName("someName");
         List<GoodGroup> givenGroups = givenGroupsWithId(null);
-        when(goodServiceMock.findGoodsFiltered(eq(null),eq(null), eq("someName")))
+        when(goodServiceMock.findGoodsFiltered(eq(null), eq(null), eq("someName")))
                 .thenReturn(givenGoods);
         when(goodServiceMock.findGroupsFiltered(eq(null)))
                 .thenReturn(givenGroups);
-        //ACT
+        //ACT & ASSERT
         mockMvc.perform(get("/good/getAll")
                 .param("group_id", (String) null)
                 .param("brand_id", (String) null)
@@ -175,20 +166,18 @@ public class GoodControllerTest {
                 .andExpect(jsonPath("$.goods").isArray())
                 .andExpect(jsonPath("$.goods[0].name").value("someName"))
                 .andExpect(jsonPath("$.goods[1].name").value("someName other"));
-        //ASSERT
     }
-
 
     @WithMockUser("spring")
     @Test
-    void test_getFilteredGoods_withBrandIdAndName() throws Exception{
+    void test_getFilteredGoods_withBrandIdAndName() throws Exception {
         List<Good> givenGoods = givenGoodsWithBrandIdAndName(5, "someName");
         List<GoodGroup> givenGroups = givenGroupsWithId(null);
-        when(goodServiceMock.findGoodsFiltered(eq(null),eq(5), eq("someName")))
+        when(goodServiceMock.findGoodsFiltered(eq(null), eq(5), eq("someName")))
                 .thenReturn(givenGoods);
         when(goodServiceMock.findGroupsFiltered(eq(null)))
                 .thenReturn(givenGroups);
-        //ACT
+        //ACT & ASSERT
         mockMvc.perform(get("/good/getAll")
                 .param("group_id", (String) null)
                 .param("brand_id", "5")
@@ -199,7 +188,6 @@ public class GoodControllerTest {
                 .andExpect(jsonPath("$.goods[0].name").value("someName"))
                 .andExpect(jsonPath("$.goods[1].name").value("someName other"))
                 .andExpect(jsonPath("$.goods[0].weight").value(1000f));
-        //ASSERT
     }
 
     private List<GoodGroup> givenGroupsWithId(Integer parentGroupId) {
@@ -299,7 +287,6 @@ public class GoodControllerTest {
                 .build());
         return goods;
     }
-
 
 
     private List<Good> givenGoodsWithGroupIdAndName(Integer groupId, String name) {
