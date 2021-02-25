@@ -17,7 +17,7 @@ import {withStyles} from "@material-ui/styles";
 import {signUpStart} from "../../store/actions/authActions";
 import {CircularProgress, IconButton} from "@material-ui/core";
 import axios from "axios";
-import {withSnackbar} from "notistack";
+import {toast} from "material-react-toastify";
 
 
 const styles = (theme) => ({
@@ -125,14 +125,14 @@ class SignUp extends Component {
                         searching: false
                     })
                 } else {
-                    this.props.enqueueSnackbar("Error searching for Client", {variant: "error"});
+                    toast.warning(resp.status + ": " + resp.data.message);
                 }
             })
-            .catch(() => {
+            .catch(err => {
                 this.setState({
                     searching: false,
                 });
-                this.props.enqueueSnackbar("Error searching for Client", {variant: "error"});
+                toast.error(err.response.status + ": " + err.response.statusText || err.response.data.message);
             })
     }
 
@@ -141,11 +141,32 @@ class SignUp extends Component {
         if (!entityFound) {
             return "";
         }
-        if (entityFound.code) {
-            return entityFound.code;
+        if (entityFound.errors) {
+            return entityFound.errors[0].code;
         } else {
             return "Found Client: " + entityFound.name + ", with IDNO: " + entityFound.idno;
         }
+    }
+
+    getErrorForField(fieldName) {
+        const {errors} = this.state;
+        if (errors.length === 0) {
+            return false;
+        }
+        for (let i = 0; i < errors.length; i++) {
+            const error = errors[i];
+            if (error.field === fieldName) {
+                return error.description;
+            }
+        }
+        return false;
+    }
+
+    changeValue(field, newValue) {
+        this.setState(state => ({
+            [field]: newValue,
+            errors: state.errors.filter(err => err.field !== field)
+        }));
     }
 
     render = () => {
@@ -153,7 +174,7 @@ class SignUp extends Component {
         const {classes, auth} = this.props;
         const {
             firstName, lastName, email, password,
-            idno, searching, entityFound, confirmPassword, errors
+            idno, searching, entityFound, confirmPassword
         } = this.state;
 
         return (
@@ -191,7 +212,7 @@ class SignUp extends Component {
                                 </IconButton>
                             </Grid>
                             {entityFound && <Grid item xs={12}>
-                                <Typography color={entityFound.code ? "error" : "primary"}>
+                                <Typography color={entityFound.errors ? "error" : "secondary"}>
                                     {this.getClientInfo()}
                                 </Typography>
                             </Grid>}
@@ -294,27 +315,6 @@ class SignUp extends Component {
             </div>
         );
     }
-
-    getErrorForField(fieldName) {
-        const {errors} = this.state;
-        if (errors.length === 0) {
-            return false;
-        }
-        for (let i = 0; i < errors.length; i++) {
-            const error = errors[i];
-            if (error.field === fieldName) {
-                return error.description;
-            }
-        }
-        return false;
-    }
-
-    changeValue(field, newValue) {
-        this.setState(state => ({
-            [field]: newValue,
-            errors: state.errors.filter(err => err.field !== field)
-        }));
-    }
 }
 
 const mapStateToProps = state => ({
@@ -323,4 +323,4 @@ const mapStateToProps = state => ({
 
 export default connect(mapStateToProps, {
     signUpStart
-})(withStyles(styles)(withSnackbar(SignUp)));
+})(withStyles(styles)(SignUp));

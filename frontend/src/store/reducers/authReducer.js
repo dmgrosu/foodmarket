@@ -2,8 +2,10 @@ import {LOGIN_FAIL, LOGIN_START, LOGIN_SUCCESS, SIGNUP_FAIL, SIGNUP_START, SIGNU
 
 const initialState = {
     token: null,
+    userId: null,
+    userEmail: null,
     isLoading: false,
-    error: ""
+    error: null
 };
 
 const authReducer = (state = initialState, action) => {
@@ -13,20 +15,21 @@ const authReducer = (state = initialState, action) => {
             return {
                 ...state,
                 isLoading: true,
-                error: ""
+                error: null
             };
         case LOGIN_SUCCESS:
         case SIGNUP_SUCCESS:
             return {
                 ...state,
-                token: action.payload,
+                token: action.payload.token,
+                userId: action.payload.user.id,
+                userEmail: action.payload.user.email,
                 isLoading: false
             };
         case LOGIN_FAIL:
         case SIGNUP_FAIL:
             return {
                 ...state,
-                token: null,
                 isLoading: false,
                 error: action.payload
             };

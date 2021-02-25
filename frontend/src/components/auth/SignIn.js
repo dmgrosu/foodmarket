@@ -16,6 +16,7 @@ import Copyright from "../Copyright";
 import {withStyles} from "@material-ui/styles";
 import {connect} from "react-redux";
 import {loginStart} from "../../store/actions/authActions";
+import {CircularProgress} from "@material-ui/core";
 
 
 const styles = (theme) => ({
@@ -29,8 +30,17 @@ const styles = (theme) => ({
         margin: theme.spacing(1),
         backgroundColor: theme.palette.secondary.main,
     },
+    buttonProgress: {
+        color: theme.palette.primary,
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        marginTop: -28,
+        marginLeft: -12,
+    },
     submit: {
         margin: theme.spacing(3, 0, 2),
+        position: 'relative',
     },
 });
 
@@ -38,19 +48,62 @@ class SignIn extends Component {
 
     state = {
         email: '',
-        password: ''
+        password: '',
+        errors: []
     }
 
-    changeEmail = (newEmail) => {
-        this.setState({
-            email: newEmail
-        })
+    validateInput = () => {
+        const {email, password} = this.state;
+        const errors = [];
+        if (!email) {
+            errors.push({
+                field: 'email',
+                code: 'EMAIL_EMPTY',
+                description: 'Email required!'
+            })
+        }
+        if (!password) {
+            errors.push({
+                field: 'password',
+                code: 'PASSWORD_EMPTY',
+                description: 'Password required!'
+            })
+        }
+        if (errors.length > 0) {
+            this.setState({
+                errors: errors
+            })
+            return false;
+        }
+        return true;
     }
 
-    changePassword = (newPasswd) => {
-        this.setState({
-            password: newPasswd
-        })
+    getErrorForField(fieldName) {
+        const {errors} = this.state;
+        if (errors.length === 0) {
+            return false;
+        }
+        for (let i = 0; i < errors.length; i++) {
+            const error = errors[i];
+            if (error.field === fieldName) {
+                return error.description;
+            }
+        }
+        return false;
+    }
+
+    changeValue(field, newValue) {
+        this.setState(state => ({
+            [field]: newValue,
+            errors: state.errors.filter(err => err.field !== field)
+        }));
+    }
+
+    requestLogin = () => {
+        const {email, password} = this.state;
+        if (this.validateInput()) {
+            this.props.loginStart(email, password);
+        }
     }
 
     render() {
@@ -80,8 +133,10 @@ class SignIn extends Component {
                             name="email"
                             autoComplete="email"
                             autoFocus
+                            error={this.getErrorForField("email") !== false}
+                            helperText={this.getErrorForField("email")}
                             disabled={isLoading}
-                            onChange={(e) => this.changeEmail(e.target.value)}
+                            onChange={(e) => this.changeValue('email', e.target.value)}
                         />
                         <TextField
                             variant="outlined"
@@ -93,8 +148,10 @@ class SignIn extends Component {
                             type="password"
                             id="password"
                             disabled={isLoading}
+                            error={this.getErrorForField("password") !== false}
+                            helperText={this.getErrorForField("password")}
                             autoComplete="current-password"
-                            onChange={(e) => this.changePassword(e.target.value)}
+                            onChange={(e) => this.changeValue('password', e.target.value)}
                         />
                         <FormControlLabel
                             control={<Checkbox value="remember" color="primary"/>}
@@ -111,13 +168,14 @@ class SignIn extends Component {
                         >
                             Sign In
                         </Button>
+                        {isLoading && <CircularProgress size={24} className={classes.buttonProgress}/>}
                         <Grid container>
-                            <Grid item xs>
+                            <Grid item xs={6}>
                                 <Link to='/' variant="body2">
                                     Forgot password?
                                 </Link>
                             </Grid>
-                            <Grid item>
+                            <Grid item xs={6}>
                                 <Link to='/signUp' variant="body2">
                                     {"Don't have an account? Sign Up"}
                                 </Link>
@@ -132,14 +190,10 @@ class SignIn extends Component {
         );
     }
 
-    requestLogin = () => {
-        const {email, password} = this.state;
-        this.props.loginStart(email, password);
-    }
 }
 
 const mapStateToProps = state => ({
-    auth: state.authReducer
+    auth: state.authReducer,
 });
 
 export default connect(mapStateToProps, {

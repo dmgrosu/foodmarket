@@ -5,7 +5,8 @@ import {Route, Switch, withRouter} from "react-router-dom";
 import SignIn from "./components/auth/SignIn";
 import SignUp from "./components/auth/SignUp";
 import Home from "./components/Home";
-import {SnackbarProvider} from "notistack";
+import {ToastContainer} from "material-react-toastify";
+import 'material-react-toastify/dist/ReactToastify.min.css';
 
 const theme = createMuiTheme({
     palette: {
@@ -27,13 +28,14 @@ const theme = createMuiTheme({
 const App = () => {
     return (
         <ThemeProvider theme={theme}>
-            <SnackbarProvider maxSnack={3} anchorOrigin={{vertical: 'bottom', horizontal: 'right'}}>
-                <Switch>
-                    <Route exact path='/' component={Home}/>
-                    <Route path='/signIn' component={SignIn}/>
-                    <Route path='/signUp' component={SignUp}/>
-                </Switch>
-            </SnackbarProvider>
+            <Switch>
+                <Route exact path='/' component={Home}/>
+                <Route path='/signIn' component={SignIn}/>
+                <Route path='/signUp' component={SignUp}/>
+            </Switch>
+            <ToastContainer position="bottom-right"
+                            autoClose={5000}
+            />
         </ThemeProvider>
     );
 }
