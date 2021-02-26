@@ -4,9 +4,6 @@ import {toast} from "material-react-toastify";
 export const LOGIN_START = "LOGIN_START";
 export const LOGIN_SUCCESS = "LOGIN_SUCCESS";
 export const LOGIN_FAIL = "LOGIN_FAIL";
-export const SIGNUP_START = "SIGNUP_START";
-export const SIGNUP_SUCCESS = "SIGNUP_SUCCESS";
-export const SIGNUP_FAIL = "SIGNUP_FAIL";
 
 
 export const loginStart = (email, password) => {
@@ -24,27 +21,32 @@ export const loginStart = (email, password) => {
                     type: LOGIN_FAIL,
                     payload: err.response.data
                 });
-                toast.error(err.response.status + ": " + err.response.statusText || err.response.data.message);
+                handleError(err);
             })
     };
 };
 
 export const signUpStart = (email, password, clientId) => {
     return dispatch => {
-        dispatch({type: SIGNUP_START});
+        dispatch({type: LOGIN_START});
         axios.post("/auth/register", {email: email, password: password, clientId: clientId})
             .then(resp => {
                 dispatch({
-                    type: SIGNUP_SUCCESS,
+                    type: LOGIN_SUCCESS,
                     payload: resp.data
                 });
             })
             .catch(err => {
                 dispatch({
-                    type: SIGNUP_FAIL,
-                    payload: err.data
+                    type: LOGIN_FAIL,
+                    payload: err.response.data
                 })
+                handleError(err);
             })
     };
 };
+
+const handleError = (err) => {
+    toast.error(err.response.status + ": " + err.response.data.message || err.response.statusText);
+}
 

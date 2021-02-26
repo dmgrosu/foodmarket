@@ -5,7 +5,7 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
-import {Link} from 'react-router-dom';
+import {Link, Redirect} from 'react-router-dom';
 import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
@@ -109,10 +109,11 @@ class SignIn extends Component {
     render() {
 
         const {classes, auth} = this.props;
-        const {isLoading} = auth;
+        const {isLoading, token} = auth;
 
         return (
             <div>
+                {token && <Redirect exact to="/"/>}
                 <Navbar/>
                 <Container component="main" maxWidth="xs">
                     <CssBaseline/>

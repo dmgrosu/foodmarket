@@ -3,7 +3,7 @@ import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
-import {Link} from 'react-router-dom';
+import {Link, Redirect} from 'react-router-dom';
 import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
@@ -132,7 +132,7 @@ class SignUp extends Component {
                 this.setState({
                     searching: false,
                 });
-                toast.error(err.response.status + ": " + err.response.statusText || err.response.data.message);
+                toast.error(err.response.status + ": " + err.response.data.message || err.response.statusText);
             })
     }
 
@@ -179,6 +179,7 @@ class SignUp extends Component {
 
         return (
             <div>
+                {auth.token && <Redirect exact to="/"/>}
                 <Navbar/>
                 <Container component="main" maxWidth="xs">
                     <CssBaseline/>

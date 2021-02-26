@@ -6,7 +6,7 @@ const Copyright = () => {
     return (
         <Typography variant="body2" color="textSecondary" align="center">
             {'Copyright © '}
-            <Link color="inherit" to="/">
+            <Link color="inherit" exact to="/">
                 Ramaiana
             </Link>{' '}
             {new Date().getFullYear()}
