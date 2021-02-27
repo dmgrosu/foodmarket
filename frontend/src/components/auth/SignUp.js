@@ -10,7 +10,7 @@ import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import SearchIcon from '@material-ui/icons/Search';
 import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
-import Navbar from "../Navbar";
+import Navbar from "../navigation/Navbar";
 import Copyright from "../Copyright";
 import {connect} from "react-redux";
 import {withStyles} from "@material-ui/styles";
@@ -179,7 +179,7 @@ class SignUp extends Component {
 
         return (
             <div>
-                {auth.token && <Redirect exact to="/"/>}
+                {auth.token && <Redirect to="/"/>}
                 <Navbar/>
                 <Container component="main" maxWidth="xs">
                     <CssBaseline/>

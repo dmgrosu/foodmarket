@@ -50,7 +50,8 @@ class AppUserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.user.email").value("someEmail"))
                 .andExpect(jsonPath("$.user.id").isNotEmpty())
-                .andExpect(jsonPath("$.token").isNotEmpty());
+                .andExpect(jsonPath("$.token").isNotEmpty())
+                .andExpect(jsonPath("$.tokenTtl").value("3600"));
 
     }
 
@@ -65,6 +66,7 @@ class AppUserControllerTest {
                         .build());
         when(tokenServiceMock.createToken(any(AppUser.class)))
                 .thenReturn("someLongTokenString");
+        when(tokenServiceMock.getTOKEN_VALIDITY()).thenReturn(3600000);
         // ACT & ASSERT
         mockMvc.perform(post("/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -72,8 +74,8 @@ class AppUserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.user.email").value("email"))
                 .andExpect(jsonPath("$.user.id").isNotEmpty())
-                .andExpect(jsonPath("$.token").isNotEmpty());
-
+                .andExpect(jsonPath("$.token").isNotEmpty())
+                .andExpect(jsonPath("$.tokenTtl").value("3600"));
     }
 
     @Test
@@ -102,6 +104,7 @@ class AppUserControllerTest {
                 ));
         when(tokenServiceMock.createToken(any(AppUser.class)))
                 .thenReturn("someLongTokenString");
+        when(tokenServiceMock.getTOKEN_VALIDITY()).thenReturn(3600000);
     }
 
     private String givenUserDtoInJson(String email, String passwd) throws Exception {

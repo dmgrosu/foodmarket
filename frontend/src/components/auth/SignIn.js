@@ -3,15 +3,11 @@ import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Checkbox from '@material-ui/core/Checkbox';
 import {Link, Redirect} from 'react-router-dom';
 import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
-import Container from '@material-ui/core/Container';
-import Navbar from "../Navbar";
 import Copyright from "../Copyright";
 import {withStyles} from "@material-ui/styles";
 import {connect} from "react-redux";
@@ -92,9 +88,9 @@ class SignIn extends Component {
         return false;
     }
 
-    changeValue(field, newValue) {
+    changeValue(field, e) {
         this.setState(state => ({
-            [field]: newValue,
+            [field]: e.target.value,
             errors: state.errors.filter(err => err.field !== field)
         }));
     }
@@ -113,80 +109,72 @@ class SignIn extends Component {
 
         return (
             <div>
-                {token && <Redirect exact to="/"/>}
-                <Navbar/>
-                <Container component="main" maxWidth="xs">
-                    <CssBaseline/>
-                    <div className={classes.paper}>
-                        <Avatar className={classes.avatar}>
-                            <LockOutlinedIcon/>
-                        </Avatar>
-                        <Typography component="h1" variant="h5">
-                            Sign in
-                        </Typography>
-                        <TextField
-                            variant="outlined"
-                            margin="normal"
-                            required
-                            fullWidth
-                            id="email"
-                            label="Email Address"
-                            name="email"
-                            autoComplete="email"
-                            autoFocus
-                            error={this.getErrorForField("email") !== false}
-                            helperText={this.getErrorForField("email")}
-                            disabled={isLoading}
-                            onChange={(e) => this.changeValue('email', e.target.value)}
-                        />
-                        <TextField
-                            variant="outlined"
-                            margin="normal"
-                            required
-                            fullWidth
-                            name="password"
-                            label="Password"
-                            type="password"
-                            id="password"
-                            disabled={isLoading}
-                            error={this.getErrorForField("password") !== false}
-                            helperText={this.getErrorForField("password")}
-                            autoComplete="current-password"
-                            onChange={(e) => this.changeValue('password', e.target.value)}
-                        />
-                        <FormControlLabel
-                            control={<Checkbox value="remember" color="primary"/>}
-                            disabled={isLoading}
-                            label="Remember me"
-                        />
-                        <Button
-                            fullWidth
-                            variant="contained"
-                            color="primary"
-                            disabled={isLoading}
-                            className={classes.submit}
-                            onClick={() => this.requestLogin()}
-                        >
-                            Sign In
-                        </Button>
-                        {isLoading && <CircularProgress size={24} className={classes.buttonProgress}/>}
-                        <Grid container>
-                            <Grid item xs={6}>
-                                <Link to='/' variant="body2">
-                                    Forgot password?
-                                </Link>
-                            </Grid>
-                            <Grid item xs={6}>
-                                <Link to='/signUp' variant="body2">
-                                    {"Don't have an account? Sign Up"}
-                                </Link>
-                            </Grid>
+                {token && <Redirect to='/'/>}
+                <CssBaseline/>
+                <div className={classes.paper}>
+                    <Avatar className={classes.avatar}>
+                        <LockOutlinedIcon/>
+                    </Avatar>
+                    <Typography component="h1" variant="h5">
+                        Sign in
+                    </Typography>
+                    <TextField
+                        variant="outlined"
+                        margin="normal"
+                        required
+                        fullWidth
+                        id="email"
+                        label="Email Address"
+                        name="email"
+                        autoComplete="email"
+                        autoFocus
+                        error={this.getErrorForField("email") !== false}
+                        helperText={this.getErrorForField("email")}
+                        disabled={isLoading}
+                        onChange={(e) => this.changeValue('email', e)}
+                    />
+                    <TextField
+                        variant="outlined"
+                        margin="normal"
+                        required
+                        fullWidth
+                        name="password"
+                        label="Password"
+                        type="password"
+                        id="password"
+                        disabled={isLoading}
+                        error={this.getErrorForField("password") !== false}
+                        helperText={this.getErrorForField("password")}
+                        autoComplete="current-password"
+                        onChange={(e) => this.changeValue('password', e)}
+                    />
+                    <Button
+                        fullWidth
+                        variant="contained"
+                        color="primary"
+                        disabled={isLoading}
+                        className={classes.submit}
+                        onClick={this.requestLogin}
+                    >
+                        Sign In
+                    </Button>
+                    {isLoading && <CircularProgress size={24} className={classes.buttonProgress}/>}
+                    <Grid container>
+                        <Grid item xs={6}>
+                            {/*<Link to="/" >*/}
+                            {/*    Forgot password?*/}
+                            {/*</Link>*/}
                         </Grid>
-                    </div>
-                    <Box mt={8}>
-                        <Copyright/>
-                    </Box>
-                </Container>
+                        <Grid item xs={6}>
+                            <Link to="/signUp">
+                                {"Don't have an account? Sign Up"}
+                            </Link>
+                        </Grid>
+                    </Grid>
+                </div>
+                <Box mt={8}>
+                    <Copyright/>
+                </Box>
             </div>
         );
     }

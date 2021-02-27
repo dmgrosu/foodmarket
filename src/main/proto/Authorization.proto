@@ -13,6 +13,8 @@ message LoginRequest {
 message LoginResponse {
   UserProto user = 1;
   string token = 2;
+  // token validity in seconds
+  int32 tokenTtl = 3;
 }
 
 message SignUpRequest {

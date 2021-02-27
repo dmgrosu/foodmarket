@@ -119,9 +119,11 @@ public class AppUserController {
     private String buildSuccessfulLoginResponse(AppUser appUser) throws InvalidProtocolBufferException {
         UserProto userProto = buildProtoFromAppUser(appUser);
         String token = tokenService.createToken(appUser);
+        int tokenTtl = tokenService.getTOKEN_VALIDITY() / 1000;
         return printer.print(LoginResponse.newBuilder()
                 .setUser(userProto)
                 .setToken(token)
+                .setTokenTtl(tokenTtl)
                 .build());
     }
 

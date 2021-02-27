@@ -1,24 +1,16 @@
 import React from 'react';
-import Navbar from "./Navbar";
-import {Paper} from "@material-ui/core";
-import {connect} from "react-redux";
+import Navbar from "./navigation/Navbar";
 
-const Home = (props) => {
-
-    const {token} = props.auth;
+const Home = () => {
 
     return (
         <div>
-            <Navbar authorized={!!token}/>
-            <Paper>
-                Here will be implemented home page
-            </Paper>
+            <Navbar />
+            <br/>
+            <br/>
+            Here will be implemented home page
         </div>
     )
 }
 
-const mapStateToProps = state => ({
-    auth: state.authReducer
-});
-
-export default connect(mapStateToProps, {})(Home);
+export default Home;

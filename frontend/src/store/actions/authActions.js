@@ -4,6 +4,7 @@ import {toast} from "material-react-toastify";
 export const LOGIN_START = "LOGIN_START";
 export const LOGIN_SUCCESS = "LOGIN_SUCCESS";
 export const LOGIN_FAIL = "LOGIN_FAIL";
+export const LOGOUT = "LOGOUT";
 
 
 export const loginStart = (email, password) => {
@@ -11,6 +12,7 @@ export const loginStart = (email, password) => {
         dispatch({type: LOGIN_START});
         axios.post("/auth/login", {email: email, password: password})
             .then(resp => {
+                storeAuthData(resp.data);
                 dispatch({
                     type: LOGIN_SUCCESS,
                     payload: resp.data
@@ -31,6 +33,7 @@ export const signUpStart = (email, password, clientId) => {
         dispatch({type: LOGIN_START});
         axios.post("/auth/register", {email: email, password: password, clientId: clientId})
             .then(resp => {
+                storeAuthData(resp.data);
                 dispatch({
                     type: LOGIN_SUCCESS,
                     payload: resp.data
@@ -46,7 +49,22 @@ export const signUpStart = (email, password, clientId) => {
     };
 };
 
+export const logout = () => {
+    removeAuthData();
+    return {type: LOGOUT}
+}
+
 const handleError = (err) => {
     toast.error(err.response.status + ": " + err.response.data.message || err.response.statusText);
+}
+
+const storeAuthData = (authData) => {
+    localStorage.setItem('token', authData.token);
+    localStorage.setItem('tokenTtl', authData.tokenTtl);
+}
+
+const removeAuthData = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('tokenTtl');
 }
 
