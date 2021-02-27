@@ -4,13 +4,15 @@ import {Home, ShopTwo} from "@material-ui/icons";
 import {withStyles} from "@material-ui/styles";
 import SidebarItem from "./SidebarItem";
 
+const drawerWidth = 180;
+
 const styles = () => ({
     drawer: {
-        width: 200,
+        width: drawerWidth,
         flexShrink: 0,
     },
     drawerPaper: {
-        width: 200,
+        width: drawerWidth,
     },
     drawerContainer: {
         overflow: 'auto',

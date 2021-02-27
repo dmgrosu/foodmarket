@@ -1,15 +1,11 @@
 import React from 'react';
-import Navbar from "./navigation/Navbar";
+import {Typography} from "@material-ui/core";
 
 const Home = () => {
-
     return (
-        <div>
-            <Navbar />
-            <br/>
-            <br/>
+        <Typography paragraph>
             Here will be implemented home page
-        </div>
+        </Typography>
     )
 }
 

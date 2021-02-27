@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {AppBar, IconButton, Menu, MenuItem, Toolbar, Typography} from "@material-ui/core";
+import {AppBar, Button, Dialog, DialogActions, DialogTitle, IconButton, Menu, MenuItem, Toolbar, Typography} from "@material-ui/core";
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
 import {Link} from "react-router-dom";
 import {AccountCircle} from "@material-ui/icons";
@@ -27,6 +27,7 @@ class Navbar extends Component {
 
     state = {
         menuOpen: null,
+        dialogIsOpen: false,
     }
 
     openMenu = (event) => {
@@ -35,11 +36,22 @@ class Navbar extends Component {
         })
     }
 
+    toggleDialog = () => {
+        this.setState(state => ({
+            dialogIsOpen: !state.dialogIsOpen,
+        }));
+    }
+
+    handleLogout = () => {
+        this.toggleDialog();
+        this.props.logout();
+    }
+
     render = () => {
 
         const {classes, auth} = this.props;
         const isAuthenticated = auth.token !== null;
-        const {menuOpen} = this.state;
+        const {menuOpen, dialogIsOpen} = this.state;
 
         return (
             <AppBar position="fixed" className={classes.appBar}>
@@ -68,11 +80,26 @@ class Navbar extends Component {
                         onClose={() => this.setState({menuOpen: null})}
                     >
                         {isAuthenticated && <MenuItem component={Link} to="/profile">Profile</MenuItem>}
-                        {isAuthenticated && <MenuItem onClick={this.props.logout}>Logout</MenuItem>}
+                        {isAuthenticated && <MenuItem onClick={this.toggleDialog}>Logout</MenuItem>}
                         {!isAuthenticated && <MenuItem component={Link} to="/signIn">Login</MenuItem>}
                         {!isAuthenticated && <MenuItem component={Link} to="/signUp">Sign Up</MenuItem>}
                     </Menu>
                 </Toolbar>
+                <Dialog
+                    open={dialogIsOpen}
+                    onClose={this.toggleDialog}
+                    aria-labelledby="alert-dialog-title"
+                >
+                    <DialogTitle id="alert-dialog-title">{"Are you sure to logout?"}</DialogTitle>
+                    <DialogActions>
+                        <Button onClick={this.handleLogout} color="primary">
+                            OK
+                        </Button>
+                        <Button onClick={this.toggleDialog} color="primary" autoFocus>
+                            Cancel
+                        </Button>
+                    </DialogActions>
+                </Dialog>
             </AppBar>
         )
     }

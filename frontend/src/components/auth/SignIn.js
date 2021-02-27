@@ -109,7 +109,7 @@ class SignIn extends Component {
 
         return (
             <div>
-                {token && <Redirect to='/'/>}
+                {token && <Redirect to='/goods'/>}
                 <CssBaseline/>
                 <div className={classes.paper}>
                     <Avatar className={classes.avatar}>

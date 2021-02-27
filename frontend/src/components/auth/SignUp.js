@@ -9,8 +9,6 @@ import Box from '@material-ui/core/Box';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import SearchIcon from '@material-ui/icons/Search';
 import Typography from '@material-ui/core/Typography';
-import Container from '@material-ui/core/Container';
-import Navbar from "../navigation/Navbar";
 import Copyright from "../Copyright";
 import {connect} from "react-redux";
 import {withStyles} from "@material-ui/styles";
@@ -172,6 +170,7 @@ class SignUp extends Component {
     render = () => {
 
         const {classes, auth} = this.props;
+        const {isLoading, token} = auth;
         const {
             firstName, lastName, email, password,
             idno, searching, entityFound, confirmPassword
@@ -179,140 +178,137 @@ class SignUp extends Component {
 
         return (
             <div>
-                {auth.token && <Redirect to="/"/>}
-                <Navbar/>
-                <Container component="main" maxWidth="xs">
-                    <CssBaseline/>
-                    <div className={classes.paper}>
-                        <Avatar className={classes.avatar}>
-                            <LockOutlinedIcon/>
-                        </Avatar>
-                        <Typography component="h1" variant="h5" gutterBottom>
-                            Sign up
-                        </Typography>
-                        <Grid container spacing={2}>
-                            <Grid item xs={10}>
-                                <TextField
-                                    variant="outlined"
-                                    fullWidth
-                                    id="idno"
-                                    label="IDNO"
-                                    name="idno"
-                                    value={idno}
-                                    disabled={searching}
-                                    onChange={(e) => this.setState({idno: e.target.value})}
-                                />
-                            </Grid>
-                            <Grid item xs={2}>
-                                <IconButton aria-label="search"
-                                            disabled={!idno || searching || auth.isLoading}
-                                            onClick={() => this.findEntity()}
-                                >
-                                    <SearchIcon fontSize="large"/>
-                                    {searching && <CircularProgress size={36} className={classes.buttonProgress}/>}
-                                </IconButton>
-                            </Grid>
-                            {entityFound && <Grid item xs={12}>
-                                <Typography color={entityFound.errors ? "error" : "secondary"}>
-                                    {this.getClientInfo()}
-                                </Typography>
-                            </Grid>}
-                            <Grid item xs={12} sm={6}>
-                                <TextField
-                                    name="firstName"
-                                    variant="outlined"
-                                    fullWidth
-                                    id="firstName"
-                                    label="First Name"
-                                    autoFocus
-                                    value={firstName}
-                                    disabled={auth.isLoading}
-                                    onChange={(e) => this.changeValue('firstName', e.target.value)}
-                                />
-                            </Grid>
-                            <Grid item xs={12} sm={6}>
-                                <TextField
-                                    variant="outlined"
-                                    fullWidth
-                                    id="lastName"
-                                    label="Last Name"
-                                    name="lastName"
-                                    value={lastName}
-                                    disabled={auth.isLoading}
-                                    onChange={(e) => this.changeValue('lastName', e.target.value)}
-                                />
-                            </Grid>
-                            <Grid item xs={12}>
-                                <TextField
-                                    variant="outlined"
-                                    required
-                                    fullWidth
-                                    id="email"
-                                    label="Email Address"
-                                    name="email"
-                                    error={this.getErrorForField("email") !== false}
-                                    helperText={this.getErrorForField("email")}
-                                    value={email}
-                                    disabled={auth.isLoading}
-                                    onChange={(e) => this.changeValue('email', e.target.value)}
-                                />
-                            </Grid>
-                            <Grid item xs={12}>
-                                <TextField
-                                    variant="outlined"
-                                    required
-                                    fullWidth
-                                    name="password"
-                                    label="Password"
-                                    type="password"
-                                    id="password"
-                                    error={this.getErrorForField("password") !== false}
-                                    helperText={this.getErrorForField("password")}
-                                    value={password}
-                                    disabled={auth.isLoading}
-                                    onChange={(e) => this.changeValue('password', e.target.value)}
-                                />
-                            </Grid>
-                            <Grid item xs={12}>
-                                <TextField
-                                    variant="outlined"
-                                    required
-                                    fullWidth
-                                    name="confirmPassword"
-                                    label="Confirm password"
-                                    error={this.getErrorForField("confirmPassword") !== false}
-                                    helperText={this.getErrorForField("confirmPassword")}
-                                    type="password"
-                                    id="confirmPassword"
-                                    value={confirmPassword}
-                                    disabled={auth.isLoading}
-                                    onChange={(e) => this.changeValue('confirmPassword', e.target.value)}
-                                />
-                            </Grid>
+                {token && <Redirect to="/goods"/>}
+                <CssBaseline/>
+                <div className={classes.paper}>
+                    <Avatar className={classes.avatar}>
+                        <LockOutlinedIcon/>
+                    </Avatar>
+                    <Typography component="h1" variant="h5" gutterBottom>
+                        Sign up
+                    </Typography>
+                    <Grid container spacing={2}>
+                        <Grid item xs={10}>
+                            <TextField
+                                variant="outlined"
+                                fullWidth
+                                id="idno"
+                                label="IDNO"
+                                name="idno"
+                                value={idno}
+                                disabled={searching}
+                                onChange={(e) => this.setState({idno: e.target.value})}
+                            />
                         </Grid>
-                        <Button
-                            fullWidth
-                            variant="contained"
-                            color="primary"
-                            onClick={() => this.signUp()}
-                            className={classes.submit}
-                            disabled={auth.isLoading}
-                        >
-                            Sign Up
-                        </Button>
-                        {auth.isLoading && <CircularProgress size={24} className={classes.buttonProgress}/>}
-                        <Grid container justify="flex-end">
-                            <Grid item>
-                                <Link to="/signIn" variant="body2">
-                                    Already have an account? Sign in
-                                </Link>
-                            </Grid>
+                        <Grid item xs={2}>
+                            <IconButton aria-label="search"
+                                        disabled={!idno || searching || isLoading}
+                                        onClick={() => this.findEntity()}
+                            >
+                                <SearchIcon fontSize="large"/>
+                                {searching && <CircularProgress size={36} className={classes.buttonProgress}/>}
+                            </IconButton>
                         </Grid>
-                    </div>
-                    <Box mt={5}>
-                        <Copyright/>
-                    </Box>
-                </Container>
+                        {entityFound && <Grid item xs={12}>
+                            <Typography color={entityFound.errors ? "error" : "secondary"}>
+                                {this.getClientInfo()}
+                            </Typography>
+                        </Grid>}
+                        <Grid item xs={12} sm={6}>
+                            <TextField
+                                name="firstName"
+                                variant="outlined"
+                                fullWidth
+                                id="firstName"
+                                label="First Name"
+                                autoFocus
+                                value={firstName}
+                                disabled={isLoading}
+                                onChange={(e) => this.changeValue('firstName', e.target.value)}
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <TextField
+                                variant="outlined"
+                                fullWidth
+                                id="lastName"
+                                label="Last Name"
+                                name="lastName"
+                                value={lastName}
+                                disabled={isLoading}
+                                onChange={(e) => this.changeValue('lastName', e.target.value)}
+                            />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <TextField
+                                variant="outlined"
+                                required
+                                fullWidth
+                                id="email"
+                                label="Email Address"
+                                name="email"
+                                error={this.getErrorForField("email") !== false}
+                                helperText={this.getErrorForField("email")}
+                                value={email}
+                                disabled={isLoading}
+                                onChange={(e) => this.changeValue('email', e.target.value)}
+                            />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <TextField
+                                variant="outlined"
+                                required
+                                fullWidth
+                                name="password"
+                                label="Password"
+                                type="password"
+                                id="password"
+                                error={this.getErrorForField("password") !== false}
+                                helperText={this.getErrorForField("password")}
+                                value={password}
+                                disabled={isLoading}
+                                onChange={(e) => this.changeValue('password', e.target.value)}
+                            />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <TextField
+                                variant="outlined"
+                                required
+                                fullWidth
+                                name="confirmPassword"
+                                label="Confirm password"
+                                error={this.getErrorForField("confirmPassword") !== false}
+                                helperText={this.getErrorForField("confirmPassword")}
+                                type="password"
+                                id="confirmPassword"
+                                value={confirmPassword}
+                                disabled={isLoading}
+                                onChange={(e) => this.changeValue('confirmPassword', e.target.value)}
+                            />
+                        </Grid>
+                    </Grid>
+                    <Button
+                        fullWidth
+                        variant="contained"
+                        color="primary"
+                        onClick={() => this.signUp()}
+                        className={classes.submit}
+                        disabled={isLoading}
+                    >
+                        Sign Up
+                    </Button>
+                    {isLoading && <CircularProgress size={24} className={classes.buttonProgress}/>}
+                    <Grid container justify="flex-end">
+                        <Grid item>
+                            <Link to="/signIn" variant="body2">
+                                Already have an account? Sign in
+                            </Link>
+                        </Grid>
+                    </Grid>
+                </div>
+                <Box mt={5}>
+                    <Copyright/>
+                </Box>
             </div>
         );
     }

@@ -50,6 +50,7 @@ const App = (props) => {
         routes = [
             <Route path='/goods' component={Home} key={2}/>,
             <Route path='/orders' component={Home} key={3}/>,
+            <Route path='/profile' component={Home} key={3}/>,
             <Route exact path='/' component={Home} key={1}/>,
             <Redirect to='/' key={4}/>
         ];
