@@ -1,7 +1,6 @@
 import React, {Component} from 'react';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
-import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
 import {Link, Redirect} from 'react-router-dom';
 import Grid from '@material-ui/core/Grid';
@@ -12,12 +11,12 @@ import Copyright from "../Copyright";
 import {withStyles} from "@material-ui/styles";
 import {connect} from "react-redux";
 import {loginStart} from "../../store/actions/authActions";
-import {CircularProgress} from "@material-ui/core";
+import {CircularProgress, Container} from "@material-ui/core";
 
 
 const styles = (theme) => ({
     paper: {
-        marginTop: theme.spacing(8),
+        marginTop: theme.spacing(4),
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -108,9 +107,10 @@ class SignIn extends Component {
         const {isLoading, token} = auth;
 
         return (
-            <div>
+            <Container component="main"
+                       maxWidth="xs"
+            >
                 {token && <Redirect to='/goods'/>}
-                <CssBaseline/>
                 <div className={classes.paper}>
                     <Avatar className={classes.avatar}>
                         <LockOutlinedIcon/>
@@ -175,7 +175,7 @@ class SignIn extends Component {
                 <Box mt={8}>
                     <Copyright/>
                 </Box>
-            </div>
+            </Container>
         );
     }
 

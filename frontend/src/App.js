@@ -10,8 +10,10 @@ import 'material-react-toastify/dist/ReactToastify.min.css';
 import {connect} from "react-redux";
 import axios from "axios";
 import Navbar from "./components/navigation/Navbar";
-import Sidebar from "./components/navigation/Sidebar";
-import Container from "@material-ui/core/Container";
+import Goods from "./components/goods/Goods";
+import Profile from "./components/auth/Profile";
+import CssBaseline from "@material-ui/core/CssBaseline";
+import Orders from "./components/orders/Orders";
 
 const theme = createMuiTheme({
     palette: {
@@ -36,41 +38,33 @@ const App = (props) => {
     const isAuthenticated = token !== null;
 
     let routes = [
-        <Route path='/signIn' component={SignIn} key={2}/>,
-        <Route path='/signUp' component={SignUp} key={3}/>,
-        <Route exact path='/' component={Home} key={1}/>,
-        <Redirect to='/' key={4}/>,
+        <Route path='/signIn' component={SignIn} key={1}/>,
+        <Route path='/signUp' component={SignUp} key={2}/>,
+        <Route exact path='/' component={Home} key={3}/>,
+        <Redirect to='/signIn' key={4}/>,
     ];
 
+    axios.interceptors.request.use(request => {
+        request.headers.common['Authorization'] = token;
+        return request;
+    });
     if (isAuthenticated) {
-        axios.interceptors.request.use(request => {
-            request.headers.common['Authorization'] = token;
-            return request;
-        });
         routes = [
-            <Route path='/goods' component={Home} key={2}/>,
-            <Route path='/orders' component={Home} key={3}/>,
-            <Route path='/profile' component={Home} key={3}/>,
-            <Route exact path='/' component={Home} key={1}/>,
-            <Redirect to='/' key={4}/>
+            <Route path='/goods' component={Goods} key={1}/>,
+            <Route path='/orders' component={Orders} key={2}/>,
+            <Route path='/profile' component={Profile} key={3}/>,
+            <Route exact path='/' component={Home} key={4}/>,
+            <Redirect to='/' key={5}/>
         ];
     }
 
     return (
         <ThemeProvider theme={theme}>
+            <CssBaseline/>
             <Navbar/>
-            <Sidebar isAuthenticated={isAuthenticated}/>
-            <Container component="main"
-                       maxWidth="xs"
-                       style={{
-                           flexGrow: 1,
-                           padding: theme.spacing(3),
-                       }}
-            >
-                <Switch>
-                    {routes}
-                </Switch>
-            </Container>
+            <Switch>
+                {routes}
+            </Switch>
             <ToastContainer position="bottom-right"
                             autoClose={5000}
             />

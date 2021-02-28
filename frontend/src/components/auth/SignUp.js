@@ -1,7 +1,6 @@
 import React, {Component} from 'react';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
-import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
 import {Link, Redirect} from 'react-router-dom';
 import Grid from '@material-ui/core/Grid';
@@ -13,14 +12,14 @@ import Copyright from "../Copyright";
 import {connect} from "react-redux";
 import {withStyles} from "@material-ui/styles";
 import {signUpStart} from "../../store/actions/authActions";
-import {CircularProgress, IconButton} from "@material-ui/core";
+import {CircularProgress, Container, IconButton} from "@material-ui/core";
 import axios from "axios";
 import {toast} from "material-react-toastify";
 
 
 const styles = (theme) => ({
     paper: {
-        marginTop: theme.spacing(8),
+        marginTop: theme.spacing(4),
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -177,9 +176,10 @@ class SignUp extends Component {
         } = this.state;
 
         return (
-            <div>
+            <Container component="main"
+                       maxWidth="xs"
+            >
                 {token && <Redirect to="/goods"/>}
-                <CssBaseline/>
                 <div className={classes.paper}>
                     <Avatar className={classes.avatar}>
                         <LockOutlinedIcon/>
@@ -309,7 +309,7 @@ class SignUp extends Component {
                 <Box mt={5}>
                     <Copyright/>
                 </Box>
-            </div>
+            </Container>
         );
     }
 }
