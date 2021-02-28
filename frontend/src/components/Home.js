@@ -1,20 +1,45 @@
 import React from 'react';
-import {Typography} from "@material-ui/core";
+import {Card, CardContent, Grid, Typography} from "@material-ui/core";
 import {withStyles} from "@material-ui/styles";
 
 const styles = (theme) => ({
-    paper: {
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
+    root: {
+        flexGrow: 1,
+        padding: theme.spacing(2)
     },
 });
 
 const Home = ({classes}) => {
     return (
-        <Typography paragraph className={classes.paper}>
-            Here will be implemented home page
-        </Typography>
+        <Grid container spacing={2} className={classes.root}>
+            <Grid item xs={12}>
+                <Card>
+                    <CardContent>
+                        <Typography variant="h5">
+                            Here will be implemented home page
+                        </Typography>
+                    </CardContent>
+                </Card>
+            </Grid>
+            <Grid item xs={6}>
+                <Card>
+                    <CardContent>
+                        <Typography variant="h6">
+                            Part 1
+                        </Typography>
+                    </CardContent>
+                </Card>
+            </Grid>
+            <Grid item xs={6}>
+                <Card>
+                    <CardContent>
+                        <Typography variant="h6">
+                            Part 2
+                        </Typography>
+                    </CardContent>
+                </Card>
+            </Grid>
+        </Grid>
     )
 }
 

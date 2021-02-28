@@ -3,7 +3,6 @@ import {LOGIN_FAIL, LOGIN_START, LOGIN_SUCCESS, LOGOUT} from "../actions/authAct
 const initialState = {
     token: null,
     userId: null,
-    userEmail: null,
     isLoading: false,
     error: null
 };
@@ -19,8 +18,7 @@ const authReducer = (state = initialState, action) => {
             return {
                 ...state,
                 token: action.payload.token,
-                userId: action.payload.user.id,
-                userEmail: action.payload.user.email,
+                userId: action.payload.userId,
                 isLoading: false
             };
         case LOGIN_FAIL:

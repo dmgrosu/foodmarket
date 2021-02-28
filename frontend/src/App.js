@@ -14,6 +14,7 @@ import Goods from "./components/goods/Goods";
 import Profile from "./components/auth/Profile";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import Orders from "./components/orders/Orders";
+import {authCheckState} from "./store/actions/authActions";
 
 const theme = createMuiTheme({
     palette: {
@@ -36,6 +37,10 @@ const App = (props) => {
 
     const {token} = props.auth;
     const isAuthenticated = token !== null;
+
+    if (!isAuthenticated) {
+        props.authCheckState();
+    }
 
     let routes = [
         <Route path='/signIn' component={SignIn} key={1}/>,
@@ -76,4 +81,6 @@ const mapStateToProps = state => ({
     auth: state.authReducer,
 });
 
-export default withRouter(connect(mapStateToProps, null)(App));
+export default withRouter(connect(mapStateToProps, {
+    authCheckState
+})(App));
