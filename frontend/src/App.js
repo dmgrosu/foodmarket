@@ -38,21 +38,8 @@ const App = (props) => {
     const {token} = props.auth;
     const isAuthenticated = token !== null;
 
-    if (!isAuthenticated) {
-        props.authCheckState();
-    }
+    let routes;
 
-    let routes = [
-        <Route path='/signIn' component={SignIn} key={1}/>,
-        <Route path='/signUp' component={SignUp} key={2}/>,
-        <Route exact path='/' component={Home} key={3}/>,
-        <Redirect to='/signIn' key={4}/>,
-    ];
-
-    axios.interceptors.request.use(request => {
-        request.headers.common['Authorization'] = token;
-        return request;
-    });
     if (isAuthenticated) {
         routes = [
             <Route path='/goods' component={Goods} key={1}/>,
@@ -61,7 +48,20 @@ const App = (props) => {
             <Route exact path='/' component={Home} key={4}/>,
             <Redirect to='/' key={5}/>
         ];
+    } else {
+        props.authCheckState();
+        routes = [
+            <Route path='/signIn' component={SignIn} key={1}/>,
+            <Route path='/signUp' component={SignUp} key={2}/>,
+            <Route exact path='/' component={Home} key={3}/>,
+            <Redirect to='/signIn' key={4}/>,
+        ];
     }
+
+    axios.interceptors.request.use(request => {
+        request.headers.common['Authorization'] = token;
+        return request;
+    });
 
     return (
         <ThemeProvider theme={theme}>

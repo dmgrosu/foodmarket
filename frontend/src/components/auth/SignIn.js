@@ -110,7 +110,7 @@ class SignIn extends Component {
             <Container component="main"
                        maxWidth="xs"
             >
-                {token && <Redirect to='/goods'/>}
+                {token && <Redirect to="/goods"/>}
                 <div className={classes.paper}>
                     <Avatar className={classes.avatar}>
                         <LockOutlinedIcon/>
