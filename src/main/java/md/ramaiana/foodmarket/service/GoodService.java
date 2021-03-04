@@ -18,42 +18,39 @@ public class GoodService {
 
     private final GoodDao goodDao;
     private final GoodGroupDao goodGroupDao;
-    private final BrandDao brandDao;
 
     @Autowired
     public GoodService(GoodDao goodDao,
-                       GoodGroupDao goodGroupDao,
-                       BrandDao brandDao) {
+                       GoodGroupDao goodGroupDao) {
         this.goodDao = goodDao;
         this.goodGroupDao = goodGroupDao;
-        this.brandDao = brandDao;
     }
 
     public List<Good> findGoodsFiltered(Integer groupId, Integer brandId, String name) {
         if (groupId != null && brandId != null && name != null) {
-            return goodDao.getAllByGroupIdAndBrandIdAndNameLikeAndDeletedAtNull(groupId, brandId, name); // tested
+            return goodDao.getAllByGroupIdAndBrandIdAndNameLikeAndDeletedAtNull(groupId, brandId, name);
         } else if (groupId != null && brandId != null) {
-            return goodDao.getAllByGroupIdAndBrandIdAndDeletedAtNull(groupId, brandId); // tested
+            return goodDao.getAllByGroupIdAndBrandIdAndDeletedAtNull(groupId, brandId);
         } else if (groupId != null && name != null) {
-            return goodDao.getAllByGroupIdAndNameAndDeletedAtNull(groupId, name); // tested
+            return goodDao.getAllByGroupIdAndNameAndDeletedAtNull(groupId, name);
         } else if (brandId != null && name != null) {
-            return goodDao.getAllByBrandIdAndNameAndDeletedAtNull(brandId, name); // tested
+            return goodDao.getAllByBrandIdAndNameAndDeletedAtNull(brandId, name);
         } else if (groupId != null) {
-            return goodDao.getAllByGroupIdAndDeletedAtNull(groupId); // tested
+            return goodDao.getAllByGroupIdAndDeletedAtNull(groupId);
         } else if (brandId != null) {
-            return goodDao.getAllByBrandIdAndDeletedAtNull(brandId); // tested
+            return goodDao.getAllByBrandIdAndDeletedAtNull(brandId);
         } else if (name != null) {
-            return goodDao.getAllByNameAndDeletedAtNull(name); // tested
+            return goodDao.getAllByNameAndDeletedAtNull(name);
         } else {
-            return goodDao.getAllByGroupIdNullAndDeletedAtNull(); // tested
+            return goodDao.getAllByGroupIdNullAndDeletedAtNull();
         }
     }
 
     public List<GoodGroup> findGroupsFiltered(Integer parentGroupId) {
         if (parentGroupId != null){
-            return goodGroupDao.getAllByParentGroupIdAndDeletedAtNull(parentGroupId); // tested
+            return goodGroupDao.getAllByParentGroupIdAndDeletedAtNull(parentGroupId);
         } else {
-            return goodGroupDao.getAllByParentGroupIdNullAndDeletedAtNull(); // tested
+            return goodGroupDao.getAllByParentGroupIdNullAndDeletedAtNull();
         }
     }
 }
