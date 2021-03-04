@@ -15,3 +15,18 @@ enum ErrorCode {
   GOOD_NOT_FOUND = 3;
 
 }
+
+message Pagination {
+  int32 pageNo = 1;
+  int32 perPage = 2;
+  int32 totalCount = 3;
+}
+
+message Sorting {
+  string columnName = 1;
+  enum Direction {
+    ASC = 0;
+    DESC = 1;
+  }
+  Direction direction = 2;
+}

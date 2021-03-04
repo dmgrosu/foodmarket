@@ -8,7 +8,6 @@ import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.OffsetDateTime;
-
 /**
  * @author Dmitri Grosu (dmitri.grosu@gmail.com), 2/10/21
  */

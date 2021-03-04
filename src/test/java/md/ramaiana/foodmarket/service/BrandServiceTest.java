@@ -19,8 +19,6 @@ public class BrandServiceTest {
 
     @Test
     void test_getAllBrands() {
-        //ARRANGE
-
         //ACT
         brandService.getAllBrands();
         //ASSERT
