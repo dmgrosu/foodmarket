@@ -1,6 +1,5 @@
 package md.ramaiana.foodmarket.service;
 
-import md.ramaiana.foodmarket.dao.BrandDao;
 import md.ramaiana.foodmarket.dao.GoodDao;
 import md.ramaiana.foodmarket.dao.GoodGroupDao;
 import md.ramaiana.foodmarket.model.Good;
