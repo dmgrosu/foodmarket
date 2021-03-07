@@ -21,8 +21,9 @@ message Order {
 
 message AddGoodToOrderRequest {
   int32 orderId = 1; // could be 0, in this case new order is created
-  Good good = 2;
-  int32 quantity = 3;
+  int32 goodId = 2;
+  float quantity = 3;
+  int32 clientId = 4;
 }
 
 message AddGoodToOrderResponse {

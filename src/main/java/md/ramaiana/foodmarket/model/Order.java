@@ -35,4 +35,20 @@ public class Order {
     String processingResult;
     @MappedCollection(idColumn = "good_id")
     List<OrderGood> goods;
+
+    public float getTotalSumForGoods() {
+        float result = 0f;
+        for (OrderGood good : goods) {
+            result += good.sum;
+        }
+        return result;
+    }
+
+    public float getTotalWeightForGoods() {
+        float result = 0f;
+        for (OrderGood good : goods) {
+            result += good.weight;
+        }
+        return result;
+    }
 }

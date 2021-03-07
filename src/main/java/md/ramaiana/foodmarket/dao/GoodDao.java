@@ -28,4 +28,6 @@ public interface GoodDao extends PagingAndSortingRepository<Good, Integer> {
 
     List<Good> getAllByGroupIdNullAndDeletedAtNull();
 
+    Good getById(Integer goodId);
+
 }

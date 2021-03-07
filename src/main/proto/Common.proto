@@ -13,7 +13,7 @@ enum ErrorCode {
   CLIENT_NOT_FOUND = 1;
   CLIENT_BLOCKED = 2;
   GOOD_NOT_FOUND = 3;
-
+  QUANTITY_IS_LESS_OR_EQUAL_TO_ZERO = 4;
 }
 
 message Pagination {
