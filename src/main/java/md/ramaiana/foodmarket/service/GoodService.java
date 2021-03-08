@@ -9,6 +9,7 @@ import md.ramaiana.foodmarket.model.GoodGroup;
 import md.ramaiana.foodmarket.model.GoodsReadResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -67,6 +68,7 @@ public class GoodService {
         }
     }
 
+    @Scheduled(fixedDelay = 10000)
     public void loadGoods() {
         GoodsReadResult readResult = dbfService.readGoodsFromFile(filePath);
         Map<String, Brand> updatedBrands = updateBrands(readResult.getBrands());
@@ -117,6 +119,7 @@ public class GoodService {
             brandsMap.put(existingBrand.getErpCode(), existingBrand);
         }
         for (Brand newBrand : newBrands.values()) {
+            newBrand.setCreatedAt(OffsetDateTime.now());
             String erpCode = newBrand.getErpCode();
             if (brandsMap.containsKey(erpCode)) {
                 newBrand.setId(brandsMap.get(erpCode).getId());
@@ -150,6 +153,7 @@ public class GoodService {
                 return goodGroupDao.save(foundGroup);
             }
         } else {
+            newGroup.setCreatedAt(OffsetDateTime.now());
             return goodGroupDao.save(newGroup);
         }
     }
@@ -175,6 +179,7 @@ public class GoodService {
                 return foundGood;
             }
         } else {
+            newGood.setCreatedAt(OffsetDateTime.now());
             return goodDao.save(newGood);
         }
     }

@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * @author Dmitri Grosu (dmitri.grosu@codefactorygroup.com), 3/7/21
+ * @author Dmitri Grosu (dmitri.grosu@gmail.com), 3/7/21
  */
 @Getter
 @Value
