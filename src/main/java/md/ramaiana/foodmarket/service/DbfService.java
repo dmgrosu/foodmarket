@@ -11,10 +11,8 @@ import org.springframework.stereotype.Service;
 
 import java.io.FileInputStream;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Dmitri Grosu (dmitri.grosu@codefactorygroup.com), 3/7/21
@@ -42,21 +40,32 @@ public class DbfService {
      * @return instance of GoodsReadResult, containing lists of Good, Groups and Brands that were read from file
      */
     public GoodsReadResult readGoodsFromFile(String filePath) {
-        List<GoodGroup> groups = new ArrayList<>();
-        List<Good> goods = new ArrayList<>();
-        Set<Brand> brands = new HashSet<>();
+        Map<String, GoodGroup> groups = new HashMap<>();
+        Map<String, Good> goods = new HashMap<>();
+        Map<String, Brand> brands = new HashMap<>();
+        Map<String, String[]> erpCodes = new HashMap<>();
 
         try (DBFReader dbfReader = new DBFReader(new FileInputStream(filePath), Charset.forName("cp1251"))) {
             DBFRow dbfRow;
             while ((dbfRow = dbfReader.nextRow()) != null) {
                 try {
                     int goodType = Integer.parseInt(dbfRow.getString("TYPE"));
+                    String goodErpCode = dbfRow.getString("ERP_ID");
                     if (goodType == 0) {
-                        goods.add(mapDbfRowToGood(dbfRow));
+                        goods.put(goodErpCode, mapDbfRowToGood(dbfRow));
                     } else {
-                        groups.add(mapDbfRowToGroup(dbfRow));
+                        groups.put(goodErpCode, mapDbfRowToGroup(dbfRow));
                     }
-                    brands.add(mapDbfRowToBrand(dbfRow));
+                    String brandErpCode = dbfRow.getString("BR_ID");
+                    brands.put(brandErpCode, Brand.builder()
+                            .erpCode(brandErpCode)
+                            .name(dbfRow.getString("BR_NAME"))
+                            .build());
+                    String parentErpCode = dbfRow.getString("GR_ID");
+                    String[] codes = new String[2];
+                    codes[0] = parentErpCode.isEmpty() ? null : parentErpCode;
+                    codes[1] = brandErpCode.isEmpty() ? null : brandErpCode;
+                    erpCodes.put(goodErpCode, codes);
                 } catch (Exception ex) {
                     log.error("Error reading DBF row: " + ex.getMessage());
                 }
@@ -68,13 +77,7 @@ public class DbfService {
                 .goods(goods)
                 .groups(groups)
                 .brands(brands)
-                .build();
-    }
-
-    private Brand mapDbfRowToBrand(DBFRow dbfRow) {
-        return Brand.builder()
-                .erpCode(dbfRow.getString("BR_ID"))
-                .name(dbfRow.getString("BR_NAME"))
+                .erpCodes(erpCodes)
                 .build();
     }
 

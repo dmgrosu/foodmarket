@@ -15,7 +15,7 @@ import java.util.List;
 @Service
 public class BrandService {
 
-    private BrandDao brandDao;
+    private final BrandDao brandDao;
 
     @Autowired
     public BrandService(BrandDao brandDao) {
