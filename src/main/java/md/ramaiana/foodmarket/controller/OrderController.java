@@ -32,13 +32,14 @@ public class OrderController {
 
     @PostMapping("/save")
     public ResponseEntity<?> addGoodToOrder(@RequestBody Orders.AddGoodToOrderRequest addGoodToOrderRequest) throws InvalidProtocolBufferException {
-        Integer orderId = addGoodToOrderRequest.getOrderId();
-        Integer goodId = addGoodToOrderRequest.getGoodId();
-        float quantity = addGoodToOrderRequest.getQuantity();
-        Integer clientId = addGoodToOrderRequest.getClientId();
-        if (quantity <= 0) {
-            return ResponseEntity.ok(printer.print(buildQuantityIsZeroResponse()));
+        ResponseEntity<String> validation = validateRequest(addGoodToOrderRequest);
+        if (validation != null) {
+            return validation;
         }
+        int orderId = addGoodToOrderRequest.getOrderId();
+        int goodId = addGoodToOrderRequest.getGoodId();
+        float quantity = addGoodToOrderRequest.getQuantity();
+        int clientId = addGoodToOrderRequest.getClientId();
         Order order = orderService.addGoodToOrder(orderId, goodId, quantity, clientId);
         return ResponseEntity.ok(printer.print(buildProtoFromDomain(order)));
     }
@@ -78,4 +79,22 @@ public class OrderController {
                 .build();
     }
 
+    private Common.ErrorResponse buildGoodIsZeroResponse() {
+        return Common.ErrorResponse.newBuilder()
+                .setCode(Common.ErrorCode.GOOD_ID_IS_LESS_OR_EQUAL_TO_ZERO)
+                .build();
+    }
+
+
+    private ResponseEntity<String> validateRequest(Orders.AddGoodToOrderRequest addGoodToOrderRequest) throws InvalidProtocolBufferException {
+        int goodId = addGoodToOrderRequest.getGoodId();
+        float quantity = addGoodToOrderRequest.getQuantity();
+        if (quantity <= 0) {
+            return ResponseEntity.badRequest().body(printer.print(buildQuantityIsZeroResponse()));
+        }
+        if (goodId <= 0) {
+            return ResponseEntity.badRequest().body(printer.print(buildGoodIsZeroResponse()));
+        }
+        return null;
+    }
 }

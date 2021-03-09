@@ -58,7 +58,7 @@ public class OrderControllerTest {
 
     @WithMockUser("spring")
     @Test
-    void test_addGoodToNewOrder_quantityZero_responseOk() throws Exception {
+    void test_addGoodToNewOrder_quantityZero_responseBadRequest() throws Exception {
         //ARRANGE
         float givenQuantity = 0f;
         int clientId = 55;
@@ -68,8 +68,24 @@ public class OrderControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(someAddGoodToOrderRequest(0, 11, givenQuantity, clientId)))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk())
+                .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("QUANTITY_IS_LESS_OR_EQUAL_TO_ZERO"));
+    }
+
+    @WithMockUser("spring")
+    @Test
+    void test_addGoodToNewOrder_goodIdZero_responseBadRequest() throws Exception {
+        //ARRANGE
+        float givenQuantity = 10f;
+        int clientId = 55;
+        givenNewOrder(givenQuantity, clientId);
+        //ACT & ASSERT
+        mockMvc.perform(post("/order/save")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(someAddGoodToOrderRequest(0, 0, givenQuantity, clientId)))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("GOOD_ID_IS_LESS_OR_EQUAL_TO_ZERO"));
     }
 
     @WithMockUser("spring")
@@ -92,7 +108,7 @@ public class OrderControllerTest {
 
     @WithMockUser("spring")
     @Test
-    void test_addToExistingOrder_quantityZero_responseOk() throws Exception {
+    void test_addToExistingOrder_quantityZero_responseBadRequest() throws Exception {
         //ARRANGE
         int orderId = 5;
         float givenQuantity = 0f;
@@ -103,7 +119,25 @@ public class OrderControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(someAddGoodToOrderRequest(orderId, 12, givenQuantity, clientId)))
                 .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("QUANTITY_IS_LESS_OR_EQUAL_TO_ZERO"));
+    }
+
+    @WithMockUser("spring")
+    @Test
+    void test_addToExistingOrder_goodIdZero_responseBadRequest() throws Exception {
+        //ARRANGE
+        int orderId = 5;
+        float givenQuantity = 10f;
+        int clientId = 55;
+        givenExistingOrder(orderId, givenQuantity, clientId);
+        //ACT & ASSERT
+        mockMvc.perform(post("/order/save")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(someAddGoodToOrderRequest(orderId, 0, givenQuantity, clientId)))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("GOOD_ID_IS_LESS_OR_EQUAL_TO_ZERO"));
     }
 
     private void givenNewOrder(float goodQuantity, int clientId) {
