@@ -32,7 +32,7 @@ public class GoodService {
     private final GoodGroupDao goodGroupDao;
     private final DbfService dbfService;
     private final BrandDao brandDao;
-    @Value("${goodsFilePath}")
+    @Value("${dataFilePath}")
     private String filePath;
 
     @Autowired
@@ -74,7 +74,7 @@ public class GoodService {
         }
     }
 
-    @Scheduled(fixedDelay = 20000)
+    @Scheduled(fixedDelayString = "${dataLoadingDelay}")
     public void loadGoods() {
         GoodsReadResult readResult;
         log.info("... data loading started");
