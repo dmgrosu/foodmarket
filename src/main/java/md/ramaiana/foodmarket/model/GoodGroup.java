@@ -29,4 +29,8 @@ public class GoodGroup {
     OffsetDateTime deletedAt;
     @Column("updated_at")
     OffsetDateTime updatedAt;
+
+    public boolean idDeleted() {
+        return deletedAt != null;
+    }
 }
