@@ -66,7 +66,6 @@ public class OrderController {
                 .setTotalWeight(order.getTotalWeightForGoods())
                 .setTotalSum(order.getTotalSumForGoods())
                 .build();
-        // TODO: 3/5/2021 setTotalSum and setTotalWeight
 
         return Orders.AddGoodToOrderResponse.newBuilder()
                 .setOrder(protoOrder)
