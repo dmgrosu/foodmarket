@@ -10,6 +10,7 @@ import md.ramaiana.foodmarket.model.GoodsReadResult;
 import org.springframework.stereotype.Service;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
@@ -39,7 +40,7 @@ public class DbfService {
      * </p>
      * @return instance of GoodsReadResult, containing lists of Good, Groups and Brands that were read from file
      */
-    public GoodsReadResult readGoodsFromFile(String filePath) {
+    public GoodsReadResult readGoodsFromFile(String filePath) throws FileNotFoundException {
         Map<String, GoodGroup> groups = new HashMap<>();
         Map<String, Good> goods = new HashMap<>();
         Map<String, Brand> brands = new HashMap<>();
@@ -70,6 +71,8 @@ public class DbfService {
                     log.error("Error reading DBF row: " + ex.getMessage());
                 }
             }
+        } catch (FileNotFoundException ex) {
+            throw ex;
         } catch (Exception e) {
             log.error("Error loading goods from file: " + e.getMessage());
         }

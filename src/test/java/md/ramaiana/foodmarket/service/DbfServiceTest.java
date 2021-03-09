@@ -19,7 +19,7 @@ class DbfServiceTest {
     private DbfService dbfService;
 
     @Test
-    void test_readGoodsFromFile() {
+    void test_readGoodsFromFile() throws Exception {
         // ARRANGE
         String filePath = "src/test/resources/testData.dbf";
         // ACT

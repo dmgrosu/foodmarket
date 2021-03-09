@@ -1,5 +1,6 @@
 package md.ramaiana.foodmarket.service;
 
+import lombok.extern.slf4j.Slf4j;
 import md.ramaiana.foodmarket.dao.BrandDao;
 import md.ramaiana.foodmarket.dao.GoodDao;
 import md.ramaiana.foodmarket.dao.GoodGroupDao;
@@ -13,6 +14,10 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.OffsetDateTime;
 import java.util.*;
 
@@ -20,6 +25,7 @@ import java.util.*;
  * @author Dmitri Grosu (dmitri.grosu@gmail.com), 2/10/21
  */
 @Service
+@Slf4j
 public class GoodService {
 
     private final GoodDao goodDao;
@@ -68,12 +74,22 @@ public class GoodService {
         }
     }
 
-    @Scheduled(fixedDelay = 10000)
+    @Scheduled(fixedDelay = 20000)
     public void loadGoods() {
-        GoodsReadResult readResult = dbfService.readGoodsFromFile(filePath);
-        Map<String, Brand> updatedBrands = updateBrands(readResult.getBrands());
-        Map<String, GoodGroup> updatedGroups = updateGroups(readResult);
+        GoodsReadResult readResult;
+        log.info("... data loading started");
+        try {
+            readResult = dbfService.readGoodsFromFile(filePath);
+        } catch (FileNotFoundException ex) {
+            log.warn(String.format("Could not start loading: file does not exists [%s]", filePath));
+            return;
+        }
         Map<String, String[]> erpCodes = readResult.getErpCodes();
+        log.info(String.format("... read [%s] lines from DBF", erpCodes.size()));
+        Map<String, Brand> updatedBrands = updateBrands(readResult.getBrands());
+        log.info(String.format("... updated [%s] brands", updatedBrands.size()));
+        Map<String, GoodGroup> updatedGroups = updateGroups(readResult);
+        log.info(String.format("... updated [%s] groups", updatedGroups.size()));
         Map<String, Good> newGoods = readResult.getGoods();
         List<Integer> updatedGoodIds = new ArrayList<>();
         for (Good newGood : newGoods.values()) {
@@ -81,7 +97,9 @@ public class GoodService {
             String parentErp = erpCodes.get(goodErp)[0];
             if (parentErp != null) {
                 GoodGroup parent = updatedGroups.get(parentErp);
-                newGood.setGroupId(parent.getId());
+                if (parent != null) {
+                    newGood.setGroupId(parent.getId());
+                }
             }
             String brandErp = erpCodes.get(goodErp)[1];
             if (brandErp != null) {
@@ -91,7 +109,20 @@ public class GoodService {
             Good updatedGood = upsertGood(newGood);
             updatedGoodIds.add(updatedGood.getId());
         }
-        goodDao.setDeletedIfIdNotIn(updatedGoodIds);
+        log.info(String.format("... updated [%s] goods", updatedGoodIds.size()));
+        int deletedCount = goodDao.setDeletedIfIdNotIn(updatedGoodIds);
+        log.info(String.format("... mark deleted [%s] goods", deletedCount));
+        deleteDataFile();
+        log.info("... data loading finished");
+    }
+
+    private void deleteDataFile() {
+        try {
+            Files.deleteIfExists(Paths.get(filePath));
+            log.info("... data file was deleted");
+        } catch (IOException e) {
+            log.error("Could not delete data file: " + e.getMessage());
+        }
     }
 
     protected Map<String, GoodGroup> updateGroups(GoodsReadResult readResult) {
