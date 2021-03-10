@@ -1,6 +1,8 @@
 package md.ramaiana.foodmarket.service;
 
 
+import md.ramaiana.foodmarket.dao.ClientDao;
+import md.ramaiana.foodmarket.dao.GoodDao;
 import md.ramaiana.foodmarket.dao.OrderDao;
 import md.ramaiana.foodmarket.model.Good;
 import md.ramaiana.foodmarket.model.Order;
@@ -10,6 +12,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.*;
 
 
@@ -17,6 +20,12 @@ import static org.mockito.Mockito.*;
 public class OrderServiceTest {
     @Mock
     OrderDao orderDaoMock;
+
+    @Mock
+    GoodDao goodDaoMock;
+
+    @Mock
+    ClientDao clientDaoMock;
 
     @InjectMocks
     OrderService orderService;
@@ -48,7 +57,7 @@ public class OrderServiceTest {
     }
 
     @Test
-    void test_addGoodToOrder() throws GoodNotFoundException, ClientNotFoundException {
+    void test_addGoodToOrder_responseOk() throws GoodNotFoundException, ClientNotFoundException {
         //ARRANGE
         Integer orderId = 2;
         Good someGood = Good.builder().id(1).price(15f).build();
@@ -64,5 +73,25 @@ public class OrderServiceTest {
                         .clientId(clientId)
                         .totalSum(sum)
                         .build());
+    }
+
+    @Test
+    void test_addGoodToOrder_responseGoodValidationError_exceptionThrown() {
+        //ARRANGE
+        int goodId = 1;
+        //ACT & ASSERT
+        assertThatExceptionOfType(GoodNotFoundException.class)
+                .isThrownBy(() -> orderService.addGoodToOrder(2, goodId, 15f, 5));
+    }
+
+    @Test
+    void test_addGoodToOrder_responseClientValidationError_exceptionThrown() {
+        //ARRANGE
+        int clientId = 1;
+        when(goodDaoMock.getByIdAndDeletedAtNull(6))
+                .thenReturn(Good.builder().id(6).build());
+        //ACT & ASSERT
+        assertThatExceptionOfType(ClientNotFoundException.class)
+                .isThrownBy(() -> orderService.addGoodToOrder(2,6, 15f, clientId));
     }
 }
