@@ -4,6 +4,10 @@ option java_package = "md.ramaiana.foodmarket.proto";
 option java_outer_classname = "Common";
 
 message ErrorResponse {
+  repeated Error errors = 1;
+}
+
+message Error {
   ErrorCode code = 1;
   string description = 2;
 }
@@ -13,7 +17,9 @@ enum ErrorCode {
   CLIENT_NOT_FOUND = 1;
   CLIENT_BLOCKED = 2;
   GOOD_NOT_FOUND = 3;
-
+  EMAIL_EXISTS = 4;
+  EMAIL_EMPTY = 5;
+  PASSWORD_EMPTY = 6;
 }
 
 message Pagination {

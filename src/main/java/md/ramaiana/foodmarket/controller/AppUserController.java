@@ -11,6 +11,7 @@ import md.ramaiana.foodmarket.proto.Authorization.LoginResponse;
 import md.ramaiana.foodmarket.proto.Authorization.SignUpRequest;
 import md.ramaiana.foodmarket.proto.Authorization.UserProto;
 import md.ramaiana.foodmarket.proto.Clients;
+import md.ramaiana.foodmarket.proto.Common;
 import md.ramaiana.foodmarket.service.AppUserService;
 import md.ramaiana.foodmarket.service.TokenService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Dmitri Grosu, 2/7/21
@@ -67,8 +70,9 @@ public class AppUserController {
 
     @PostMapping("/register")
     public ResponseEntity<?> signUp(@RequestBody SignUpRequest signUpRequest) throws InvalidProtocolBufferException {
-        if (appUserService.userEmailExists(signUpRequest.getEmail())) {
-            return ResponseEntity.badRequest().body("User email is not unique!");
+        List<Common.Error> errors = validateSignUpRequest(signUpRequest);
+        if (!errors.isEmpty()) {
+            return ResponseEntity.badRequest().body(buildErrorResponse(errors));
         }
         AppUser appUser = AppUser.builder()
                 .email(signUpRequest.getEmail())
@@ -80,12 +84,46 @@ public class AppUserController {
         return ResponseEntity.ok(buildSuccessfulLoginResponse(savedUser));
     }
 
+    private List<Common.Error> validateSignUpRequest(SignUpRequest signUpRequest) {
+        List<Common.Error> errors = new ArrayList<>();
+        if (signUpRequest.getEmail().isEmpty()) {
+            errors.add(Common.Error.newBuilder()
+                    .setCode(Common.ErrorCode.EMAIL_EMPTY)
+                    .setDescription("Missing required user email")
+                    .build());
+        }
+        if (signUpRequest.getPassword().isEmpty()) {
+            errors.add(Common.Error.newBuilder()
+                    .setCode(Common.ErrorCode.PASSWORD_EMPTY)
+                    .setDescription("Missing required password")
+                    .build());
+        }
+        if (!errors.isEmpty()) {
+            return errors;
+        }
+        if (appUserService.userEmailExists(signUpRequest.getEmail())) {
+            errors.add(Common.Error.newBuilder()
+                    .setCode(Common.ErrorCode.EMAIL_EXISTS)
+                    .setDescription(String.format("User [%s] already exists", signUpRequest.getEmail()))
+                    .build());
+        }
+        return errors;
+    }
+
+    private String buildErrorResponse(List<Common.Error> errors) throws InvalidProtocolBufferException {
+        return printer.print(Common.ErrorResponse.newBuilder()
+                .addAllErrors(errors)
+                .build());
+    }
+
     private String buildSuccessfulLoginResponse(AppUser appUser) throws InvalidProtocolBufferException {
         UserProto userProto = buildProtoFromAppUser(appUser);
         String token = tokenService.createToken(appUser);
+        int tokenTtl = tokenService.getTOKEN_VALIDITY() / 1000;
         return printer.print(LoginResponse.newBuilder()
                 .setUser(userProto)
                 .setToken(token)
+                .setTokenTtl(tokenTtl)
                 .build());
     }
 
