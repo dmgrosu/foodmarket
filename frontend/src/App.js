@@ -1,7 +1,7 @@
 import React from "react";
 import ThemeProvider from "@material-ui/styles/ThemeProvider";
 import {createMuiTheme} from "@material-ui/core";
-import {Redirect, Route, Switch, withRouter} from "react-router-dom";
+import {Route, Switch, withRouter} from "react-router-dom";
 import SignIn from "./components/auth/SignIn";
 import SignUp from "./components/auth/SignUp";
 import Home from "./components/Home";
@@ -51,7 +51,6 @@ const App = (props) => {
             <Route path='/profile' component={Profile} key={6}/>,
         );
     } else {
-        routes.push(<Redirect to="/" key={0}/>)
         props.authCheckState();
     }
 
