@@ -38,24 +38,21 @@ const App = (props) => {
     const {token} = props.auth;
     const isAuthenticated = token !== null;
 
-    let routes;
+    let routes = [
+        <Route path='/signIn' component={SignIn} key={1}/>,
+        <Route path='/signUp' component={SignUp} key={2}/>,
+        <Route exact path='/' component={Home} key={3}/>,
+    ];
 
     if (isAuthenticated) {
-        routes = [
-            <Route path='/goods' component={Goods} key={1}/>,
-            <Route path='/orders' component={Orders} key={2}/>,
-            <Route path='/profile' component={Profile} key={3}/>,
-            <Route exact path='/' component={Home} key={4}/>,
-            <Redirect to='/' key={5}/>
-        ];
+        routes.push(
+            <Route path='/goods' component={Goods} key={4}/>,
+            <Route path='/orders' component={Orders} key={5}/>,
+            <Route path='/profile' component={Profile} key={6}/>,
+        );
     } else {
+        routes.push(<Redirect to="/" key={0}/>)
         props.authCheckState();
-        routes = [
-            <Route path='/signIn' component={SignIn} key={1}/>,
-            <Route path='/signUp' component={SignUp} key={2}/>,
-            <Route exact path='/' component={Home} key={3}/>,
-            <Redirect to='/signIn' key={4}/>,
-        ];
     }
 
     axios.interceptors.request.use(request => {
