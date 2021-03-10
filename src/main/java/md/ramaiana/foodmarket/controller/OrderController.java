@@ -8,8 +8,11 @@ import md.ramaiana.foodmarket.proto.Clients;
 import md.ramaiana.foodmarket.proto.Common;
 import md.ramaiana.foodmarket.proto.Goods;
 import md.ramaiana.foodmarket.proto.Orders;
+import md.ramaiana.foodmarket.service.ClientNotFoundException;
+import md.ramaiana.foodmarket.service.GoodNotFoundException;
 import md.ramaiana.foodmarket.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +22,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/order")
+@Slf4j
 public class OrderController {
 
     private final OrderService orderService;
@@ -40,7 +44,16 @@ public class OrderController {
         int goodId = addGoodToOrderRequest.getGoodId();
         float quantity = addGoodToOrderRequest.getQuantity();
         int clientId = addGoodToOrderRequest.getClientId();
-        Order order = orderService.addGoodToOrder(orderId, goodId, quantity, clientId);
+        Order order = null;
+        try {
+            order = orderService.addGoodToOrder(orderId, goodId, quantity, clientId);
+        } catch (GoodNotFoundException e) {
+            log.warn(e.getMessage());
+            return ResponseEntity.ok(printer.print(buildGoodNotFoundResponse()));
+        } catch (ClientNotFoundException e) {
+            log.warn(e.getMessage());
+            return ResponseEntity.ok(printer.print(buildClientNotFountResponse()));
+        }
         return ResponseEntity.ok(printer.print(buildProtoFromDomain(order)));
     }
 
@@ -82,6 +95,18 @@ public class OrderController {
     private Common.ErrorResponse buildGoodIsZeroResponse() {
         return Common.ErrorResponse.newBuilder()
                 .setCode(Common.ErrorCode.GOOD_ID_IS_LESS_OR_EQUAL_TO_ZERO)
+                .build();
+    }
+
+    private Common.ErrorResponse buildGoodNotFoundResponse() {
+        return Common.ErrorResponse.newBuilder()
+                .setCode(Common.ErrorCode.GOOD_NOT_FOUND)
+                .build();
+    }
+
+    private Common.ErrorResponse buildClientNotFountResponse() {
+        return Common.ErrorResponse.newBuilder()
+                .setCode(Common.ErrorCode.CLIENT_NOT_FOUND)
                 .build();
     }
 

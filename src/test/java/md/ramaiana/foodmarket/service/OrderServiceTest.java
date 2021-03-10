@@ -48,7 +48,7 @@ public class OrderServiceTest {
     }
 
     @Test
-    void test_addGoodToOrder() {
+    void test_addGoodToOrder() throws GoodNotFoundException, ClientNotFoundException {
         //ARRANGE
         Integer orderId = 2;
         Good someGood = Good.builder().id(1).price(15f).build();

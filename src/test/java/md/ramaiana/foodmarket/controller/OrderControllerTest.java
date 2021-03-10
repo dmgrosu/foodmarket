@@ -8,6 +8,8 @@ import md.ramaiana.foodmarket.model.Order;
 import md.ramaiana.foodmarket.model.OrderGood;
 import md.ramaiana.foodmarket.proto.Goods;
 import md.ramaiana.foodmarket.proto.Orders;
+import md.ramaiana.foodmarket.service.ClientNotFoundException;
+import md.ramaiana.foodmarket.service.GoodNotFoundException;
 import md.ramaiana.foodmarket.service.OrderService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -140,7 +142,39 @@ public class OrderControllerTest {
                 .andExpect(jsonPath("$.code").value("GOOD_ID_IS_LESS_OR_EQUAL_TO_ZERO"));
     }
 
-    private void givenNewOrder(float goodQuantity, int clientId) {
+    @WithMockUser("spring")
+    @Test
+    void test_addToOrder_serviceValidationNotPassed_clientNotFound_responceOk() throws Exception {
+        //ARRANGE
+        when(orderServiceMock.addGoodToOrder(1, 2, 3.5f, 4))
+                .thenThrow(new ClientNotFoundException("Client with ID 4 not found"));
+
+        //ACT & ASSERT
+        mockMvc.perform(post("/order/save")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(someAddGoodToOrderRequest(1,2,3.5f,4)))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("CLIENT_NOT_FOUND"));
+    }
+
+    @WithMockUser("spring")
+    @Test
+    void test_addToOrder_serviceValidationNotPassed_goodNotFound_responceOk() throws Exception {
+        //ARRANGE
+        when(orderServiceMock.addGoodToOrder(1, 2, 3.5f, 4))
+                .thenThrow(new GoodNotFoundException("Good with ID 2 not found"));
+
+        //ACT & ASSERT
+        mockMvc.perform(post("/order/save")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(someAddGoodToOrderRequest(1,2,3.5f,4)))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("GOOD_NOT_FOUND"));
+    }
+
+    private void givenNewOrder(float goodQuantity, int clientId) throws GoodNotFoundException, ClientNotFoundException {
         Good someGood = givenGood("someName", 10f, 1.5f);
         OrderGood givenOrderGood = givenOrderGoodForNewOrder(someGood, goodQuantity);
         List<OrderGood> givenGoods = Collections.singletonList(givenOrderGood);
@@ -154,11 +188,11 @@ public class OrderControllerTest {
                 .thenReturn(givenOrder);
     }
 
-    private void givenExistingOrder(int orderId, float givenQuantity, int clientId) {
+    private void givenExistingOrder(int orderId, float givenQuantity, int clientId) throws GoodNotFoundException, ClientNotFoundException {
         Good someGood1 = givenGood("someName", 10f, 1.5f);
         Good someGood2 = givenOtherGood("someName2", 10f, 1.5f);
-        OrderGood givenOrderGood1 = givenOrderGoodForExistingOrder(orderId,someGood1, givenQuantity, 11);
-        OrderGood givenOrderGood2 = givenOrderGoodForExistingOrder(orderId,someGood2, givenQuantity, 12);
+        OrderGood givenOrderGood1 = givenOrderGoodForExistingOrder(orderId, someGood1, givenQuantity, 11);
+        OrderGood givenOrderGood2 = givenOrderGoodForExistingOrder(orderId, someGood2, givenQuantity, 12);
         List<OrderGood> givenGoods = new ArrayList<>();
         givenGoods.add(givenOrderGood1);
         givenGoods.add(givenOrderGood2);
@@ -181,7 +215,6 @@ public class OrderControllerTest {
                 .weight(good.getWeight() * quantity)
                 .build();
     }
-
 
 
     private OrderGood givenOrderGoodForExistingOrder(int orderId, Good good, float quantity, int orderGoodId) {
