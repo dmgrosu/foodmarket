@@ -44,7 +44,7 @@ public class TokenService {
             Date now = new Date();
             return "Bearer " + JWT.create()
                     .withClaim("username", appUser.getUsername())
-                    .withClaim("userId", appUser.getId())
+                    .withClaim("userId", appUser.getId().toString())
                     .withClaim("createdAt", now)
                     .withExpiresAt(new Date(now.getTime() + TOKEN_VALIDITY))
                     .sign(algorithm);
@@ -71,7 +71,7 @@ public class TokenService {
 
     public Authentication getAuthentication(String token) {
         Map<String, String> userData = getUserDataFromToken(token);
-        UserDetails userDetails = appUserService.loadUserByUsername(userData.get("email"));
+        UserDetails userDetails = appUserService.findById(Integer.parseInt(userData.get("id")));
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
 }

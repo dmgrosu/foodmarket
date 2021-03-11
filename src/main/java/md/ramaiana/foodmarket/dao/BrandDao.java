@@ -15,6 +15,6 @@ public interface BrandDao extends CrudRepository<Brand, Integer> {
 
     Optional<Brand> findByIdAndDeletedAtIsNull(Integer id);
 
-    List<Brand> getAllByDeletedAtNull();
+    List<Brand> getAllByDeletedAtNullOrderByName();
 
 }

@@ -27,13 +27,8 @@ public class AppUserService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        AppUser appUser = appUserDao.findByEmail(email)
+        return appUserDao.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException(String.format("User with email [%s] not found", email)));
-        if (appUser.hasClient()) {
-            clientDao.findById(appUser.getClientId())
-                    .ifPresent(appUser::setClient);
-        }
-        return appUser;
     }
 
     public AppUser registerNewUser(AppUser appUser) {
@@ -43,6 +38,16 @@ public class AppUserService implements UserDetailsService {
                     .ifPresent(savedUser::setClient);
         }
         return savedUser;
+    }
+
+    public AppUser findById(Integer id) throws UsernameNotFoundException {
+        AppUser appUser = appUserDao.findById(id)
+                .orElseThrow(() -> new UsernameNotFoundException(String.format("User with id [%s] not found", id)));
+        if (appUser.hasClient()) {
+            clientDao.findById(appUser.getClientId())
+                    .ifPresent(appUser::setClient);
+        }
+        return appUser;
     }
 
     public boolean userEmailExists(String email) {
