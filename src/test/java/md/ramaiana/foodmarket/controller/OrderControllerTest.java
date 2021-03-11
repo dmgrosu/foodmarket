@@ -6,11 +6,8 @@ import com.google.protobuf.util.JsonFormat;
 import md.ramaiana.foodmarket.model.Good;
 import md.ramaiana.foodmarket.model.Order;
 import md.ramaiana.foodmarket.model.OrderGood;
-import md.ramaiana.foodmarket.proto.Goods;
 import md.ramaiana.foodmarket.proto.Orders;
-import md.ramaiana.foodmarket.service.ClientNotFoundException;
-import md.ramaiana.foodmarket.service.GoodNotFoundException;
-import md.ramaiana.foodmarket.service.OrderService;
+import md.ramaiana.foodmarket.service.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -29,6 +26,7 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -144,7 +142,7 @@ public class OrderControllerTest {
 
     @WithMockUser("spring")
     @Test
-    void test_addToOrder_serviceValidationNotPassed_clientNotFound_responceOk() throws Exception {
+    void test_addToOrder_serviceValidationNotPassed_clientNotFound_responseOk() throws Exception {
         //ARRANGE
         when(orderServiceMock.addGoodToOrder(1, 2, 3.5f, 4))
                 .thenThrow(new ClientNotFoundException("Client with ID 4 not found"));
@@ -152,7 +150,7 @@ public class OrderControllerTest {
         //ACT & ASSERT
         mockMvc.perform(post("/order/save")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(someAddGoodToOrderRequest(1,2,3.5f,4)))
+                .content(someAddGoodToOrderRequest(1, 2, 3.5f, 4)))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("CLIENT_NOT_FOUND"));
@@ -160,7 +158,7 @@ public class OrderControllerTest {
 
     @WithMockUser("spring")
     @Test
-    void test_addToOrder_serviceValidationNotPassed_goodNotFound_responceOk() throws Exception {
+    void test_addToOrder_serviceValidationNotPassed_goodNotFound_responseOk() throws Exception {
         //ARRANGE
         when(orderServiceMock.addGoodToOrder(1, 2, 3.5f, 4))
                 .thenThrow(new GoodNotFoundException("Good with ID 2 not found"));
@@ -168,11 +166,55 @@ public class OrderControllerTest {
         //ACT & ASSERT
         mockMvc.perform(post("/order/save")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(someAddGoodToOrderRequest(1,2,3.5f,4)))
+                .content(someAddGoodToOrderRequest(1, 2, 3.5f, 4)))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("GOOD_NOT_FOUND"));
     }
+
+    @WithMockUser("spring")
+    @Test
+    void test_getOrderById_responseOk() throws Exception {
+        //ARRANGE
+        OrderGood someOrderGood = OrderGood.builder().id(1).orderId(2).sum(200f).weight(150f).build();
+        List<OrderGood> someGoods = new ArrayList<>();
+        someGoods.add(someOrderGood);
+        Order someOrder = Order.builder().id(2).clientId(15).goods(someGoods).createdAt(OffsetDateTime.now()).build();
+        when(orderServiceMock.findOrdersById(2))
+                .thenReturn(someOrder);
+        //ACT & ASSERT
+        mockMvc.perform(get("/order/getById")
+                .param("id", "2"))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.order.id").value(2));
+    }
+
+    @WithMockUser("spring")
+    @Test
+    void test_getOrderById_serviceValidationNotPassed_OrderNotFound_responseOk() throws Exception {
+        //ARRANGE
+        when(orderServiceMock.findOrdersById(1))
+                .thenThrow(new OrderNotFoundException("Order with ID 1 not found"));
+        //ACT & ASSERT
+        mockMvc.perform(get("/order/getById")
+                .param("id", "1"))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("ORDER_NOT_FOUND"));
+    }
+
+    @WithMockUser("spring")
+    @Test
+    void test_getOrderById_ValidationNotPassed_OrderIdIsZero_responseBadRequest() throws Exception {
+        //ARRANGE & ACT & ASSERT
+        mockMvc.perform(get("/order/getById")
+                .param("id", "0"))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("ORDER_ID_IS_ZERO"));
+    }
+
 
     private void givenNewOrder(float goodQuantity, int clientId) throws GoodNotFoundException, ClientNotFoundException {
         Good someGood = givenGood("someName", 10f, 1.5f);

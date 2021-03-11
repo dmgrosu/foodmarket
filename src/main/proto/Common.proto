@@ -15,6 +15,9 @@ enum ErrorCode {
   GOOD_NOT_FOUND = 3;
   QUANTITY_IS_LESS_OR_EQUAL_TO_ZERO = 4;
   GOOD_ID_IS_LESS_OR_EQUAL_TO_ZERO = 5;
+  ORDER_NOT_FOUND = 6;
+  ORDER_ID_IS_ZERO = 7;
+  ORDER_ID_IS_NULL = 8;
 }
 
 message Pagination {

@@ -8,6 +8,7 @@ import md.ramaiana.foodmarket.model.Good;
 import md.ramaiana.foodmarket.model.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
 /**
  * @author Grosu Kirill (grosukirill009@gmail.com), 2/12/2021
@@ -28,9 +29,20 @@ public class OrderService {
         this.clientDao = clientDao;
     }
 
-    public Order findOrdersById(Integer orderId) {
-        return orderDao.getByIdAndDeletedAtNull(orderId);
+    public Order findOrdersById(Integer orderId) throws OrderNotFoundException, OrderIdZeroException, IllegalArgumentException {
+        Assert.notNull(orderId, "Order ID is null");
+        if (orderId == 0) {
+            throw new OrderIdZeroException("Order ID is zero");
+        }
+        Order order = orderDao.getByIdAndDeletedAtNull(orderId);
+        if (order == null) {
+            throw new OrderNotFoundException(String.format("Order with ID [%s] not found", orderId));
+        } else {
+            return order;
+        }
     }
+
+
 
     public void deleteOrder(Integer orderId) {
         orderDao.deleteByIdAndProcessedAtNull(orderId);
@@ -59,6 +71,13 @@ public class OrderService {
         Good good = goodDao.getByIdAndDeletedAtNull(goodId);
         if (good == null) {
             throw new GoodNotFoundException(String.format("Good with ID [%s] not found", goodId));
+        }
+    }
+
+    private void validateOrder(Integer orderId) throws OrderNotFoundException {
+        Order order = orderDao.getByIdAndDeletedAtNull(orderId);
+        if (order == null) {
+            throw new OrderNotFoundException(String.format("Order with ID [%s] not found", orderId));
         }
     }
 }

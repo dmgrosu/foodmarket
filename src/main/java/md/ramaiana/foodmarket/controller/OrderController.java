@@ -1,6 +1,7 @@
 package md.ramaiana.foodmarket.controller;
 
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.MessageOrBuilder;
 import com.google.protobuf.util.JsonFormat;
 import md.ramaiana.foodmarket.model.Order;
 import md.ramaiana.foodmarket.model.OrderGood;
@@ -8,9 +9,7 @@ import md.ramaiana.foodmarket.proto.Clients;
 import md.ramaiana.foodmarket.proto.Common;
 import md.ramaiana.foodmarket.proto.Goods;
 import md.ramaiana.foodmarket.proto.Orders;
-import md.ramaiana.foodmarket.service.ClientNotFoundException;
-import md.ramaiana.foodmarket.service.GoodNotFoundException;
-import md.ramaiana.foodmarket.service.OrderService;
+import md.ramaiana.foodmarket.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -44,7 +43,7 @@ public class OrderController {
         int goodId = addGoodToOrderRequest.getGoodId();
         float quantity = addGoodToOrderRequest.getQuantity();
         int clientId = addGoodToOrderRequest.getClientId();
-        Order order = null;
+        Order order;
         try {
             order = orderService.addGoodToOrder(orderId, goodId, quantity, clientId);
         } catch (GoodNotFoundException e) {
@@ -56,6 +55,29 @@ public class OrderController {
         }
         return ResponseEntity.ok(printer.print(buildProtoFromDomain(order)));
     }
+
+    @GetMapping("/getById")
+    public ResponseEntity<?> getOrderById(@RequestParam("id") Integer orderId) throws InvalidProtocolBufferException {
+        if (orderId == 0) {
+            return ResponseEntity.badRequest().body(printer.print(buildOrderIdIsZeroResponse()));
+        }
+        Order order;
+        try {
+            order = orderService.findOrdersById(orderId);
+        } catch (OrderNotFoundException e) {
+            log.warn(e.getMessage());
+            return ResponseEntity.ok(printer.print(buildOrderNotFoundResponse()));
+        } catch (OrderIdZeroException e) {
+            log.warn(e.getMessage());
+            return ResponseEntity.ok(printer.print(buildOrderIdIsZeroResponse()));
+        } catch (IllegalArgumentException e) {
+            log.warn(e.getMessage());
+            return ResponseEntity.ok(printer.print(buildOrderIdIsNullResponse()));
+        }
+        return ResponseEntity.ok(printer.print(buildProtoFromDomain(order)));
+    }
+
+
 
     private Orders.AddGoodToOrderResponse buildProtoFromDomain(Order order) {
         Orders.OrderState state = Orders.OrderState.NEW;
@@ -110,6 +132,23 @@ public class OrderController {
                 .build();
     }
 
+    private Common.ErrorResponse buildOrderNotFoundResponse() {
+        return Common.ErrorResponse.newBuilder()
+                .setCode(Common.ErrorCode.ORDER_NOT_FOUND)
+                .build();
+    }
+
+    private Common.ErrorResponse buildOrderIdIsZeroResponse() {
+        return Common.ErrorResponse.newBuilder()
+                .setCode(Common.ErrorCode.ORDER_ID_IS_ZERO)
+                .build();
+    }
+
+    private Common.ErrorResponse buildOrderIdIsNullResponse() {
+        return Common.ErrorResponse.newBuilder()
+                .setCode(Common.ErrorCode.ORDER_ID_IS_NULL)
+                .build();
+    }
 
     private ResponseEntity<String> validateRequest(Orders.AddGoodToOrderRequest addGoodToOrderRequest) throws InvalidProtocolBufferException {
         int goodId = addGoodToOrderRequest.getGoodId();
