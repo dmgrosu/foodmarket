@@ -34,9 +34,9 @@ public class OrderController {
 
     @PostMapping("/save")
     public ResponseEntity<?> addGoodToOrder(@RequestBody Orders.AddGoodToOrderRequest addGoodToOrderRequest) throws InvalidProtocolBufferException {
-        ResponseEntity<String> validation = validateRequest(addGoodToOrderRequest);
-        if (validation != null) {
-            return validation;
+        List<Common.Error> errors = validateRequest(addGoodToOrderRequest);
+        if (!errors.isEmpty()) {
+            return ResponseEntity.ok(printer.print(buildErrorResponse(errors)));
         }
         int orderId = addGoodToOrderRequest.getOrderId();
         int goodId = addGoodToOrderRequest.getGoodId();
@@ -47,10 +47,10 @@ public class OrderController {
             order = orderService.addGoodToOrder(orderId, goodId, quantity, clientId);
         } catch (GoodNotFoundException e) {
             log.warn(e.getMessage());
-            return ResponseEntity.ok(printer.print(buildGoodNotFoundResponse()));
+            return ResponseEntity.ok(printer.print(buildGoodNotFoundResponse(e.getMessage())));
         } catch (ClientNotFoundException e) {
             log.warn(e.getMessage());
-            return ResponseEntity.ok(printer.print(buildClientNotFountResponse()));
+            return ResponseEntity.ok(printer.print(buildClientNotFountResponse(e.getMessage())));
         }
         return ResponseEntity.ok(printer.print(buildProtoFromDomain(order)));
     }
@@ -58,20 +58,20 @@ public class OrderController {
     @GetMapping("/getById")
     public ResponseEntity<?> getOrderById(@RequestParam("id") Integer orderId) throws InvalidProtocolBufferException {
         if (orderId == 0) {
-            return ResponseEntity.badRequest().body(printer.print(buildOrderIdIsZeroResponse()));
+            return ResponseEntity.badRequest().body(printer.print(buildOrderIdIsZeroResponse("Order ID is zero")));
         }
         Order order;
         try {
             order = orderService.findOrdersById(orderId);
         } catch (OrderNotFoundException e) {
             log.warn(e.getMessage());
-            return ResponseEntity.ok(printer.print(buildOrderNotFoundResponse()));
+            return ResponseEntity.ok(printer.print(buildOrderNotFoundResponse(e.getMessage())));
         } catch (OrderIdZeroException e) {
             log.warn(e.getMessage());
-            return ResponseEntity.ok(printer.print(buildOrderIdIsZeroResponse()));
+            return ResponseEntity.ok(printer.print(buildOrderIdIsZeroResponse(e.getMessage())));
         } catch (IllegalArgumentException e) {
             log.warn(e.getMessage());
-            return ResponseEntity.ok(printer.print(buildOrderIdIsNullResponse()));
+            return ResponseEntity.ok(printer.print(buildOrderIdIsNullResponse(e.getMessage())));
         }
         return ResponseEntity.ok(printer.print(buildProtoFromDomain(order)));
     }
@@ -82,7 +82,6 @@ public class OrderController {
         orderService.deleteOrderById(orderId);
         return ResponseEntity.ok().build();
     }
-
 
 
     private Orders.AddGoodToOrderResponse buildProtoFromDomain(Order order) {
@@ -114,57 +113,72 @@ public class OrderController {
                 .build();
     }
 
-    private Common.ErrorResponse buildQuantityIsZeroResponse() {
+
+    private Common.ErrorResponse buildGoodNotFoundResponse(String error) {
         return Common.ErrorResponse.newBuilder()
-                .setCode(Common.ErrorCode.QUANTITY_IS_LESS_OR_EQUAL_TO_ZERO)
+                .addErrors(Common.Error.newBuilder()
+                        .setCode(Common.ErrorCode.GOOD_NOT_FOUND)
+                        .setDescription(error)
+                        .build())
                 .build();
     }
 
-    private Common.ErrorResponse buildGoodIsZeroResponse() {
+    private Common.ErrorResponse buildClientNotFountResponse(String error) {
         return Common.ErrorResponse.newBuilder()
-                .setCode(Common.ErrorCode.GOOD_ID_IS_LESS_OR_EQUAL_TO_ZERO)
+                .addErrors(Common.Error.newBuilder()
+                        .setCode(Common.ErrorCode.CLIENT_NOT_FOUND)
+                        .setDescription(error)
+                        .build())
                 .build();
     }
 
-    private Common.ErrorResponse buildGoodNotFoundResponse() {
+    private Common.ErrorResponse buildOrderNotFoundResponse(String error) {
         return Common.ErrorResponse.newBuilder()
-                .setCode(Common.ErrorCode.GOOD_NOT_FOUND)
+                .addErrors(Common.Error.newBuilder()
+                        .setCode(Common.ErrorCode.ORDER_NOT_FOUND)
+                        .setDescription(error)
+                        .build())
                 .build();
     }
 
-    private Common.ErrorResponse buildClientNotFountResponse() {
+    private Common.ErrorResponse buildOrderIdIsZeroResponse(String error) {
         return Common.ErrorResponse.newBuilder()
-                .setCode(Common.ErrorCode.CLIENT_NOT_FOUND)
+                .addErrors(Common.Error.newBuilder()
+                        .setCode(Common.ErrorCode.ORDER_ID_IS_ZERO)
+                        .setDescription(error)
+                        .build())
                 .build();
     }
 
-    private Common.ErrorResponse buildOrderNotFoundResponse() {
+    private Common.ErrorResponse buildOrderIdIsNullResponse(String error) {
         return Common.ErrorResponse.newBuilder()
-                .setCode(Common.ErrorCode.ORDER_NOT_FOUND)
+                .addErrors(Common.Error.newBuilder()
+                        .setCode(Common.ErrorCode.ORDER_ID_IS_NULL)
+                        .setDescription(error)
+                        .build())
                 .build();
     }
 
-    private Common.ErrorResponse buildOrderIdIsZeroResponse() {
-        return Common.ErrorResponse.newBuilder()
-                .setCode(Common.ErrorCode.ORDER_ID_IS_ZERO)
-                .build();
-    }
-
-    private Common.ErrorResponse buildOrderIdIsNullResponse() {
-        return Common.ErrorResponse.newBuilder()
-                .setCode(Common.ErrorCode.ORDER_ID_IS_NULL)
-                .build();
-    }
-
-    private ResponseEntity<String> validateRequest(Orders.AddGoodToOrderRequest addGoodToOrderRequest) throws InvalidProtocolBufferException {
+    private List<Common.Error> validateRequest(Orders.AddGoodToOrderRequest addGoodToOrderRequest) {
+        List<Common.Error> errors = new ArrayList<>();
         int goodId = addGoodToOrderRequest.getGoodId();
         float quantity = addGoodToOrderRequest.getQuantity();
         if (quantity <= 0) {
-            return ResponseEntity.badRequest().body(printer.print(buildQuantityIsZeroResponse()));
+            errors.add(Common.Error.newBuilder()
+                    .setCode(Common.ErrorCode.QUANTITY_IS_LESS_OR_EQUAL_TO_ZERO)
+                    .build());
         }
         if (goodId <= 0) {
-            return ResponseEntity.badRequest().body(printer.print(buildGoodIsZeroResponse()));
+            errors.add(Common.Error.newBuilder()
+                    .setCode(Common.ErrorCode.GOOD_ID_IS_LESS_OR_EQUAL_TO_ZERO)
+                    .build());
         }
-        return null;
+        return errors;
+    }
+
+    private Common.ErrorResponse buildErrorResponse(List<Common.Error> errors) {
+        return Common.ErrorResponse.newBuilder()
+                .addAllErrors(errors)
+                .build();
     }
 }
