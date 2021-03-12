@@ -5,6 +5,7 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author Dmitri Grosu (dmitri.grosu@gmail.com), 2/10/21
@@ -15,4 +16,7 @@ public interface GoodGroupDao extends PagingAndSortingRepository<GoodGroup, Inte
     List<GoodGroup> getAllByParentGroupIdNullAndDeletedAtNull();
 
     List<GoodGroup> getAllByParentGroupIdAndDeletedAtNull(Integer groupId);
+
+    Optional<GoodGroup> findByErpCode(String parentErp);
+
 }

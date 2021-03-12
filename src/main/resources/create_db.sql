@@ -9,6 +9,9 @@ create table if not exists rama_fm.brand
     deleted_at timestamp with time zone
 );
 
+create unique index brand_erp_code_uindex
+    on rama_fm.brand (erp_code);
+
 create table if not exists rama_fm.good_group
 (
     id              serial                   not null

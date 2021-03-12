@@ -53,8 +53,9 @@ public class ClientController {
 
     private Common.ErrorResponse buildNotFoundResponse(String error) {
         return Common.ErrorResponse.newBuilder()
-                .setCode(Common.ErrorCode.CLIENT_NOT_FOUND)
-                .setDescription(error)
+                .addErrors(Common.Error.newBuilder()
+                        .setCode(Common.ErrorCode.CLIENT_NOT_FOUND)
+                        .setDescription(error))
                 .build();
     }
 

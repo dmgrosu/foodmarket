@@ -6,6 +6,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import lombok.Getter;
 import md.ramaiana.foodmarket.model.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,8 +27,9 @@ public class TokenService {
 
     @Value("${jwt.token.secret}")
     private String TOKEN_SECRET;
+    @Getter
     @Value("${jwt.token.validity}")
-    public Long TOKEN_VALIDITY;
+    private Integer TOKEN_VALIDITY;
 
     private final AppUserService appUserService;
 
