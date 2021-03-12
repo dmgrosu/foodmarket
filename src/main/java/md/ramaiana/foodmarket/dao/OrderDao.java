@@ -1,7 +1,10 @@
 package md.ramaiana.foodmarket.dao;
 
 import md.ramaiana.foodmarket.model.Order;
+import org.springframework.data.jdbc.repository.query.Modifying;
+import org.springframework.data.jdbc.repository.query.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -12,10 +15,12 @@ import java.util.List;
 
 @Repository
 public interface OrderDao extends CrudRepository<Order, Integer> {
-    List<Order> getAllByClientIdAndDeletedAtNull(Integer clientId);
 
     Order getByIdAndDeletedAtNull(Integer orderId);
 
-    void deleteByIdAndProcessedAtNull(Integer orderId);
+    Order getById(Integer orderId);
 
+    @Modifying
+    @Query("UPDATE \"order\" SET \"deleted_at\" = now() WHERE id = :orderId")
+    void setOrderToDeletedState(@Param("orderId") Integer orderId);
 }

@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
+import java.time.OffsetDateTime;
+
 /**
  * @author Grosu Kirill (grosukirill009@gmail.com), 2/12/2021
  **/
@@ -44,8 +46,8 @@ public class OrderService {
 
 
 
-    public void deleteOrder(Integer orderId) {
-        orderDao.deleteByIdAndProcessedAtNull(orderId);
+    public void deleteOrderById(Integer orderId) {
+        orderDao.setOrderToDeletedState(orderId);
     }
 
     public Order addGoodToOrder(Integer orderId, Integer goodId, Float quantity, Integer clientId) throws GoodNotFoundException,

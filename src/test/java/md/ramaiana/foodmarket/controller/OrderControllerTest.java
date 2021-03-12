@@ -215,6 +215,16 @@ public class OrderControllerTest {
                 .andExpect(jsonPath("$.code").value("ORDER_ID_IS_ZERO"));
     }
 
+    @WithMockUser("spring")
+    @Test
+    void test_deleteOrderById_responseOk() throws Exception {
+        //ARRANGE & ACT & ASSERT
+        mockMvc.perform(post("/order/deleteById")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(someDeleteOrderRequest(1)))
+                .andExpect(status().isOk());
+    }
+
 
     private void givenNewOrder(float goodQuantity, int clientId) throws GoodNotFoundException, ClientNotFoundException {
         Good someGood = givenGood("someName", 10f, 1.5f);
@@ -304,6 +314,13 @@ public class OrderControllerTest {
                 .setGoodId(goodId)
                 .setQuantity(quantity)
                 .setClientId(clientId)
+                .build();
+        return JsonFormat.printer().print(protoRequest);
+    }
+
+    private String someDeleteOrderRequest(int orderId) throws InvalidProtocolBufferException {
+        Orders.DeleteOrderRequest protoRequest = Orders.DeleteOrderRequest.newBuilder()
+                .setOrderId(orderId)
                 .build();
         return JsonFormat.printer().print(protoRequest);
     }

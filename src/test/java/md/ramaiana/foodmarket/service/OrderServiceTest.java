@@ -32,16 +32,16 @@ public class OrderServiceTest {
     OrderService orderService;
 
 
-    @Test
-    void test_deleteOrder() {
-        //ARRANGE
-        Integer orderId = 1;
-        //ACT
-        orderService.deleteOrder(orderId);
-        //ASSERT
-        verify(orderDaoMock, times(1))
-                .deleteByIdAndProcessedAtNull(orderId);
-    }
+//    @Test
+//    void test_deleteOrder() {
+//        //ARRANGE
+//        Integer orderId = 1;
+//        //ACT
+//        orderService.deleteOrder(orderId);
+//        //ASSERT
+//        verify(orderDaoMock, times(1))
+//                .deleteOrderById(orderId);
+//    }
 
     @Test
     void test_addGoodToOrder_responseOk() throws GoodNotFoundException, ClientNotFoundException {
@@ -128,5 +128,16 @@ public class OrderServiceTest {
         //ACT & ASSERT
         assertThatExceptionOfType(OrderIdZeroException.class)
                 .isThrownBy(() -> orderService.findOrdersById(orderId));
+    }
+
+    @Test
+    void test_deleteOrderById() {
+        //ARRANGE
+        Integer orderId = 1;
+        //ACT
+        orderService.deleteOrderById(orderId);
+        //ASSERT
+        verify(orderDaoMock, times(1))
+                .setOrderToDeletedState(orderId);
     }
 }

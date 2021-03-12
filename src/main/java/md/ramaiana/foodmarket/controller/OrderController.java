@@ -1,7 +1,6 @@
 package md.ramaiana.foodmarket.controller;
 
 import com.google.protobuf.InvalidProtocolBufferException;
-import com.google.protobuf.MessageOrBuilder;
 import com.google.protobuf.util.JsonFormat;
 import md.ramaiana.foodmarket.model.Order;
 import md.ramaiana.foodmarket.model.OrderGood;
@@ -75,6 +74,13 @@ public class OrderController {
             return ResponseEntity.ok(printer.print(buildOrderIdIsNullResponse()));
         }
         return ResponseEntity.ok(printer.print(buildProtoFromDomain(order)));
+    }
+
+    @PostMapping("/deleteById")
+    public ResponseEntity<?> deleteOrderById(@RequestBody Orders.DeleteOrderRequest deleteOrderRequest) {
+        int orderId = deleteOrderRequest.getOrderId();
+        orderService.deleteOrderById(orderId);
+        return ResponseEntity.ok().build();
     }
 
 

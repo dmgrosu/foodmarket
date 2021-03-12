@@ -26,6 +26,21 @@ message AddGoodToOrderRequest {
   int32 clientId = 4;
 }
 
+message DeleteGoodFromOrderRequest {
+  int32 orderId = 1;
+  int32 goodId = 2;
+}
+
+message UpdateOrderRequest {
+  int32 orderId = 1;
+  int32 goodId = 2;
+  float newQuantity = 3;
+}
+
+message DeleteOrderRequest {
+  int32 orderId = 1;
+}
+
 message AddGoodToOrderResponse {
   Order order = 1;
 }
