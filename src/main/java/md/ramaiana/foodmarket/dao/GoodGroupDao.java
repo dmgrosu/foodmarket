@@ -13,10 +13,16 @@ import java.util.Optional;
 @Repository
 public interface GoodGroupDao extends PagingAndSortingRepository<GoodGroup, Integer> {
 
-    List<GoodGroup> getAllByParentGroupIdNullAndDeletedAtNull();
+    List<GoodGroup> getAllByParentGroupIdNullAndDeletedAtNullOrderByName();
 
-    List<GoodGroup> getAllByParentGroupIdAndDeletedAtNull(Integer groupId);
+    List<GoodGroup> getAllByParentGroupIdAndDeletedAtNullOrderByName(Integer groupId);
 
     Optional<GoodGroup> findByErpCode(String parentErp);
+
+    List<GoodGroup> findByParentGroupIdNullAndDeletedAtNullOrderByName();
+
+    List<GoodGroup> findByParentGroupIdAndDeletedAtNullOrderByName(Integer parentGroupId);
+
+    boolean existsByParentGroupId(Integer parentGroupId);
 
 }

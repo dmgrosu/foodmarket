@@ -66,12 +66,20 @@ public class GoodService {
         }
     }
 
-    public List<GoodGroup> findGroupsFiltered(Integer parentGroupId) {
-        if (parentGroupId != null) {
-            return goodGroupDao.getAllByParentGroupIdAndDeletedAtNull(parentGroupId);
+    public List<GoodGroup> getGroupsHierarchy(Integer parentGroupId) {
+        List<GoodGroup> foundGroups;
+        if (parentGroupId == null) {
+            foundGroups = goodGroupDao.findByParentGroupIdNullAndDeletedAtNullOrderByName();
         } else {
-            return goodGroupDao.getAllByParentGroupIdNullAndDeletedAtNull();
+            foundGroups = goodGroupDao.getAllByParentGroupIdAndDeletedAtNullOrderByName(parentGroupId);
         }
+        for (GoodGroup foundGroup : foundGroups) {
+            if (goodGroupDao.existsByParentGroupId(foundGroup.getId())) {
+                List<GoodGroup> children = getGroupsHierarchy(foundGroup.getId());
+                foundGroup.setChildGroups(children);
+            }
+        }
+        return foundGroups;
     }
 
     @Scheduled(fixedDelayString = "${dataLoadingDelay}")

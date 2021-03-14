@@ -149,13 +149,13 @@ class GoodServiceTest {
     void test_findGroupsFiltered_withParentGroupIdParam_returnedList() {
         //ARRANGE
         List<GoodGroup> groups = givenGroups(5);
-        when(goodGroupDaoMock.getAllByParentGroupIdAndDeletedAtNull(5))
+        when(goodGroupDaoMock.getAllByParentGroupIdAndDeletedAtNullOrderByName(5))
                 .thenReturn(groups);
         //ACT
         List<GoodGroup> returnedGroups = goodService.findGroupsFiltered(5);
         //ASSERT
         verify(goodGroupDaoMock, times(1))
-                .getAllByParentGroupIdAndDeletedAtNull(5);
+                .getAllByParentGroupIdAndDeletedAtNullOrderByName(5);
 
         assertThat(returnedGroups.get(0).getId()).isEqualTo(1);
     }
@@ -166,13 +166,13 @@ class GoodServiceTest {
     void test_findGroupsFiltered_withNoParams_returnedList() {
         //ARRANGE
         List<GoodGroup> groups = givenGroups(null);
-        when(goodGroupDaoMock.getAllByParentGroupIdNullAndDeletedAtNull())
+        when(goodGroupDaoMock.getAllByParentGroupIdNullAndDeletedAtNullOrderByName())
                 .thenReturn(groups);
         //ACT
         List<GoodGroup> returnedGroups = goodService.findGroupsFiltered(null);
         //ASSERT
         verify(goodGroupDaoMock, times(1))
-                .getAllByParentGroupIdNullAndDeletedAtNull();
+                .getAllByParentGroupIdNullAndDeletedAtNullOrderByName();
 
         assertThat(returnedGroups.get(0).getId()).isEqualTo(5);
     }
