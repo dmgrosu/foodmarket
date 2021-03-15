@@ -1,6 +1,7 @@
 package md.ramaiana.foodmarket.controller;
 
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.MessageOrBuilder;
 import com.google.protobuf.util.JsonFormat;
 import md.ramaiana.foodmarket.model.Order;
 import md.ramaiana.foodmarket.model.OrderGood;
@@ -83,6 +84,44 @@ public class OrderController {
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping("getOrdersByPeriod")
+    public ResponseEntity<?> getOrdersByPeriod(@RequestParam(value = "dateFrom") Integer from,
+                                               @RequestParam(value = "dateTo") Integer to,
+                                               @RequestParam(value = "pagination") Common.Pagination page,
+                                               @RequestParam(value = "sortBy") Common.Sorting sortBy) throws InvalidProtocolBufferException {
+        List<Order> orders = orderService.findOrdersByDate();
+        return ResponseEntity.ok(printer.print(buildListOrdersProtoFromDomain(orders, page)));
+    }
+
+    private Orders.OrdersListResponse buildListOrdersProtoFromDomain(List<Order> orders, Common.Pagination page) {
+        List<Orders.Order> protoOrders = new ArrayList<>();
+        for (Order order : orders) {
+            Orders.OrderState state = Orders.OrderState.NEW;
+            List<Goods.Good> protoGoods = new ArrayList<>();
+            if (!StringUtils.hasText(order.getProcessingResult())) {
+                // TODO: 3/5/2021 Make logic
+            }
+            for (OrderGood good : order.getGoods()) {
+                protoGoods.add(Goods.Good.newBuilder()
+                        .setId(good.getId())
+                        .setWeight(good.getWeight())
+                        .build());
+            }
+            protoOrders.add(Orders.Order.newBuilder()
+                    .setId(order.getId())
+                    .setClient(Clients.Client.newBuilder().setId(order.getClientId()).build())
+                    .setTotalSum(order.getTotalSumForGoods())
+                    .setState(state)
+                    .setDate(order.getCreatedAt().toInstant().toEpochMilli())
+                    .setTotalWeight(order.getTotalWeightForGoods())
+                    .addAllGoods(protoGoods)
+                    .build());
+        }
+        return Orders.OrdersListResponse.newBuilder()
+                .addAllOrders(protoOrders)
+                .setPagination(page)
+                .build();
+    }
 
     private Orders.AddGoodToOrderResponse buildProtoFromDomain(Order order) {
         Orders.OrderState state = Orders.OrderState.NEW;

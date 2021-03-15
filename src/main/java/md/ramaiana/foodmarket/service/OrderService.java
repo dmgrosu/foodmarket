@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 
 /**
  * @author Grosu Kirill (grosukirill009@gmail.com), 2/12/2021
@@ -62,6 +63,11 @@ public class OrderService {
                 .build());
     }
 
+    public List<Order> findOrdersByDate() {
+        // TODO: 3/15/2021 Complete method 
+        return null;
+    }
+
     private void validateClient(Integer clientId) throws ClientNotFoundException {
         Client client = clientDao.getByIdAndDeletedAtNull(clientId);
         if (client == null) {
@@ -82,4 +88,6 @@ public class OrderService {
             throw new OrderNotFoundException(String.format("Order with ID [%s] not found", orderId));
         }
     }
+
+    
 }
