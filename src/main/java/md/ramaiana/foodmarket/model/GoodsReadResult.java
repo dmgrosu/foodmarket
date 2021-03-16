@@ -35,7 +35,9 @@ public class GoodsReadResult {
     /**
      * Map containing ERP child-parent-brand relations:
      * key - good/group ERP code
-     * value - array, containing parent ERP code (index 0) and brand ERP cond (index 1)
+     * value - array, containing:
+     * [0] parent ERP code
+     * [1] brand ERP code
      */
     @Builder.Default
     Map<String, String[]> erpCodes = new HashMap<>();

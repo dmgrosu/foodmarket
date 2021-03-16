@@ -54,4 +54,29 @@ public class GoodGroup {
     public boolean hasChildren() {
         return childGroups != null && !childGroups.isEmpty();
     }
+
+    public boolean updateIfChanged(GoodGroup other) {
+        if (other == null) {
+            return false;
+        }
+        boolean changed = false;
+        if (name == null || !name.equals(other.getName())) {
+            setName(other.getName());
+            changed = true;
+        }
+        if (parentGroupId == null || !parentGroupId.equals(other.getParentGroupId())) {
+            if (other.getParentGroupId() != null) {
+                setParentGroupId(other.getParentGroupId());
+                changed = true;
+            }
+        }
+        if (idDeleted()) {
+            setDeletedAt(null);
+            changed = true;
+        }
+        if (changed) {
+            setUpdatedAt(OffsetDateTime.now());
+        }
+        return changed;
+    }
 }

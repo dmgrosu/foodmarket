@@ -16,11 +16,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -39,7 +38,7 @@ public class GoodControllerTest {
         List<GoodGroup> givenGroups = givenGroupsWithId(2);
         when(goodServiceMock.findGoodsFiltered(eq(8), eq(null), eq(null)))
                 .thenReturn(givenGoods);
-        when(goodServiceMock.findGroupsFiltered(eq(8)))
+        when(goodServiceMock.getGroupsHierarchy(eq(8)))
                 .thenReturn(givenGroups);
         //ACT & ASSERT
         mockMvc.perform(get("/good/getAll")
@@ -62,7 +61,7 @@ public class GoodControllerTest {
         List<GoodGroup> givenGroups = givenGroupsWithId(8);
         when(goodServiceMock.findGoodsFiltered(eq(8), eq(5), eq(null)))
                 .thenReturn(givenGoods);
-        when(goodServiceMock.findGroupsFiltered(eq(8)))
+        when(goodServiceMock.getGroupsHierarchy(eq(8)))
                 .thenReturn(givenGroups);
         //ACT & ASSERT
         mockMvc.perform(get("/good/getAll")
@@ -85,7 +84,7 @@ public class GoodControllerTest {
         List<GoodGroup> givenGroups = givenGroupsWithId(8);
         when(goodServiceMock.findGoodsFiltered(eq(8), eq(5), eq("someName")))
                 .thenReturn(givenGoods);
-        when(goodServiceMock.findGroupsFiltered(eq(8)))
+        when(goodServiceMock.getGroupsHierarchy(eq(8)))
                 .thenReturn(givenGroups);
         //ACT & ASSERT
         mockMvc.perform(get("/good/getAll")
@@ -108,7 +107,7 @@ public class GoodControllerTest {
         List<GoodGroup> givenGroups = givenGroupsWithId(2);
         when(goodServiceMock.findGoodsFiltered(eq(5), eq(null), eq("someName")))
                 .thenReturn(givenGoods);
-        when(goodServiceMock.findGroupsFiltered(eq(5)))
+        when(goodServiceMock.getGroupsHierarchy(eq(5)))
                 .thenReturn(givenGroups);
         //ACT & ASSERT
         mockMvc.perform(get("/good/getAll")
@@ -132,7 +131,7 @@ public class GoodControllerTest {
         List<GoodGroup> givenGroups = givenGroupsWithId(null);
         when(goodServiceMock.findGoodsFiltered(eq(null), eq(5), eq(null)))
                 .thenReturn(givenGoods);
-        when(goodServiceMock.findGroupsFiltered(eq(null)))
+        when(goodServiceMock.getGroupsHierarchy(eq(null)))
                 .thenReturn(givenGroups);
         //ACT & ASSERT
         mockMvc.perform(get("/good/getAll")
@@ -154,7 +153,7 @@ public class GoodControllerTest {
         List<GoodGroup> givenGroups = givenGroupsWithId(null);
         when(goodServiceMock.findGoodsFiltered(eq(null), eq(null), eq("someName")))
                 .thenReturn(givenGoods);
-        when(goodServiceMock.findGroupsFiltered(eq(null)))
+        when(goodServiceMock.getGroupsHierarchy(eq(null)))
                 .thenReturn(givenGroups);
         //ACT & ASSERT
         mockMvc.perform(get("/good/getAll")
@@ -175,7 +174,7 @@ public class GoodControllerTest {
         List<GoodGroup> givenGroups = givenGroupsWithId(null);
         when(goodServiceMock.findGoodsFiltered(eq(null), eq(5), eq("someName")))
                 .thenReturn(givenGoods);
-        when(goodServiceMock.findGroupsFiltered(eq(null)))
+        when(goodServiceMock.getGroupsHierarchy(eq(null)))
                 .thenReturn(givenGroups);
         //ACT & ASSERT
         mockMvc.perform(get("/good/getAll")

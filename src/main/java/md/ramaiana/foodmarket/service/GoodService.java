@@ -183,13 +183,10 @@ public class GoodService {
         Optional<GoodGroup> optionalGroup = goodGroupDao.findByErpCode(newGroup.getErpCode());
         if (optionalGroup.isPresent()) {
             GoodGroup foundGroup = optionalGroup.get();
-            if (foundGroup.getName().equals(newGroup.getName()) && !foundGroup.idDeleted()) {
-                return foundGroup;
-            } else {
-                foundGroup.setName(newGroup.getName());
-                foundGroup.setDeletedAt(null);
-                foundGroup.setUpdatedAt(OffsetDateTime.now());
+            if (foundGroup.updateIfChanged(newGroup)) {
                 return goodGroupDao.save(foundGroup);
+            } else {
+                return foundGroup;
             }
         } else {
             newGroup.setCreatedAt(OffsetDateTime.now());
@@ -202,17 +199,7 @@ public class GoodService {
         Optional<Good> optionalGood = goodDao.findByErpCode(newGood.getErpCode());
         if (optionalGood.isPresent()) {
             Good foundGood = optionalGood.get();
-            if (foundGood.needsUpdate(newGood)) {
-                foundGood.setName(newGood.getName());
-                foundGood.setBarCode(newGood.getBarCode());
-                foundGood.setPrice(newGood.getPrice());
-                foundGood.setWeight(newGood.getWeight());
-                foundGood.setBrandId(newGood.getBrandId());
-                foundGood.setGroupId(newGood.getGroupId());
-                foundGood.setInPackage(newGood.getInPackage());
-                foundGood.setUnit(newGood.getUnit());
-                foundGood.setDeletedAt(null);
-                foundGood.setUpdatedAt(OffsetDateTime.now());
+            if (foundGood.updateIfChanged(newGood)) {
                 return goodDao.save(foundGood);
             } else {
                 return foundGood;

@@ -152,7 +152,7 @@ class GoodServiceTest {
         when(goodGroupDaoMock.getAllByParentGroupIdAndDeletedAtNullOrderByName(5))
                 .thenReturn(groups);
         //ACT
-        List<GoodGroup> returnedGroups = goodService.findGroupsFiltered(5);
+        List<GoodGroup> returnedGroups = goodService.getGroupsHierarchy(5);
         //ASSERT
         verify(goodGroupDaoMock, times(1))
                 .getAllByParentGroupIdAndDeletedAtNullOrderByName(5);
@@ -169,7 +169,7 @@ class GoodServiceTest {
         when(goodGroupDaoMock.getAllByParentGroupIdNullAndDeletedAtNullOrderByName())
                 .thenReturn(groups);
         //ACT
-        List<GoodGroup> returnedGroups = goodService.findGroupsFiltered(null);
+        List<GoodGroup> returnedGroups = goodService.getGroupsHierarchy(null);
         //ASSERT
         verify(goodGroupDaoMock, times(1))
                 .getAllByParentGroupIdNullAndDeletedAtNullOrderByName();
