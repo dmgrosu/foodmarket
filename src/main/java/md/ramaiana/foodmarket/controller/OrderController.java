@@ -1,7 +1,6 @@
 package md.ramaiana.foodmarket.controller;
 
 import com.google.protobuf.InvalidProtocolBufferException;
-import com.google.protobuf.MessageOrBuilder;
 import com.google.protobuf.util.JsonFormat;
 import md.ramaiana.foodmarket.model.Order;
 import md.ramaiana.foodmarket.model.OrderGood;
@@ -12,10 +11,14 @@ import md.ramaiana.foodmarket.proto.Orders;
 import md.ramaiana.foodmarket.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,7 +38,8 @@ public class OrderController {
 
     @PostMapping("/save")
     public ResponseEntity<?> addGoodToOrder(@RequestBody Orders.AddGoodToOrderRequest addGoodToOrderRequest) throws InvalidProtocolBufferException {
-        List<Common.Error> errors = validateRequest(addGoodToOrderRequest);
+        //validation
+        List<Common.Error> errors = validateAddGoodToOrderRequest(addGoodToOrderRequest);
         if (!errors.isEmpty()) {
             return ResponseEntity.ok(printer.print(buildErrorResponse(errors)));
         }
@@ -58,6 +62,7 @@ public class OrderController {
 
     @GetMapping("/getById")
     public ResponseEntity<?> getOrderById(@RequestParam("id") Integer orderId) throws InvalidProtocolBufferException {
+        //validation
         if (orderId == 0) {
             return ResponseEntity.badRequest().body(printer.print(buildOrderIdIsZeroResponse("Order ID is zero")));
         }
@@ -84,18 +89,30 @@ public class OrderController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("getOrdersByPeriod")
-    public ResponseEntity<?> getOrdersByPeriod(@RequestParam(value = "dateFrom") Integer from,
-                                               @RequestParam(value = "dateTo") Integer to,
-                                               @RequestParam(value = "pagination") Common.Pagination page,
-                                               @RequestParam(value = "sortBy") Common.Sorting sortBy) throws InvalidProtocolBufferException {
-        List<Order> orders = orderService.findOrdersByDate();
-        return ResponseEntity.ok(printer.print(buildListOrdersProtoFromDomain(orders, page)));
+    @PostMapping("getOrdersByPeriod")
+    public ResponseEntity<?> getOrdersByPeriod(@RequestBody Orders.OrderListRequest orderListRequest) throws InvalidProtocolBufferException {
+        //validation
+        List<Common.Error> errors = validateOrderListRequest(orderListRequest);
+        if (!errors.isEmpty()) {
+            return ResponseEntity.ok(printer.print(buildErrorResponse(errors)));
+        }
+        Long from = orderListRequest.getDateFrom();
+        Long to = orderListRequest.getDateTo();
+        OffsetDateTime dateFrom = convertMillisToDate(from);
+        OffsetDateTime dateTo = convertMillisToDate(to);
+        Integer clientId = orderListRequest.getClientId();
+        Integer pageNumber = orderListRequest.getPagination().getPageNo();
+        Integer pageSize = orderListRequest.getPagination().getPerPage();
+        String sortingColumnName = orderListRequest.getSorting().getColumnName();
+        String sortBy = orderListRequest.getSorting().getDirection().toString();
+        Page<Order> orders = orderService.findOrdersByPeriod(dateFrom, dateTo, clientId, pageNumber, pageSize, sortingColumnName, sortBy);
+        return ResponseEntity.ok(printer.print(buildListOrdersProtoFromDomain(orders)));
     }
 
-    private Orders.OrdersListResponse buildListOrdersProtoFromDomain(List<Order> orders, Common.Pagination page) {
+
+    private Orders.OrdersListResponse buildListOrdersProtoFromDomain(Page<Order> orders) {
         List<Orders.Order> protoOrders = new ArrayList<>();
-        for (Order order : orders) {
+        for (Order order : orders.toList()) {
             Orders.OrderState state = Orders.OrderState.NEW;
             List<Goods.Good> protoGoods = new ArrayList<>();
             if (!StringUtils.hasText(order.getProcessingResult())) {
@@ -117,9 +134,14 @@ public class OrderController {
                     .addAllGoods(protoGoods)
                     .build());
         }
+        Common.Pagination protoPagination = Common.Pagination.newBuilder()
+                .setPageNo(orders.getNumber())
+                .setPerPage(orders.getSize())
+                .setTotalCount(orders.getTotalPages())
+                .build();
         return Orders.OrdersListResponse.newBuilder()
                 .addAllOrders(protoOrders)
-                .setPagination(page)
+                .setPagination(protoPagination)
                 .build();
     }
 
@@ -198,7 +220,17 @@ public class OrderController {
                 .build();
     }
 
-    private List<Common.Error> validateRequest(Orders.AddGoodToOrderRequest addGoodToOrderRequest) {
+    private Common.ErrorResponse buildErrorResponse(List<Common.Error> errors) {
+        return Common.ErrorResponse.newBuilder()
+                .addAllErrors(errors)
+                .build();
+    }
+
+    private OffsetDateTime convertMillisToDate(Long from) {
+        return OffsetDateTime.ofInstant(Instant.ofEpochMilli(from), ZoneId.of("UTC"));
+    }
+
+    private List<Common.Error> validateAddGoodToOrderRequest(Orders.AddGoodToOrderRequest addGoodToOrderRequest) {
         List<Common.Error> errors = new ArrayList<>();
         int goodId = addGoodToOrderRequest.getGoodId();
         float quantity = addGoodToOrderRequest.getQuantity();
@@ -215,9 +247,20 @@ public class OrderController {
         return errors;
     }
 
-    private Common.ErrorResponse buildErrorResponse(List<Common.Error> errors) {
-        return Common.ErrorResponse.newBuilder()
-                .addAllErrors(errors)
-                .build();
+    private List<Common.Error> validateOrderListRequest(Orders.OrderListRequest request) {
+        List<Common.Error> errors = new ArrayList<>();
+        int pageNumber = request.getPagination().getPageNo();
+        int perPage = request.getPagination().getPerPage();
+        if (pageNumber <= 0) {
+            errors.add(Common.Error.newBuilder()
+                    .setCode(Common.ErrorCode.PAGE_IS_LESS_OR_EQUAL_TO_ZERO)
+                    .build());
+        }
+        if (perPage <= 0) {
+            errors.add(Common.Error.newBuilder()
+                    .setCode(Common.ErrorCode.PAGE_SIZE_IS_LESS_OR_EQUAL_TO_ZERO)
+                    .build());
+        }
+        return errors;
     }
 }

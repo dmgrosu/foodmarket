@@ -7,11 +7,13 @@ import md.ramaiana.foodmarket.model.Client;
 import md.ramaiana.foodmarket.model.Good;
 import md.ramaiana.foodmarket.model.Order;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import java.time.OffsetDateTime;
-import java.util.List;
 
 /**
  * @author Grosu Kirill (grosukirill009@gmail.com), 2/12/2021
@@ -46,13 +48,12 @@ public class OrderService {
     }
 
 
-
     public void deleteOrderById(Integer orderId) {
         orderDao.setOrderToDeletedState(orderId);
     }
 
     public Order addGoodToOrder(Integer orderId, Integer goodId, Float quantity, Integer clientId) throws GoodNotFoundException,
-                                                                                                          ClientNotFoundException {
+            ClientNotFoundException {
         validateGood(goodId);
         validateClient(clientId);
         Float sum = goodDao.getByIdAndDeletedAtNull(goodId).getPrice() * quantity;
@@ -63,9 +64,9 @@ public class OrderService {
                 .build());
     }
 
-    public List<Order> findOrdersByDate() {
-        // TODO: 3/15/2021 Complete method 
-        return null;
+    public Page<Order> findOrdersByPeriod(OffsetDateTime from, OffsetDateTime to, Integer clientId, Integer page, Integer pageSize, String direction, String column) {
+        PageRequest pageable = PageRequest.of(page, pageSize, Sort.Direction.valueOf(direction), column);
+        return orderDao.findAllByDeletedAtNullAndCreatedAtBetweenAndClientId(pageable, from, to, clientId);
     }
 
     private void validateClient(Integer clientId) throws ClientNotFoundException {
@@ -82,12 +83,4 @@ public class OrderService {
         }
     }
 
-    private void validateOrder(Integer orderId) throws OrderNotFoundException {
-        Order order = orderDao.getByIdAndDeletedAtNull(orderId);
-        if (order == null) {
-            throw new OrderNotFoundException(String.format("Order with ID [%s] not found", orderId));
-        }
-    }
-
-    
 }
