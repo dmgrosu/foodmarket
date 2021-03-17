@@ -433,6 +433,7 @@ public class OrderControllerTest {
                 .setClientId(clientId)
                 .build();
         return JsonFormat.printer().print(protoRequest);
+
     }
 
     private String someDeleteOrderRequest(int orderId) throws InvalidProtocolBufferException {
