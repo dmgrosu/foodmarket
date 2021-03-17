@@ -89,7 +89,7 @@ public class OrderController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("getOrdersByPeriod")
+    @PostMapping("/getOrdersByPeriod")
     public ResponseEntity<?> getOrdersByPeriod(@RequestBody Orders.OrderListRequest orderListRequest) throws InvalidProtocolBufferException {
         //validation
         List<Common.Error> errors = validateOrderListRequest(orderListRequest);
@@ -98,14 +98,20 @@ public class OrderController {
         }
         Long from = orderListRequest.getDateFrom();
         Long to = orderListRequest.getDateTo();
-        OffsetDateTime dateFrom = convertMillisToDate(from);
-        OffsetDateTime dateTo = convertMillisToDate(to);
+        OffsetDateTime dateFrom = OffsetDateTime.ofInstant(Instant.ofEpochMilli(from), ZoneId.of("UTC"));
+        OffsetDateTime dateTo = OffsetDateTime.ofInstant(Instant.ofEpochMilli(to), ZoneId.of("UTC"));
         Integer clientId = orderListRequest.getClientId();
         Integer pageNumber = orderListRequest.getPagination().getPageNo();
         Integer pageSize = orderListRequest.getPagination().getPerPage();
         String sortingColumnName = orderListRequest.getSorting().getColumnName();
-        String sortBy = orderListRequest.getSorting().getDirection().toString();
-        Page<Order> orders = orderService.findOrdersByPeriod(dateFrom, dateTo, clientId, pageNumber, pageSize, sortingColumnName, sortBy);
+        String direction = orderListRequest.getSorting().getDirection().toString();
+        Page<Order> orders;
+        try {
+            orders = orderService.findOrdersByPeriod(dateFrom, dateTo, clientId, pageNumber, pageSize, direction, sortingColumnName);
+        } catch (ClientNotFoundException e) {
+            log.warn(e.getMessage());
+            return ResponseEntity.ok(printer.print(buildClientNotFountResponse(e.getMessage())));
+        }
         return ResponseEntity.ok(printer.print(buildListOrdersProtoFromDomain(orders)));
     }
 
@@ -224,10 +230,6 @@ public class OrderController {
         return Common.ErrorResponse.newBuilder()
                 .addAllErrors(errors)
                 .build();
-    }
-
-    private OffsetDateTime convertMillisToDate(Long from) {
-        return OffsetDateTime.ofInstant(Instant.ofEpochMilli(from), ZoneId.of("UTC"));
     }
 
     private List<Common.Error> validateAddGoodToOrderRequest(Orders.AddGoodToOrderRequest addGoodToOrderRequest) {

@@ -6,6 +6,7 @@ import com.google.protobuf.util.JsonFormat;
 import md.ramaiana.foodmarket.model.Good;
 import md.ramaiana.foodmarket.model.Order;
 import md.ramaiana.foodmarket.model.OrderGood;
+import md.ramaiana.foodmarket.proto.Common;
 import md.ramaiana.foodmarket.proto.Orders;
 import md.ramaiana.foodmarket.service.*;
 import org.junit.jupiter.api.Test;
@@ -13,12 +14,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.*;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
+import java.time.Instant;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -225,6 +229,119 @@ public class OrderControllerTest {
                 .andExpect(status().isOk());
     }
 
+    @WithMockUser("spring")
+    @Test
+    void test_getOrdersByPeriod_responseOk() throws Exception {
+        //ARRANGE
+
+        long from = 1615986580054L;
+        long to = 1615986589387L;
+        OffsetDateTime dateFrom = OffsetDateTime.ofInstant(Instant.ofEpochMilli(from), ZoneId.of("UTC"));
+        OffsetDateTime dateTo = OffsetDateTime.ofInstant(Instant.ofEpochMilli(to), ZoneId.of("UTC"));
+        int clintId = 3;
+        String direction = "DESC";
+        String column = "id";
+        Pageable pageable = PageRequest.of(1, 1, Sort.Direction.valueOf(direction), column);
+        List<OrderGood> orderGoods = new ArrayList<>();
+        orderGoods.add(givenOrderGoodForExistingOrder(1, givenGood("someName", 15f, 10f), 15, 11));
+        List<Order> orders = new ArrayList<>();
+        orders.add(Order.builder().id(1).createdAt(dateFrom.plusHours(2)).clientId(clintId).goods(orderGoods).build());
+        Page<Order> orderPage = new PageImpl<>(orders, pageable, pageable.getOffset());
+        Common.Pagination pagination = Common.Pagination.newBuilder()
+                .setPageNo(1)
+                .setPerPage(1)
+                .build();
+        Common.Sorting sorting = Common.Sorting.newBuilder()
+                .setDirection(Common.Sorting.Direction.valueOf(direction))
+                .setColumnName(column)
+                .build();
+        when(orderServiceMock.findOrdersByPeriod(eq(dateFrom), eq(dateTo), eq(clintId), eq(1), eq(1), eq(direction), eq(column)))
+                .thenReturn(orderPage);
+        //ACT & ASSERT
+        mockMvc.perform(post("/order/getOrdersByPeriod")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(someGetByPeriodRequest(from, to, clintId, pagination, sorting)))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.orders[0].id").value(1));
+    }
+
+    @WithMockUser("spring")
+    @Test
+    void test_getOrdersByPeriod_pageIsLessThanZero() throws Exception {
+        //ARRANGE
+        long from = 1615986580054L;
+        long to = 1615986589387L;
+        String direction = "DESC";
+        String column = "id";
+        Common.Pagination pagination = Common.Pagination.newBuilder()
+                .setPageNo(-1)
+                .setPerPage(1)
+                .build();
+        Common.Sorting sorting = Common.Sorting.newBuilder()
+                .setDirection(Common.Sorting.Direction.valueOf(direction))
+                .setColumnName(column)
+                .build();
+        //ACT & ASSERT
+        mockMvc.perform(post("/order/getOrdersByPeriod")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(someGetByPeriodRequest(from, to, 15, pagination, sorting)))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.errors[0].code").value("PAGE_IS_LESS_OR_EQUAL_TO_ZERO"));
+    }
+
+    @WithMockUser("spring")
+    @Test
+    void test_getOrdersByPeriod_perPageIsLessThanZero() throws Exception {
+        //ARRANGE
+        long from = 1615986580054L;
+        long to = 1615986589387L;
+        String direction = "DESC";
+        String column = "id";
+        Common.Pagination pagination = Common.Pagination.newBuilder()
+                .setPageNo(1)
+                .setPerPage(-1)
+                .build();
+        Common.Sorting sorting = Common.Sorting.newBuilder()
+                .setDirection(Common.Sorting.Direction.valueOf(direction))
+                .setColumnName(column)
+                .build();
+        //ACT & ASSERT
+        mockMvc.perform(post("/order/getOrdersByPeriod")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(someGetByPeriodRequest(from, to, 15, pagination, sorting)))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.errors[0].code").value("PAGE_SIZE_IS_LESS_OR_EQUAL_TO_ZERO"));
+    }
+
+    @WithMockUser("spring")
+    @Test
+    void test_getOrdersByPeriod_perPageIsLessThanZeroAndPageIsLessThanZero() throws Exception {
+        //ARRANGE
+        long from = 1615986580054L;
+        long to = 1615986589387L;
+        String direction = "DESC";
+        String column = "id";
+        Common.Pagination pagination = Common.Pagination.newBuilder()
+                .setPageNo(-1)
+                .setPerPage(-1)
+                .build();
+        Common.Sorting sorting = Common.Sorting.newBuilder()
+                .setDirection(Common.Sorting.Direction.valueOf(direction))
+                .setColumnName(column)
+                .build();
+        //ACT & ASSERT
+        mockMvc.perform(post("/order/getOrdersByPeriod")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(someGetByPeriodRequest(from, to, 15, pagination, sorting)))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.errors[0].code").value("PAGE_IS_LESS_OR_EQUAL_TO_ZERO"))
+                .andExpect(jsonPath("$.errors[1].code").value("PAGE_SIZE_IS_LESS_OR_EQUAL_TO_ZERO"));
+    }
+
 
     private void givenNewOrder(float goodQuantity, int clientId) throws GoodNotFoundException, ClientNotFoundException {
         Good someGood = givenGood("someName", 10f, 1.5f);
@@ -321,6 +438,17 @@ public class OrderControllerTest {
     private String someDeleteOrderRequest(int orderId) throws InvalidProtocolBufferException {
         Orders.DeleteOrderRequest protoRequest = Orders.DeleteOrderRequest.newBuilder()
                 .setOrderId(orderId)
+                .build();
+        return JsonFormat.printer().print(protoRequest);
+    }
+
+    private String someGetByPeriodRequest(long from, long to, int clientId, Common.Pagination pagination, Common.Sorting sorting) throws InvalidProtocolBufferException {
+        Orders.OrderListRequest protoRequest = Orders.OrderListRequest.newBuilder()
+                .setDateFrom(from)
+                .setDateTo(to)
+                .setClientId(clientId)
+                .setPagination(pagination)
+                .setSorting(sorting)
                 .build();
         return JsonFormat.printer().print(protoRequest);
     }

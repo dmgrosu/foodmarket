@@ -64,7 +64,8 @@ public class OrderService {
                 .build());
     }
 
-    public Page<Order> findOrdersByPeriod(OffsetDateTime from, OffsetDateTime to, Integer clientId, Integer page, Integer pageSize, String direction, String column) {
+    public Page<Order> findOrdersByPeriod(OffsetDateTime from, OffsetDateTime to, Integer clientId, Integer page, Integer pageSize, String direction, String column) throws ClientNotFoundException {
+        validateClient(clientId);
         PageRequest pageable = PageRequest.of(page, pageSize, Sort.Direction.valueOf(direction), column);
         return orderDao.findAllByDeletedAtNullAndCreatedAtBetweenAndClientId(pageable, from, to, clientId);
     }

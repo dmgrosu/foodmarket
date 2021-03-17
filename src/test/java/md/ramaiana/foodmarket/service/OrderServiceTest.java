@@ -11,7 +11,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.data.domain.*;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.*;
@@ -139,5 +144,47 @@ public class OrderServiceTest {
         //ASSERT
         verify(orderDaoMock, times(1))
                 .setOrderToDeletedState(orderId);
+    }
+
+    @Test
+    void test_findOrdersByPeriod_returnsPage() throws Exception {
+        //ARRANGE
+        OffsetDateTime from = OffsetDateTime.now();
+        OffsetDateTime to = OffsetDateTime.now();
+        int clientId = 5;
+        int page = 7;
+        int perPage = 2;
+        String direction = "DESC";
+        String column = "id";
+        Pageable pageable = PageRequest.of(page, perPage, Sort.Direction.valueOf(direction), column);
+        List<Order> orders = new ArrayList<>();
+        orders.add(Order.builder().id(1).build());
+        Page<Order> orderPage = new PageImpl<>(orders, pageable, pageable.getOffset());
+        when(orderDaoMock.findAllByDeletedAtNullAndCreatedAtBetweenAndClientId(pageable, from, to, clientId))
+                .thenReturn(orderPage);
+        when(clientDaoMock.getByIdAndDeletedAtNull(clientId))
+                .thenReturn(Client.builder().id(clientId).build());
+        //ACT
+        orderService.findOrdersByPeriod(from, to, clientId, page, perPage, direction, column);
+        //ASSERT
+        verify(orderDaoMock, times(1))
+                .findAllByDeletedAtNullAndCreatedAtBetweenAndClientId(pageable, from, to, clientId);
+    }
+
+    @Test
+    void test_findOrdersByPeriod_responseClientValidationError_exceptionThrown() {
+        //ARRANGE
+        OffsetDateTime from = OffsetDateTime.now();
+        OffsetDateTime to = OffsetDateTime.now();
+        int clientId = 5;
+        int page = 7;
+        int perPage = 2;
+        String direction = "DESC";
+        String column = "id";
+        when(clientDaoMock.getByIdAndDeletedAtNull(clientId))
+                .thenReturn(null);
+        //ACT & ASSERT
+        assertThatExceptionOfType(ClientNotFoundException.class)
+                .isThrownBy(() -> orderService.findOrdersByPeriod(from, to, clientId, page, perPage, direction, column));
     }
 }
