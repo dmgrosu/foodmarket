@@ -3,9 +3,11 @@ package md.ramaiana.foodmarket.service;
 import md.ramaiana.foodmarket.dao.ClientDao;
 import md.ramaiana.foodmarket.dao.GoodDao;
 import md.ramaiana.foodmarket.dao.OrderDao;
+import md.ramaiana.foodmarket.dao.OrderGoodDao;
 import md.ramaiana.foodmarket.model.Client;
 import md.ramaiana.foodmarket.model.Good;
 import md.ramaiana.foodmarket.model.Order;
+import md.ramaiana.foodmarket.model.OrderGood;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -24,14 +26,17 @@ public class OrderService {
     private final OrderDao orderDao;
     private final GoodDao goodDao;
     private final ClientDao clientDao;
+    private final OrderGoodDao orderGoodDao;
 
     @Autowired
     public OrderService(OrderDao orderDao,
                         GoodDao goodDao,
-                        ClientDao clientDao) {
+                        ClientDao clientDao,
+                        OrderGoodDao orderGoodDao) {
         this.orderDao = orderDao;
         this.goodDao = goodDao;
         this.clientDao = clientDao;
+        this.orderGoodDao = orderGoodDao;
     }
 
     public Order findOrdersById(Integer orderId) throws OrderNotFoundException, OrderIdZeroException, IllegalArgumentException {
@@ -68,6 +73,11 @@ public class OrderService {
         validateClient(clientId);
         PageRequest pageable = PageRequest.of(page, pageSize, Sort.Direction.valueOf(direction), column);
         return orderDao.findAllByDeletedAtNullAndCreatedAtBetweenAndClientId(pageable, from, to, clientId);
+    }
+
+    public void updateOrder(int orderId, int goodId, float newQuantity) throws GoodNotFoundException {
+        validateGood(goodId);
+        orderGoodDao.updateOrderGoodQuantity(orderId, goodId, newQuantity);
     }
 
     private void validateClient(Integer clientId) throws ClientNotFoundException {

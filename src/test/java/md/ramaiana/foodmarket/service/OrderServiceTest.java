@@ -4,6 +4,7 @@ package md.ramaiana.foodmarket.service;
 import md.ramaiana.foodmarket.dao.ClientDao;
 import md.ramaiana.foodmarket.dao.GoodDao;
 import md.ramaiana.foodmarket.dao.OrderDao;
+import md.ramaiana.foodmarket.dao.OrderGoodDao;
 import md.ramaiana.foodmarket.model.Client;
 import md.ramaiana.foodmarket.model.Good;
 import md.ramaiana.foodmarket.model.Order;
@@ -29,6 +30,9 @@ public class OrderServiceTest {
 
     @Mock
     GoodDao goodDaoMock;
+
+    @Mock
+    OrderGoodDao orderGoodDaoMock;
 
     @Mock
     ClientDao clientDaoMock;
@@ -186,5 +190,33 @@ public class OrderServiceTest {
         //ACT & ASSERT
         assertThatExceptionOfType(ClientNotFoundException.class)
                 .isThrownBy(() -> orderService.findOrdersByPeriod(from, to, clientId, page, perPage, direction, column));
+    }
+
+    @Test
+    void test_updateOrder() throws GoodNotFoundException {
+        //ARRANGE
+        int orderId = 1;
+        int goodId = 2;
+        float newQuantity = 5.5f;
+        Good someGood = Good.builder().id(goodId).build();
+        when(goodDaoMock.getByIdAndDeletedAtNull(goodId))
+                .thenReturn(someGood);
+        //ACT
+        orderService.updateOrder(orderId, goodId, newQuantity);
+        //ASSERT
+        verify(orderGoodDaoMock, times(1))
+                .updateOrderGoodQuantity(orderId, goodId, newQuantity);
+    }
+
+    @Test
+    void test_updateOrder_validationNotPassed() {
+        int orderId = 1;
+        int goodId = 2;
+        float newQuantity = 5.5f;
+        when(goodDaoMock.getByIdAndDeletedAtNull(goodId))
+                .thenReturn(null);
+        //ACT & ASSERT
+        assertThatExceptionOfType(GoodNotFoundException.class)
+                .isThrownBy(() -> orderService.updateOrder(orderId, goodId, newQuantity));
     }
 }

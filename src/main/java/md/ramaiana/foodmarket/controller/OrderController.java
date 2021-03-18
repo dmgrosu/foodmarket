@@ -91,7 +91,6 @@ public class OrderController {
 
     @PostMapping("/getOrdersByPeriod")
     public ResponseEntity<?> getOrdersByPeriod(@RequestBody Orders.OrderListRequest orderListRequest) throws InvalidProtocolBufferException {
-        //validation
         List<Common.Error> errors = validateOrderListRequest(orderListRequest);
         if (!errors.isEmpty()) {
             return ResponseEntity.ok(printer.print(buildErrorResponse(errors)));
@@ -114,6 +113,26 @@ public class OrderController {
         }
         return ResponseEntity.ok(printer.print(buildListOrdersProtoFromDomain(orders)));
     }
+
+    @PostMapping("/update")
+    public ResponseEntity<?> updateOrder(@RequestBody Orders.UpdateOrderRequest updateOrderRequest) throws InvalidProtocolBufferException {
+        List<Common.Error> errors = validateUpdateOrderRequest(updateOrderRequest);
+        if (!errors.isEmpty()) {
+            return ResponseEntity.ok(printer.print(buildErrorResponse(errors)));
+        }
+        int orderId = updateOrderRequest.getOrderId();
+        int goodId = updateOrderRequest.getGoodId();
+        float newQuantity = updateOrderRequest.getNewQuantity();
+        try {
+            orderService.updateOrder(orderId, goodId, newQuantity);
+        } catch (GoodNotFoundException e) {
+            log.warn(e.getMessage());
+            return ResponseEntity.ok(printer.print(buildGoodNotFoundResponse(e.getMessage())));
+        }
+        return ResponseEntity.ok().build();
+    }
+
+
 
 
     private Orders.OrdersListResponse buildListOrdersProtoFromDomain(Page<Order> orders) {
@@ -261,6 +280,17 @@ public class OrderController {
         if (perPage <= 0) {
             errors.add(Common.Error.newBuilder()
                     .setCode(Common.ErrorCode.PAGE_SIZE_IS_LESS_OR_EQUAL_TO_ZERO)
+                    .build());
+        }
+        return errors;
+    }
+
+    private List<Common.Error> validateUpdateOrderRequest(Orders.UpdateOrderRequest request) {
+        List<Common.Error> errors = new ArrayList<>();
+        float quantity = request.getNewQuantity();
+        if (quantity <= 0) {
+            errors.add(Common.Error.newBuilder()
+                    .setCode(Common.ErrorCode.QUANTITY_IS_LESS_OR_EQUAL_TO_ZERO)
                     .build());
         }
         return errors;

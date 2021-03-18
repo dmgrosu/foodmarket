@@ -342,6 +342,29 @@ public class OrderControllerTest {
                 .andExpect(jsonPath("$.errors[1].code").value("PAGE_SIZE_IS_LESS_OR_EQUAL_TO_ZERO"));
     }
 
+    @WithMockUser("spring")
+    @Test
+    void test_updateOrder_responseOk() throws Exception {
+        //ARRANGE & ACT & ASSERT
+        mockMvc.perform(post("/order/update")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(someUpdateOrderRequest(1, 2, 5.5f)))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk());
+    }
+
+    @WithMockUser("spring")
+    @Test
+    void test_updateOrder_quantityIsLessThanZero_responseOk() throws Exception {
+        //ARRANGE & ACT & ASSERT
+        mockMvc.perform(post("/order/update")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(someUpdateOrderRequest(1, 2, -5.5f)))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk())
+        .andExpect(jsonPath("$.errors[0].code").value("QUANTITY_IS_LESS_OR_EQUAL_TO_ZERO"));
+    }
+
 
     private void givenNewOrder(float goodQuantity, int clientId) throws GoodNotFoundException, ClientNotFoundException {
         Good someGood = givenGood("someName", 10f, 1.5f);
@@ -450,6 +473,15 @@ public class OrderControllerTest {
                 .setClientId(clientId)
                 .setPagination(pagination)
                 .setSorting(sorting)
+                .build();
+        return JsonFormat.printer().print(protoRequest);
+    }
+
+    private String someUpdateOrderRequest(int orderId, int goodId, float newQuantity) throws InvalidProtocolBufferException {
+        Orders.UpdateOrderRequest protoRequest = Orders.UpdateOrderRequest.newBuilder()
+                .setOrderId(orderId)
+                .setGoodId(goodId)
+                .setNewQuantity(newQuantity)
                 .build();
         return JsonFormat.printer().print(protoRequest);
     }
