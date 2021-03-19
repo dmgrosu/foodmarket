@@ -1,10 +1,13 @@
 import React, {Component} from 'react';
-import {Container, Paper} from "@material-ui/core";
+import {Paper} from "@material-ui/core";
 import {connect} from "react-redux";
 import {withStyles} from "@material-ui/styles";
 import {Redirect} from "react-router-dom";
 import Filter from "./Filter";
 import axios from "axios";
+import Groups from "./Groups";
+import Grid from "@material-ui/core/Grid";
+import GoodsList from "./GoodsList";
 
 const styles = theme => ({
     root: {
@@ -21,6 +24,9 @@ class Goods extends Component {
             name: "",
         },
         allBrands: [],
+        goods: [],
+        groups: [],
+        selectedGroupId: null,
     }
 
     changeFilter = (event, field) => {
@@ -38,39 +44,87 @@ class Goods extends Component {
 
     fetchBrands = () => {
         axios.get("/brand/getAll", {headers: {'Authorization': this.props.auth.token}})
-            .then((resp) => {
+            .then(resp => {
                 const {brands} = resp.data || [];
                 this.setState({
                     allBrands: brands.filter(brand => brand.id && brand.name),
                 })
             })
-            .catch((err) => {
+            .catch(err => {
                 console.log(err);
             });
     }
 
+    fetchGroups = () => {
+        axios.get("/good/listGroups", {headers: {'Authorization': this.props.auth.token}})
+            .then(resp => {
+                const {data} = resp;
+                this.setState({
+                    groups: data.groups,
+                })
+            })
+            .catch(err => {
+                console.log(err);
+            })
+    }
+
+    fetchGoods = (event, groupId) => {
+        axios.get("/good/listGoods", {
+            params: {groupId: groupId},
+            headers: {'Authorization': this.props.auth.token}
+        })
+            .then(resp => {
+                const {data} = resp;
+                this.setState({
+                    goods: data.goods,
+                })
+            })
+            .catch(err => {
+                console.log(err);
+            })
+    }
+
+    handleGoodSelect = (goodId) => {
+        console.log(goodId);
+    }
+
     componentDidMount() {
         this.fetchBrands();
+        this.fetchGroups();
     }
 
     render() {
 
         const {auth, classes} = this.props;
         const isAuthorized = auth.token !== null;
-        const {filter, allBrands} = this.state;
+        const {filter, allBrands, goods, groups} = this.state;
 
         return (
-            <Container spacing={2} className={classes.root}>
+            <Grid container spacing={2} className={classes.root}>
                 {!isAuthorized && <Redirect to="/signIn"/>}
-                <Paper>
+                <Grid item sm={12}>
                     <Filter brands={allBrands}
                             brandId={filter.brandId}
                             name={filter.name}
                             changeFilter={this.changeFilter}
                             search={this.performSearch}
                     />
-                </Paper>
-            </Container>
+                </Grid>
+                <Grid item xs={3}>
+                    <Paper elevation={3}>
+                        <Groups groups={groups}
+                                handleSelect={this.fetchGoods}
+                        />
+                    </Paper>
+                </Grid>
+                <Grid item xs={9}>
+                    <Paper elevation={3}>
+                        <GoodsList goods={goods}
+                                   handleSelect={this.handleGoodSelect}
+                        />
+                    </Paper>
+                </Grid>
+            </Grid>
         )
     }
 }
