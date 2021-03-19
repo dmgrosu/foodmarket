@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {Paper} from "@material-ui/core";
+import {Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Paper, TextField} from "@material-ui/core";
 import {connect} from "react-redux";
 import {withStyles} from "@material-ui/styles";
 import {Redirect} from "react-router-dom";
@@ -27,6 +27,8 @@ class Goods extends Component {
         goods: [],
         groups: [],
         selectedGroupId: null,
+        selectedGoodId: null,
+
     }
 
     changeFilter = (event, field) => {
@@ -85,7 +87,13 @@ class Goods extends Component {
     }
 
     handleGoodSelect = (goodId) => {
-        console.log(goodId);
+        this.setState({
+            selectedGoodId: goodId
+        })
+    }
+
+    addToCart = () => {
+
     }
 
     componentDidMount() {
@@ -97,7 +105,7 @@ class Goods extends Component {
 
         const {auth, classes} = this.props;
         const isAuthorized = auth.token !== null;
-        const {filter, allBrands, goods, groups} = this.state;
+        const {filter, allBrands, goods, groups, selectedGoodId} = this.state;
 
         return (
             <Grid container spacing={2} className={classes.root}>
@@ -124,6 +132,29 @@ class Goods extends Component {
                         />
                     </Paper>
                 </Grid>
+                <Dialog open={selectedGoodId !== null}
+                        onClose={() => this.setState({selectedGoodId: null})}
+                >
+                    <DialogTitle>
+                        Add to cart
+                    </DialogTitle>
+                    <DialogContent>
+                        <DialogContentText>
+                            Please input the desired quantity
+                        </DialogContentText>
+                        <TextField autoFocus
+                                   fullWidth
+                        />
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={this.addToCart}>
+                            OK
+                        </Button>
+                        <Button onClick={() => this.setState({selectedGoodId: null})}>
+                            Cancel
+                        </Button>
+                    </DialogActions>
+                </Dialog>
             </Grid>
         )
     }

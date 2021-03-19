@@ -6,30 +6,29 @@ const styles = theme => ({
     container: {
         height: 600,
     },
-    tableHeader: {
-        background: theme.palette.secondary
+    head: {
+        backgroundColor: theme.palette.secondary
     }
 });
 
 const GoodsList = ({classes, goods, handleSelect}) => {
 
     const columns = [
-        {id: 1, label: 'Name', align: 'left', minWidth: 400, dataId: 'name'},
-        {id: 2, label: 'Price', align: 'center', minWidth: 100, dataId: 'price'},
-        {id: 3, label: 'Bar-code', align: 'left', minWidth: 50, dataId: 'barCode'},
-        {id: 4, label: 'Package', align: 'right', minWidth: 100, dataId: 'package'},
-        {id: 5, label: 'Unit', align: 'left', minWidth: 100, dataId: 'unit'},
+        {id: 1, label: 'Name', align: 'left', minWidth: '40%', dataId: 'name'},
+        {id: 2, label: 'Price', align: 'center', minWidth: '30%', dataId: 'price'},
+        {id: 3, label: 'Bar-code', align: 'left', minWidth: '10%', dataId: 'barCode'},
+        {id: 4, label: 'Package', align: 'right', minWidth: '10%', dataId: 'package'},
+        {id: 5, label: 'Unit', align: 'left', minWidth: '10%', dataId: 'unit'},
     ]
 
     return (
         <TableContainer className={classes.container}>
             <Table stickyHeader
-                   className={classes.tableHeader}
                    size="small"
             >
-                <TableHead>
+                <TableHead >
                     <TableRow>
-                        <TableCell style={{width: 30}}/>
+                        <TableCell style={{width: 20}}/>
                         {columns.map(column => (
                             <TableCell key={column.id}
                                        align={column.align}

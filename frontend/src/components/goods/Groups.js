@@ -20,7 +20,7 @@ const styles = theme => ({
 const Groups = ({classes, expanded, selected, handleToggle, handleSelect, groups}) => {
 
     const renderTree = (group) => (
-        <TreeItem key={group.id} nodeId={group.id} label={group.name}>
+        <TreeItem key={group.id} nodeId={group.id.toString()} label={group.name}>
             {Array.isArray(group.groups) ? group.groups.map(group => renderTree(group)) : null}
         </TreeItem>
     );
