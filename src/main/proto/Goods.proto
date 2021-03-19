@@ -38,12 +38,6 @@ message GroupListResponse {
   repeated Group groups = 1;
 }
 
-message GoodsFilterRequest {
-  int32 brandId = 1;
-  int32 groupId = 2;
-  string nameSearch = 3;
-}
-
 message GoodsListResponse {
   repeated Good goods = 1;
   repeated Group groups = 2;

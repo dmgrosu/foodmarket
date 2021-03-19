@@ -1,6 +1,5 @@
 package md.ramaiana.foodmarket.controller;
 
-
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;
 import md.ramaiana.foodmarket.model.Good;
@@ -32,13 +31,18 @@ public class GoodController {
         this.printer = JsonFormat.printer().omittingInsignificantWhitespace();
     }
 
-    @GetMapping("/getAll")
+    @GetMapping("/listGroups")
     public ResponseEntity<?> getAllGoods(@RequestParam(value = "group_id", required = false) Integer groupId,
                                          @RequestParam(value = "brand_id", required = false) Integer brandId,
                                          @RequestParam(value = "name", required = false) String name) throws InvalidProtocolBufferException {
-        List<Good> goods = goodService.findGoodsFiltered(groupId, brandId, name);
         List<GoodGroup> groups = goodService.getGroupsHierarchy(groupId);
-        return ResponseEntity.ok(printer.print(buildProtoFromDomain(goods, groups)));
+        return ResponseEntity.ok(printer.print(buildProtoFromDomain(Collections.emptyList(), groups)));
+    }
+
+    @GetMapping("/listGoods")
+    public ResponseEntity<?> getGoodsForGroup(@RequestParam("groupId") Integer groupId) throws InvalidProtocolBufferException {
+        List<Good> goods = goodService.findGoodsFiltered(groupId, null, null);
+        return ResponseEntity.ok(printer.print(buildProtoFromDomain(goods, Collections.emptyList())));
     }
 
     private Goods.GoodsListResponse buildProtoFromDomain(List<Good> goods, List<GoodGroup> groups) {
@@ -58,6 +62,7 @@ public class GoodController {
                 .setPackage(good.getInPackage())
                 .setBarCode(good.getBarCode())
                 .setWeight(good.getWeight())
+                .setPrice(good.getPrice())
                 .build()).collect(Collectors.toList());
     }
 
