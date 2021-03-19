@@ -108,7 +108,7 @@ class Goods extends Component {
         const {filter, allBrands, goods, groups, selectedGoodId} = this.state;
 
         return (
-            <Grid container spacing={2} className={classes.root}>
+            <Grid container className={classes.root}>
                 {!isAuthorized && <Redirect to="/signIn"/>}
                 <Grid item sm={12}>
                     <Filter brands={allBrands}
@@ -118,19 +118,21 @@ class Goods extends Component {
                             search={this.performSearch}
                     />
                 </Grid>
-                <Grid item xs={3}>
-                    <Paper elevation={3}>
-                        <Groups groups={groups}
-                                handleSelect={this.fetchGoods}
-                        />
-                    </Paper>
-                </Grid>
-                <Grid item xs={9}>
-                    <Paper elevation={3}>
-                        <GoodsList goods={goods}
-                                   handleSelect={this.handleGoodSelect}
-                        />
-                    </Paper>
+                <Grid container spacing={2} direction="row">
+                    <Grid item xs={12} sm={3}>
+                        <Paper elevation={3}>
+                            <Groups groups={groups}
+                                    handleSelect={this.fetchGoods}
+                            />
+                        </Paper>
+                    </Grid>
+                    <Grid item xs={12} sm={9}>
+                        <Paper elevation={3}>
+                            <GoodsList goods={goods}
+                                       handleSelect={this.handleGoodSelect}
+                            />
+                        </Paper>
+                    </Grid>
                 </Grid>
                 <Dialog open={selectedGoodId !== null}
                         onClose={() => this.setState({selectedGoodId: null})}

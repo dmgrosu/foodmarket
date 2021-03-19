@@ -8,7 +8,6 @@ const styles = theme => ({
     root: {
         height: 600,
         flexGrow: 1,
-        minWidth: 400,
         overflow: 'auto',
         padding: theme.spacing(2)
     },
