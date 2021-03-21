@@ -48,22 +48,39 @@ public class GoodService {
 
     public List<Good> findGoodsFiltered(Integer groupId, Integer brandId, String name) {
         if (groupId != null && brandId != null && name != null) {
-            return goodDao.getAllByGroupIdAndBrandIdAndNameLikeAndDeletedAtNull(groupId, brandId, name);
+            return goodDao.getAllByGroupIdAndBrandIdAndNameContainingAndDeletedAtNull(groupId, brandId, name);
         } else if (groupId != null && brandId != null) {
             return goodDao.getAllByGroupIdAndBrandIdAndDeletedAtNull(groupId, brandId);
         } else if (groupId != null && name != null) {
-            return goodDao.getAllByGroupIdAndNameAndDeletedAtNull(groupId, name);
+            return goodDao.getAllByGroupIdAndNameContainingAndDeletedAtNull(groupId, name);
         } else if (brandId != null && name != null) {
-            return goodDao.getAllByBrandIdAndNameAndDeletedAtNull(brandId, name);
+            return goodDao.getAllByBrandIdAndNameContainingAndDeletedAtNull(brandId, name);
         } else if (groupId != null) {
             return goodDao.getAllByGroupIdAndDeletedAtNull(groupId);
         } else if (brandId != null) {
             return goodDao.getAllByBrandIdAndDeletedAtNull(brandId);
         } else if (name != null) {
-            return goodDao.getAllByNameAndDeletedAtNull(name);
+            return goodDao.getAllByNameContainingAndDeletedAtNull(name);
         } else {
             return goodDao.getAllByGroupIdNullAndDeletedAtNull();
         }
+    }
+
+    public List<GoodGroup> findGroupsForGoodsList(List<Good> goods) {
+        Map<Integer, GoodGroup> groupsMap = new HashMap<>();
+        List<GoodGroup> topGroups = new ArrayList<>();
+        for (Good good : goods) {
+            Integer parentGroupId = good.getGroupId();
+            addAllParentsToMap(parentGroupId, groupsMap);
+        }
+        for (GoodGroup group : groupsMap.values()) {
+            if (group.getParentGroupId() == null) {
+                topGroups.add(group);
+            } else {
+                groupsMap.get(group.getParentGroupId()).addChildIfAbsent(group);
+            }
+        }
+        return topGroups;
     }
 
     public List<GoodGroup> getGroupsHierarchy(Integer parentGroupId) {
@@ -207,6 +224,20 @@ public class GoodService {
         } else {
             newGood.setCreatedAt(OffsetDateTime.now());
             return goodDao.save(newGood);
+        }
+    }
+
+    private void addAllParentsToMap(Integer childGroupId, Map<Integer, GoodGroup> parents) {
+        if (parents == null) {
+            parents = new HashMap<>();
+        }
+        Optional<GoodGroup> optionalGroup = goodGroupDao.findById(childGroupId);
+        if (optionalGroup.isPresent()) {
+            GoodGroup group = optionalGroup.get();
+            parents.putIfAbsent(group.getId(), group);
+            if (group.hasParent()) {
+                addAllParentsToMap(group.getParentGroupId(), parents);
+            }
         }
     }
 }

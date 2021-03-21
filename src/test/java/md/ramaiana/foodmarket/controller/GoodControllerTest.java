@@ -15,6 +15,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -80,30 +81,38 @@ public class GoodControllerTest {
                 .andExpect(jsonPath("$.goods[1].name").value("someOtherName"));
     }
 
-//    @WithMockUser("spring")
-//    @Test
-//    void test_getFilteredGoods_withGroupIdAndBrandIdAndName() throws Exception {
-//        //ARRANGE
-//        List<Good> givenGoods = givenGoodsWithGroupIdAndBrandIdAndName(8, 5, "someName");
-//        List<GoodGroup> givenGroups = givenGroupsForParent(8);
-//        when(goodServiceMock.findGoodsFiltered(eq(8), eq(5), eq("someName")))
-//                .thenReturn(givenGoods);
-//        when(goodServiceMock.getGroupsHierarchy(eq(8)))
-//                .thenReturn(givenGroups);
-//        //ACT & ASSERT
-//        mockMvc.perform(get("/good/listGroups")
-//                .param("group_id", "8")
-//                .param("brand_id", "5")
-//                .param("name", "someName"))
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$.goods").isArray())
-//                .andExpect(jsonPath("$.goods[0].name").value("someName"))
-//                .andExpect(jsonPath("$.goods[1].name").value("someName other"))
-//                .andExpect(jsonPath("$.groups[0].name").value("someGroupName"))
-//                .andExpect(jsonPath("$.groups[1].name").value("someOtherGroupName"));
-//    }
+    @WithMockUser("spring")
+    @Test
+    void test_searchGoods_listReturned() throws Exception {
+        //ARRANGE
+        givenGoodsFilteredBy(8, 5, "someName");
+        givenGroupsForList();
+        //ACT & ASSERT
+        mockMvc.perform(get("/good/search")
+                .param("groupId", "8")
+                .param("brandId", "5")
+                .param("name", "someName"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.goods").isArray())
+                .andExpect(jsonPath("$.goods[0].name").value("someName"))
+                .andExpect(jsonPath("$.goods[1].name").value("someName"))
+                .andExpect(jsonPath("$.groups[0].name").value("someGroupName"))
+                .andExpect(jsonPath("$.groups[1].name").value("someOtherGroupName"));
+    }
+
+    private void givenGroupsForList() {
+        List<GoodGroup> groups = someGroups(1);
+        when(goodServiceMock.findGroupsForGoodsList(anyList()))
+                .thenReturn(groups);
+    }
 
     private void givenGroupsForParent(Integer parentGroupId) {
+        List<GoodGroup> groups = someGroups(parentGroupId);
+        when(goodServiceMock.getGroupsHierarchy(eq(parentGroupId)))
+                .thenReturn(groups);
+    }
+
+    private List<GoodGroup> someGroups(Integer parentGroupId) {
         List<GoodGroup> groups = new ArrayList<>();
         groups.add(GoodGroup.builder()
                 .id(15)
@@ -115,8 +124,7 @@ public class GoodControllerTest {
                 .name("someOtherGroupName")
                 .parentGroupId(parentGroupId)
                 .build());
-        when(goodServiceMock.getGroupsHierarchy(eq(parentGroupId)))
-                .thenReturn(groups);
+        return groups;
     }
 
     private void givenGoodsFilteredBy(Integer groupId, @Nullable Integer brandId, @Nullable String name) {

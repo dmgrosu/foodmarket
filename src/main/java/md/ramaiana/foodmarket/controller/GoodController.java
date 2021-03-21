@@ -43,6 +43,15 @@ public class GoodController {
         return ResponseEntity.ok(printer.print(buildGoodsListResponse(goods, Collections.emptyList())));
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<?> searchGoods(@RequestParam(value = "groupId", required = false) Integer groupId,
+                                         @RequestParam(value = "brandId", required = false) Integer brandId,
+                                         @RequestParam(value = "name", required = false) String nameLike) throws InvalidProtocolBufferException {
+        List<Good> goods = goodService.findGoodsFiltered(groupId, brandId, nameLike);
+        List<GoodGroup> groups = goodService.findGroupsForGoodsList(goods);
+        return ResponseEntity.ok(printer.print(buildGoodsListResponse(goods, groups)));
+    }
+
     private Goods.GoodsListResponse buildGoodsListResponse(List<Good> goods, List<GoodGroup> groups) {
         return Goods.GoodsListResponse.newBuilder()
                 .addAllGoods(mapGoodsToProto(goods))

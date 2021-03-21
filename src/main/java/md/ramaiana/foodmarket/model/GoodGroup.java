@@ -10,6 +10,7 @@ import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -55,6 +56,10 @@ public class GoodGroup {
         return childGroups != null && !childGroups.isEmpty();
     }
 
+    public boolean hasParent() {
+        return parentGroupId != null && parentGroupId != 0;
+    }
+
     public boolean updateIfChanged(GoodGroup other) {
         if (other == null) {
             return false;
@@ -78,5 +83,17 @@ public class GoodGroup {
             setUpdatedAt(OffsetDateTime.now());
         }
         return changed;
+    }
+
+    public void addChildIfAbsent(GoodGroup child) {
+        if (child == null) {
+            return;
+        }
+        if (this.childGroups == null) {
+            this.childGroups = new ArrayList<>();
+        }
+        if (!this.childGroups.contains(child)) {
+            this.childGroups.add(child);
+        }
     }
 }

@@ -16,19 +16,19 @@ import java.util.Optional;
 @Repository
 public interface GoodDao extends PagingAndSortingRepository<Good, Integer> {
 
-    List<Good> getAllByGroupIdAndBrandIdAndNameLikeAndDeletedAtNull(Integer groupId, Integer brandId, String name);
+    List<Good> getAllByGroupIdAndBrandIdAndNameContainingAndDeletedAtNull(Integer groupId, Integer brandId, String name);
 
     List<Good> getAllByGroupIdAndBrandIdAndDeletedAtNull(Integer groupId, Integer brandId);
 
-    List<Good> getAllByGroupIdAndNameAndDeletedAtNull(Integer groupId, String name);
+    List<Good> getAllByGroupIdAndNameContainingAndDeletedAtNull(Integer groupId, String name);
 
-    List<Good> getAllByBrandIdAndNameAndDeletedAtNull(Integer brandId, String name);
+    List<Good> getAllByBrandIdAndNameContainingAndDeletedAtNull(Integer brandId, String name);
 
     List<Good> getAllByGroupIdAndDeletedAtNull(Integer groupId);
 
     List<Good> getAllByBrandIdAndDeletedAtNull(Integer brandId);
 
-    List<Good> getAllByNameAndDeletedAtNull(String name);
+    List<Good> getAllByNameContainingAndDeletedAtNull(String name);
 
     List<Good> getAllByGroupIdNullAndDeletedAtNull();
 
