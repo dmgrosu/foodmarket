@@ -14,6 +14,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 import java.time.OffsetDateTime;
 
@@ -58,9 +59,10 @@ public class OrderService {
     }
 
     public Order addGoodToOrder(Integer orderId, Integer goodId, Float quantity, Integer clientId) throws GoodNotFoundException,
-            ClientNotFoundException {
+            ClientNotFoundException, OrderAlreadyProcessedException {
         validateGood(goodId);
         validateClient(clientId);
+        validateOrder(orderId);
         Float sum = goodDao.getByIdAndDeletedAtNull(goodId).getPrice() * quantity;
         return orderDao.save(Order.builder()
                 .id(orderId)
@@ -91,6 +93,13 @@ public class OrderService {
         Good good = goodDao.getByIdAndDeletedAtNull(goodId);
         if (good == null) {
             throw new GoodNotFoundException(String.format("Good with ID [%s] not found", goodId));
+        }
+    }
+
+    private void validateOrder(Integer orderId) throws OrderAlreadyProcessedException {
+        Order order = orderDao.getByIdAndDeletedAtNull(orderId);
+        if (StringUtils.hasText(order.getProcessingResult())) {
+            throw new OrderAlreadyProcessedException(String.format("Order with ID [%s] has been already processed", orderId));
         }
     }
 

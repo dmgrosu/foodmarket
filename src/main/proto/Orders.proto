@@ -31,6 +31,10 @@ message DeleteGoodFromOrderRequest {
   int32 goodId = 2;
 }
 
+message GetOrderByIdRequest {
+  int32 orderId = 1;
+}
+
 message UpdateOrderRequest {
   int32 orderId = 1;
   int32 goodId = 2;

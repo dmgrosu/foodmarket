@@ -56,12 +56,16 @@ public class OrderController {
         } catch (ClientNotFoundException e) {
             log.warn(e.getMessage());
             return ResponseEntity.ok(printer.print(buildClientNotFountResponse(e.getMessage())));
+        } catch (OrderAlreadyProcessedException e) {
+            log.warn(e.getMessage());
+            return ResponseEntity.ok(printer.print(buildOrderAlreadyProcessedResult(e.getMessage())));
         }
         return ResponseEntity.ok(printer.print(buildProtoFromDomain(order)));
     }
 
     @GetMapping("/getById")
-    public ResponseEntity<?> getOrderById(@RequestParam("id") Integer orderId) throws InvalidProtocolBufferException {
+    public ResponseEntity<?> getOrderById(@RequestBody Orders.GetOrderByIdRequest getOrderByIdRequest) throws InvalidProtocolBufferException {
+        int orderId = getOrderByIdRequest.getOrderId();
         //validation
         if (orderId == 0) {
             return ResponseEntity.badRequest().body(printer.print(buildOrderIdIsZeroResponse("Order ID is zero")));
@@ -95,8 +99,8 @@ public class OrderController {
         if (!errors.isEmpty()) {
             return ResponseEntity.ok(printer.print(buildErrorResponse(errors)));
         }
-        Long from = orderListRequest.getDateFrom();
-        Long to = orderListRequest.getDateTo();
+        long from = orderListRequest.getDateFrom();
+        long to = orderListRequest.getDateTo();
         OffsetDateTime dateFrom = OffsetDateTime.ofInstant(Instant.ofEpochMilli(from), ZoneId.of("UTC"));
         OffsetDateTime dateTo = OffsetDateTime.ofInstant(Instant.ofEpochMilli(to), ZoneId.of("UTC"));
         Integer clientId = orderListRequest.getClientId();
@@ -133,16 +137,11 @@ public class OrderController {
     }
 
 
-
-
     private Orders.OrdersListResponse buildListOrdersProtoFromDomain(Page<Order> orders) {
         List<Orders.Order> protoOrders = new ArrayList<>();
         for (Order order : orders.toList()) {
             Orders.OrderState state = Orders.OrderState.NEW;
             List<Goods.Good> protoGoods = new ArrayList<>();
-            if (!StringUtils.hasText(order.getProcessingResult())) {
-                // TODO: 3/5/2021 Make logic
-            }
             for (OrderGood good : order.getGoods()) {
                 protoGoods.add(Goods.Good.newBuilder()
                         .setId(good.getId())
@@ -173,6 +172,7 @@ public class OrderController {
     private Orders.AddGoodToOrderResponse buildProtoFromDomain(Order order) {
         Orders.OrderState state = Orders.OrderState.NEW;
         if (!StringUtils.hasText(order.getProcessingResult())) {
+            state = Orders.OrderState.PROCESSED;
             // TODO: 3/5/2021 Make logic
         }
         Clients.Client protoClient = Clients.Client.newBuilder().setId(order.getClientId()).build();
@@ -248,6 +248,15 @@ public class OrderController {
     private Common.ErrorResponse buildErrorResponse(List<Common.Error> errors) {
         return Common.ErrorResponse.newBuilder()
                 .addAllErrors(errors)
+                .build();
+    }
+
+    private Common.ErrorResponse buildOrderAlreadyProcessedResult(String error) {
+        return Common.ErrorResponse.newBuilder()
+                .addErrors(Common.Error.newBuilder()
+                        .setCode(Common.ErrorCode.ORDER_ALREADY_PROCESSED)
+                        .setDescription(error)
+                        .build())
                 .build();
     }
 
