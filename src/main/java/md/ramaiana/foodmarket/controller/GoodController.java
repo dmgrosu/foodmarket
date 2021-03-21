@@ -32,20 +32,18 @@ public class GoodController {
     }
 
     @GetMapping("/listGroups")
-    public ResponseEntity<?> getAllGoods(@RequestParam(value = "group_id", required = false) Integer groupId,
-                                         @RequestParam(value = "brand_id", required = false) Integer brandId,
-                                         @RequestParam(value = "name", required = false) String name) throws InvalidProtocolBufferException {
-        List<GoodGroup> groups = goodService.getGroupsHierarchy(groupId);
-        return ResponseEntity.ok(printer.print(buildProtoFromDomain(Collections.emptyList(), groups)));
+    public ResponseEntity<?> getGroupsByParent(@RequestParam(value = "parentGroupId", required = false) Integer parentGroupId) throws InvalidProtocolBufferException {
+        List<GoodGroup> groups = goodService.getGroupsHierarchy(parentGroupId);
+        return ResponseEntity.ok(printer.print(buildGoodsListResponse(Collections.emptyList(), groups)));
     }
 
     @GetMapping("/listGoods")
-    public ResponseEntity<?> getGoodsForGroup(@RequestParam("groupId") Integer groupId) throws InvalidProtocolBufferException {
+    public ResponseEntity<?> getGoodsByGroup(@RequestParam("groupId") Integer groupId) throws InvalidProtocolBufferException {
         List<Good> goods = goodService.findGoodsFiltered(groupId, null, null);
-        return ResponseEntity.ok(printer.print(buildProtoFromDomain(goods, Collections.emptyList())));
+        return ResponseEntity.ok(printer.print(buildGoodsListResponse(goods, Collections.emptyList())));
     }
 
-    private Goods.GoodsListResponse buildProtoFromDomain(List<Good> goods, List<GoodGroup> groups) {
+    private Goods.GoodsListResponse buildGoodsListResponse(List<Good> goods, List<GoodGroup> groups) {
         return Goods.GoodsListResponse.newBuilder()
                 .addAllGoods(mapGoodsToProto(goods))
                 .addAllGroups(mapGroupsToProto(groups))
