@@ -53,7 +53,7 @@ public class OrderServiceTest {
 //    }
 
     @Test
-    void test_addGoodToOrder_responseOk() throws GoodNotFoundException, ClientNotFoundException {
+    void test_addGoodToOrder_responseOk() throws GoodNotFoundException, ClientNotFoundException, OrderAlreadyProcessedException {
         //ARRANGE
         Integer orderId = 2;
         Good someGood = Good.builder().id(1).price(15f).build();
@@ -64,7 +64,8 @@ public class OrderServiceTest {
                 .thenReturn(someGood);
         when(clientDaoMock.getByIdAndDeletedAtNull(clientId))
                 .thenReturn(Client.builder().id(3).build());
-
+        when(orderDaoMock.getByIdAndDeletedAtNull(orderId))
+                .thenReturn(Order.builder().id(orderId).build());
         //ACT
         orderService.addGoodToOrder(orderId, someGood.getId(), quantity, clientId);
         //ASSERT

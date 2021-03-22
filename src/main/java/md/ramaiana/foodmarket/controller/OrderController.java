@@ -41,7 +41,7 @@ public class OrderController {
         //validation
         List<Common.Error> errors = validateAddGoodToOrderRequest(addGoodToOrderRequest);
         if (!errors.isEmpty()) {
-            return ResponseEntity.ok(printer.print(buildErrorResponse(errors)));
+            return ResponseEntity.badRequest().body(printer.print(buildErrorResponse(errors)));
         }
         int orderId = addGoodToOrderRequest.getOrderId();
         int goodId = addGoodToOrderRequest.getGoodId();
@@ -52,13 +52,13 @@ public class OrderController {
             order = orderService.addGoodToOrder(orderId, goodId, quantity, clientId);
         } catch (GoodNotFoundException e) {
             log.warn(e.getMessage());
-            return ResponseEntity.ok(printer.print(buildGoodNotFoundResponse(e.getMessage())));
+            return ResponseEntity.badRequest().body(printer.print(buildGoodNotFoundResponse(e.getMessage())));
         } catch (ClientNotFoundException e) {
             log.warn(e.getMessage());
-            return ResponseEntity.ok(printer.print(buildClientNotFountResponse(e.getMessage())));
+            return ResponseEntity.badRequest().body(printer.print(buildClientNotFountResponse(e.getMessage())));
         } catch (OrderAlreadyProcessedException e) {
             log.warn(e.getMessage());
-            return ResponseEntity.ok(printer.print(buildOrderAlreadyProcessedResult(e.getMessage())));
+            return ResponseEntity.badRequest().body(printer.print(buildOrderAlreadyProcessedResult(e.getMessage())));
         }
         return ResponseEntity.ok(printer.print(buildProtoFromDomain(order)));
     }
@@ -75,13 +75,13 @@ public class OrderController {
             order = orderService.findOrdersById(orderId);
         } catch (OrderNotFoundException e) {
             log.warn(e.getMessage());
-            return ResponseEntity.ok(printer.print(buildOrderNotFoundResponse(e.getMessage())));
+            return ResponseEntity.badRequest().body(printer.print(buildOrderNotFoundResponse(e.getMessage())));
         } catch (OrderIdZeroException e) {
             log.warn(e.getMessage());
-            return ResponseEntity.ok(printer.print(buildOrderIdIsZeroResponse(e.getMessage())));
+            return ResponseEntity.badRequest().body(printer.print(buildOrderIdIsZeroResponse(e.getMessage())));
         } catch (IllegalArgumentException e) {
             log.warn(e.getMessage());
-            return ResponseEntity.ok(printer.print(buildOrderIdIsNullResponse(e.getMessage())));
+            return ResponseEntity.badRequest().body(printer.print(buildOrderIdIsNullResponse(e.getMessage())));
         }
         return ResponseEntity.ok(printer.print(buildProtoFromDomain(order)));
     }
@@ -97,7 +97,7 @@ public class OrderController {
     public ResponseEntity<?> getOrdersByPeriod(@RequestBody Orders.OrderListRequest orderListRequest) throws InvalidProtocolBufferException {
         List<Common.Error> errors = validateOrderListRequest(orderListRequest);
         if (!errors.isEmpty()) {
-            return ResponseEntity.ok(printer.print(buildErrorResponse(errors)));
+            return ResponseEntity.badRequest().body(printer.print(buildErrorResponse(errors)));
         }
         long from = orderListRequest.getDateFrom();
         long to = orderListRequest.getDateTo();
@@ -113,7 +113,7 @@ public class OrderController {
             orders = orderService.findOrdersByPeriod(dateFrom, dateTo, clientId, pageNumber, pageSize, direction, sortingColumnName);
         } catch (ClientNotFoundException e) {
             log.warn(e.getMessage());
-            return ResponseEntity.ok(printer.print(buildClientNotFountResponse(e.getMessage())));
+            return ResponseEntity.badRequest().body(printer.print(buildClientNotFountResponse(e.getMessage())));
         }
         return ResponseEntity.ok(printer.print(buildListOrdersProtoFromDomain(orders)));
     }
@@ -122,7 +122,7 @@ public class OrderController {
     public ResponseEntity<?> updateOrder(@RequestBody Orders.UpdateOrderRequest updateOrderRequest) throws InvalidProtocolBufferException {
         List<Common.Error> errors = validateUpdateOrderRequest(updateOrderRequest);
         if (!errors.isEmpty()) {
-            return ResponseEntity.ok(printer.print(buildErrorResponse(errors)));
+            return ResponseEntity.badRequest().body(printer.print(buildErrorResponse(errors)));
         }
         int orderId = updateOrderRequest.getOrderId();
         int goodId = updateOrderRequest.getGoodId();
@@ -131,7 +131,7 @@ public class OrderController {
             orderService.updateOrder(orderId, goodId, newQuantity);
         } catch (GoodNotFoundException e) {
             log.warn(e.getMessage());
-            return ResponseEntity.ok(printer.print(buildGoodNotFoundResponse(e.getMessage())));
+            return ResponseEntity.badRequest().body(printer.print(buildGoodNotFoundResponse(e.getMessage())));
         }
         return ResponseEntity.ok().build();
     }

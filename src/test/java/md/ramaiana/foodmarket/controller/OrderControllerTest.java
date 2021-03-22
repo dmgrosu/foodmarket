@@ -73,7 +73,7 @@ public class OrderControllerTest {
                 .content(someAddGoodToOrderRequest(0, 11, givenQuantity, clientId)))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("QUANTITY_IS_LESS_OR_EQUAL_TO_ZERO"));
+                .andExpect(jsonPath("$.errors[0].code").value("QUANTITY_IS_LESS_OR_EQUAL_TO_ZERO"));
     }
 
     @WithMockUser("spring")
@@ -89,7 +89,7 @@ public class OrderControllerTest {
                 .content(someAddGoodToOrderRequest(0, 0, givenQuantity, clientId)))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("GOOD_ID_IS_LESS_OR_EQUAL_TO_ZERO"));
+                .andExpect(jsonPath("$.errors[0].code").value("GOOD_ID_IS_LESS_OR_EQUAL_TO_ZERO"));
     }
 
     @WithMockUser("spring")
@@ -124,7 +124,7 @@ public class OrderControllerTest {
                 .content(someAddGoodToOrderRequest(orderId, 12, givenQuantity, clientId)))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("QUANTITY_IS_LESS_OR_EQUAL_TO_ZERO"));
+                .andExpect(jsonPath("$.errors[0].code").value("QUANTITY_IS_LESS_OR_EQUAL_TO_ZERO"));
     }
 
     @WithMockUser("spring")
@@ -141,12 +141,12 @@ public class OrderControllerTest {
                 .content(someAddGoodToOrderRequest(orderId, 0, givenQuantity, clientId)))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("GOOD_ID_IS_LESS_OR_EQUAL_TO_ZERO"));
+                .andExpect(jsonPath("$.errors[0].code").value("GOOD_ID_IS_LESS_OR_EQUAL_TO_ZERO"));
     }
 
     @WithMockUser("spring")
     @Test
-    void test_addToOrder_serviceValidationNotPassed_clientNotFound_responseOk() throws Exception {
+    void test_addToOrder_serviceValidationNotPassed_clientNotFound_responseBadRequest() throws Exception {
         //ARRANGE
         when(orderServiceMock.addGoodToOrder(1, 2, 3.5f, 4))
                 .thenThrow(new ClientNotFoundException("Client with ID 4 not found"));
@@ -156,13 +156,13 @@ public class OrderControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(someAddGoodToOrderRequest(1, 2, 3.5f, 4)))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value("CLIENT_NOT_FOUND"));
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].code").value("CLIENT_NOT_FOUND"));
     }
 
     @WithMockUser("spring")
     @Test
-    void test_addToOrder_serviceValidationNotPassed_goodNotFound_responseOk() throws Exception {
+    void test_addToOrder_serviceValidationNotPassed_goodNotFound_responseBadRequest() throws Exception {
         //ARRANGE
         when(orderServiceMock.addGoodToOrder(1, 2, 3.5f, 4))
                 .thenThrow(new GoodNotFoundException("Good with ID 2 not found"));
@@ -172,8 +172,8 @@ public class OrderControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(someAddGoodToOrderRequest(1, 2, 3.5f, 4)))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value("GOOD_NOT_FOUND"));
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].code").value("GOOD_NOT_FOUND"));
     }
 
     @WithMockUser("spring")
@@ -188,7 +188,8 @@ public class OrderControllerTest {
                 .thenReturn(someOrder);
         //ACT & ASSERT
         mockMvc.perform(get("/order/getById")
-                .param("id", "2"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(someGetByIdRequest(2)))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.order.id").value(2));
@@ -196,16 +197,17 @@ public class OrderControllerTest {
 
     @WithMockUser("spring")
     @Test
-    void test_getOrderById_serviceValidationNotPassed_OrderNotFound_responseOk() throws Exception {
+    void test_getOrderById_serviceValidationNotPassed_OrderNotFound_responseBadRequest() throws Exception {
         //ARRANGE
         when(orderServiceMock.findOrdersById(1))
                 .thenThrow(new OrderNotFoundException("Order with ID 1 not found"));
         //ACT & ASSERT
         mockMvc.perform(get("/order/getById")
-                .param("id", "1"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(someGetByIdRequest(1)))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value("ORDER_NOT_FOUND"));
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].code").value("ORDER_NOT_FOUND"));
     }
 
     @WithMockUser("spring")
@@ -213,10 +215,11 @@ public class OrderControllerTest {
     void test_getOrderById_ValidationNotPassed_OrderIdIsZero_responseBadRequest() throws Exception {
         //ARRANGE & ACT & ASSERT
         mockMvc.perform(get("/order/getById")
-                .param("id", "0"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(someGetByIdRequest(0)))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("ORDER_ID_IS_ZERO"));
+                .andExpect(jsonPath("$.errors[0].code").value("ORDER_ID_IS_ZERO"));
     }
 
     @WithMockUser("spring")
@@ -268,7 +271,7 @@ public class OrderControllerTest {
 
     @WithMockUser("spring")
     @Test
-    void test_getOrdersByPeriod_pageIsLessThanZero() throws Exception {
+    void test_getOrdersByPeriod_pageIsLessThanZero_responseBadRequest() throws Exception {
         //ARRANGE
         long from = 1615986580054L;
         long to = 1615986589387L;
@@ -287,13 +290,13 @@ public class OrderControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(someGetByPeriodRequest(from, to, 15, pagination, sorting)))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk())
+                .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors[0].code").value("PAGE_IS_LESS_OR_EQUAL_TO_ZERO"));
     }
 
     @WithMockUser("spring")
     @Test
-    void test_getOrdersByPeriod_perPageIsLessThanZero() throws Exception {
+    void test_getOrdersByPeriod_perPageIsLessThanZero_responseBadRequest() throws Exception {
         //ARRANGE
         long from = 1615986580054L;
         long to = 1615986589387L;
@@ -312,13 +315,13 @@ public class OrderControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(someGetByPeriodRequest(from, to, 15, pagination, sorting)))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk())
+                .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors[0].code").value("PAGE_SIZE_IS_LESS_OR_EQUAL_TO_ZERO"));
     }
 
     @WithMockUser("spring")
     @Test
-    void test_getOrdersByPeriod_perPageIsLessThanZeroAndPageIsLessThanZero() throws Exception {
+    void test_getOrdersByPeriod_perPageIsLessThanZeroAndPageIsLessThanZero_responseBadRequest() throws Exception {
         //ARRANGE
         long from = 1615986580054L;
         long to = 1615986589387L;
@@ -337,7 +340,7 @@ public class OrderControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(someGetByPeriodRequest(from, to, 15, pagination, sorting)))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk())
+                .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors[0].code").value("PAGE_IS_LESS_OR_EQUAL_TO_ZERO"))
                 .andExpect(jsonPath("$.errors[1].code").value("PAGE_SIZE_IS_LESS_OR_EQUAL_TO_ZERO"));
     }
@@ -355,18 +358,18 @@ public class OrderControllerTest {
 
     @WithMockUser("spring")
     @Test
-    void test_updateOrder_quantityIsLessThanZero_responseOk() throws Exception {
+    void test_updateOrder_quantityIsLessThanZero_responseBadRequest() throws Exception {
         //ARRANGE & ACT & ASSERT
         mockMvc.perform(post("/order/update")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(someUpdateOrderRequest(1, 2, -5.5f)))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk())
-        .andExpect(jsonPath("$.errors[0].code").value("QUANTITY_IS_LESS_OR_EQUAL_TO_ZERO"));
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].code").value("QUANTITY_IS_LESS_OR_EQUAL_TO_ZERO"));
     }
 
 
-    private void givenNewOrder(float goodQuantity, int clientId) throws GoodNotFoundException, ClientNotFoundException {
+    private void givenNewOrder(float goodQuantity, int clientId) throws GoodNotFoundException, ClientNotFoundException, OrderAlreadyProcessedException {
         Good someGood = givenGood("someName", 10f, 1.5f);
         OrderGood givenOrderGood = givenOrderGoodForNewOrder(someGood, goodQuantity);
         List<OrderGood> givenGoods = Collections.singletonList(givenOrderGood);
@@ -380,7 +383,7 @@ public class OrderControllerTest {
                 .thenReturn(givenOrder);
     }
 
-    private void givenExistingOrder(int orderId, float givenQuantity, int clientId) throws GoodNotFoundException, ClientNotFoundException {
+    private void givenExistingOrder(int orderId, float givenQuantity, int clientId) throws GoodNotFoundException, ClientNotFoundException, OrderAlreadyProcessedException {
         Good someGood1 = givenGood("someName", 10f, 1.5f);
         Good someGood2 = givenOtherGood("someName2", 10f, 1.5f);
         OrderGood givenOrderGood1 = givenOrderGoodForExistingOrder(orderId, someGood1, givenQuantity, 11);
@@ -482,6 +485,13 @@ public class OrderControllerTest {
                 .setOrderId(orderId)
                 .setGoodId(goodId)
                 .setNewQuantity(newQuantity)
+                .build();
+        return JsonFormat.printer().print(protoRequest);
+    }
+
+    private String someGetByIdRequest(int orderId) throws InvalidProtocolBufferException {
+        Orders.GetOrderByIdRequest protoRequest = Orders.GetOrderByIdRequest.newBuilder()
+                .setOrderId(orderId)
                 .build();
         return JsonFormat.printer().print(protoRequest);
     }
