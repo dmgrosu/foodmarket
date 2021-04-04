@@ -116,7 +116,6 @@ public class GoodControllerTest {
                 .param("brand_id", (String) null)
                 .param("name", "someName"))
                 .andExpect(status().isOk())
-                .andDo(MockMvcResultHandlers.print())
                 .andExpect(jsonPath("$.goods").isArray())
                 .andExpect(jsonPath("$.goods[0].name").value("someName"))
                 .andExpect(jsonPath("$.goods[1].name").value("someName other"))
@@ -140,7 +139,6 @@ public class GoodControllerTest {
                 .param("brand_id", "5")
                 .param("name", (String) null))
                 .andExpect(status().isOk())
-                .andDo(MockMvcResultHandlers.print())
                 .andExpect(jsonPath("$.goods").isArray())
                 .andExpect(jsonPath("$.goods[0].name").value("someName"))
                 .andExpect(jsonPath("$.goods[1].name").value("otherName"));
@@ -162,7 +160,6 @@ public class GoodControllerTest {
                 .param("brand_id", (String) null)
                 .param("name", "someName"))
                 .andExpect(status().isOk())
-                .andDo(MockMvcResultHandlers.print())
                 .andExpect(jsonPath("$.goods").isArray())
                 .andExpect(jsonPath("$.goods[0].name").value("someName"))
                 .andExpect(jsonPath("$.goods[1].name").value("someName other"));
@@ -183,7 +180,6 @@ public class GoodControllerTest {
                 .param("brand_id", "5")
                 .param("name", "someName"))
                 .andExpect(status().isOk())
-                .andDo(MockMvcResultHandlers.print())
                 .andExpect(jsonPath("$.goods").isArray())
                 .andExpect(jsonPath("$.goods[0].name").value("someName"))
                 .andExpect(jsonPath("$.goods[1].name").value("someName other"))

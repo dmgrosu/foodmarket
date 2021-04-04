@@ -14,4 +14,6 @@ public interface ClientDao extends CrudRepository<Client, Integer> {
 
     Optional<Client> findByIdnoAndDeletedAtIsNull(String idno);
 
+    Client getByIdAndDeletedAtNull(Integer clientId);
+
 }

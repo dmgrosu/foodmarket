@@ -44,7 +44,7 @@ public class TokenService {
             Date now = new Date();
             return "Bearer " + JWT.create()
                     .withClaim("username", appUser.getUsername())
-                    .withClaim("userId", appUser.getId())
+                    .withClaim("userId", appUser.getId().toString())
                     .withClaim("createdAt", now)
                     .withExpiresAt(new Date(now.getTime() + TOKEN_VALIDITY))
                     .sign(algorithm);

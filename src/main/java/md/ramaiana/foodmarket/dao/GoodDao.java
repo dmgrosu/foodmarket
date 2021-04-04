@@ -37,4 +37,6 @@ public interface GoodDao extends PagingAndSortingRepository<Good, Integer> {
     @Modifying
     @Query("update good set deleted_at = now() where id not in (:ids)")
     Integer setDeletedIfIdNotIn(@Param("ids") List<Integer> updatedGoodIds);
+
+    Good getByIdAndDeletedAtNull(Integer goodId);
 }
