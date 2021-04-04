@@ -89,7 +89,7 @@ export const logout = () => {
     return {type: LOGOUT}
 }
 
-const handleError = (err) => {
+export const handleError = (err) => {
     const errorMessage = err.response ? err.response.status + ": " + err.response.data.message || err.response.statusText : "Unknown error";
     toast.error(errorMessage);
 }

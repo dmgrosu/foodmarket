@@ -1,5 +1,5 @@
 import React from 'react';
-import {IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, withStyles} from "@material-ui/core";
+import {CircularProgress, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, withStyles} from "@material-ui/core";
 import {AddShoppingCart} from "@material-ui/icons";
 
 const styles = theme => ({
@@ -8,10 +8,16 @@ const styles = theme => ({
     },
     head: {
         backgroundColor: theme.palette.secondary
+    },
+    progress: {
+        margin: 'auto',
+        display: 'flex',
+        position: 'relative',
+        top: '40%',
     }
 });
 
-const GoodsList = ({classes, goods, handleSelect}) => {
+const GoodsList = ({classes, goods, handleSelect, isFetching}) => {
 
     const columns = [
         {id: 1, label: 'Name', align: 'left', minWidth: '40%', dataId: 'name'},
@@ -19,7 +25,15 @@ const GoodsList = ({classes, goods, handleSelect}) => {
         {id: 3, label: 'Bar-code', align: 'left', minWidth: '10%', dataId: 'barCode'},
         {id: 4, label: 'Package', align: 'right', minWidth: '10%', dataId: 'package'},
         {id: 5, label: 'Unit', align: 'left', minWidth: '10%', dataId: 'unit'},
-    ]
+    ];
+
+    if (isFetching) {
+        return (
+            <div className={classes.container}>
+                <CircularProgress className={classes.progress} size={60}/>
+            </div>
+        )
+    }
 
     return (
         <TableContainer className={classes.container}>

@@ -14,7 +14,7 @@ const styles = theme => ({
     }
 });
 
-const Filter = ({brands, brandId, name, changeFilter, classes, search}) => {
+const Filter = ({brands, brandId, name, changeFilter, classes, search, changed}) => {
 
     const menuItems = brands.length > 0 && brands
         .map(brand => <MenuItem key={brand.id} value={brand.id}>{brand.name}</MenuItem>);
@@ -40,6 +40,7 @@ const Filter = ({brands, brandId, name, changeFilter, classes, search}) => {
             <FormControl>
                 <IconButton onClick={search}
                             className={classes.formButton}
+                            disabled={!changed}
                 >
                     <SearchIcon fontSize="large"/>
                 </IconButton>

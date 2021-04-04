@@ -8,6 +8,7 @@ import axios from "axios";
 import Groups from "./Groups";
 import Grid from "@material-ui/core/Grid";
 import GoodsList from "./GoodsList";
+import {handleError} from "../../store/actions/authActions";
 
 const styles = theme => ({
     root: {
@@ -22,13 +23,15 @@ class Goods extends Component {
         filter: {
             brandId: 0,
             name: "",
+            changed: false
         },
         allBrands: [],
         goods: [],
         groups: [],
         selectedGroupId: null,
         selectedGoodId: null,
-
+        isFetchingGroups: false,
+        isFetchingGoods: false,
     }
 
     changeFilter = (event, field) => {
@@ -36,8 +39,20 @@ class Goods extends Component {
             filter: {
                 ...state.filter,
                 [field]: event.target.value,
+                changed: true,
             },
         }))
+    }
+
+    setFetchingStarted = (goods, groups) => {
+        this.setState(state => ({
+            isFetchingGoods: goods,
+            isFetchingGroups: groups,
+            filter: {
+                ...state.filter,
+                changed: false,
+            }
+        }));
     }
 
     performSearch = () => {
@@ -47,6 +62,7 @@ class Goods extends Component {
             this.fetchGroups();
             return;
         }
+        this.setFetchingStarted(true, true);
         axios.get("/good/search", {
             params: {brandId: brandId, name: filter.name},
             headers: {'Authorization': this.props.auth.token}
@@ -54,11 +70,21 @@ class Goods extends Component {
             const {data} = resp;
             this.setState({
                 groups: data.groups,
-                goods: []
+                goods: [],
+                isFetchingGoods: false,
+                isFetchingGroups: false
             })
         }).catch(err => {
-            console.log(err);
+            this.handleFetchingError(err);
         })
+    }
+
+    handleFetchingError(err) {
+        this.setState({
+            isFetchingGroups: false,
+            isFetchingGoods: false,
+        });
+        handleError(err);
     }
 
     fetchBrands = () => {
@@ -70,21 +96,23 @@ class Goods extends Component {
                 })
             })
             .catch(err => {
-                console.log(err);
+                handleError(err);
             });
     }
 
     fetchGroups = () => {
+        this.setFetchingStarted(false, true);
         axios.get("/good/listGroups", {headers: {'Authorization': this.props.auth.token}})
             .then(resp => {
                 const {data} = resp;
                 this.setState({
                     groups: data.groups,
-                    goods: []
+                    goods: [],
+                    isFetchingGroups: false,
                 })
             })
             .catch(err => {
-                console.log(err);
+                this.handleFetchingError(err);
             })
     }
 
@@ -96,6 +124,7 @@ class Goods extends Component {
             brandId = filter.brandId !== 0 ? filter.brandId : null;
             nameLike = filter.name !== '' ? filter.name : null;
         }
+        this.setFetchingStarted(true, false);
         axios.get("/good/listGoods", {
             params: {
                 groupId: groupId,
@@ -108,10 +137,11 @@ class Goods extends Component {
                 const {data} = resp;
                 this.setState({
                     goods: data.goods,
+                    isFetchingGoods: false,
                 })
             })
             .catch(err => {
-                console.log(err);
+                this.handleFetchingError(err);
             })
     }
 
@@ -134,7 +164,7 @@ class Goods extends Component {
 
         const {auth, classes} = this.props;
         const isAuthorized = auth.token !== null;
-        const {filter, allBrands, goods, groups, selectedGoodId} = this.state;
+        const {filter, allBrands, goods, groups, selectedGoodId, isFetchingGroups, isFetchingGoods} = this.state;
 
         return (
             <Grid container className={classes.root}>
@@ -145,6 +175,7 @@ class Goods extends Component {
                             name={filter.name}
                             changeFilter={this.changeFilter}
                             search={this.performSearch}
+                            changed={filter.changed}
                     />
                 </Grid>
                 <Grid container spacing={2} direction="row">
@@ -152,6 +183,7 @@ class Goods extends Component {
                         <Paper elevation={3}>
                             <Groups groups={groups}
                                     handleSelect={this.fetchGoods}
+                                    isFetching={isFetchingGroups}
                             />
                         </Paper>
                     </Grid>
@@ -159,6 +191,7 @@ class Goods extends Component {
                         <Paper elevation={3}>
                             <GoodsList goods={goods}
                                        handleSelect={this.handleGoodSelect}
+                                       isFetching={isFetchingGoods}
                             />
                         </Paper>
                     </Grid>
