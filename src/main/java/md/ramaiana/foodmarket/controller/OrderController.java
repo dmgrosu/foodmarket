@@ -2,6 +2,7 @@ package md.ramaiana.foodmarket.controller;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;
+import lombok.extern.slf4j.Slf4j;
 import md.ramaiana.foodmarket.model.Order;
 import md.ramaiana.foodmarket.model.OrderGood;
 import md.ramaiana.foodmarket.proto.Clients;
@@ -10,7 +11,6 @@ import md.ramaiana.foodmarket.proto.Goods;
 import md.ramaiana.foodmarket.proto.Orders;
 import md.ramaiana.foodmarket.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
@@ -36,7 +36,7 @@ public class OrderController {
         this.printer = JsonFormat.printer().omittingInsignificantWhitespace();
     }
 
-    @PostMapping("/save")
+    @PostMapping("/addGood")
     public ResponseEntity<?> addGoodToOrder(@RequestBody Orders.AddGoodToOrderRequest addGoodToOrderRequest) throws InvalidProtocolBufferException {
         //validation
         List<Common.Error> errors = validateAddGoodToOrderRequest(addGoodToOrderRequest);

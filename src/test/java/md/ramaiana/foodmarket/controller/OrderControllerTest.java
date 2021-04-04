@@ -18,7 +18,6 @@ import org.springframework.data.domain.*;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
 import java.time.Instant;
 import java.time.OffsetDateTime;
@@ -29,8 +28,8 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -52,7 +51,7 @@ public class OrderControllerTest {
         int clientId = 55;
         givenNewOrder(givenQuantity, clientId);
         //ACT & ASSERT
-        mockMvc.perform(post("/order/save")
+        mockMvc.perform(post("/order/addGood")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(someAddGoodToOrderRequest(0, 11, givenQuantity, clientId)))
                 .andExpect(status().isOk())
@@ -67,7 +66,7 @@ public class OrderControllerTest {
         int clientId = 55;
         givenNewOrder(givenQuantity, clientId);
         //ACT & ASSERT
-        mockMvc.perform(post("/order/save")
+        mockMvc.perform(post("/order/addGood")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(someAddGoodToOrderRequest(0, 11, givenQuantity, clientId)))
                 .andExpect(status().isBadRequest())
@@ -82,7 +81,7 @@ public class OrderControllerTest {
         int clientId = 55;
         givenNewOrder(givenQuantity, clientId);
         //ACT & ASSERT
-        mockMvc.perform(post("/order/save")
+        mockMvc.perform(post("/order/addGood")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(someAddGoodToOrderRequest(0, 0, givenQuantity, clientId)))
                 .andExpect(status().isBadRequest())
@@ -98,7 +97,7 @@ public class OrderControllerTest {
         int clientId = 55;
         givenExistingOrder(orderId, givenQuantity, clientId);
         //ACT & ASSERT
-        mockMvc.perform(post("/order/save")
+        mockMvc.perform(post("/order/addGood")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(someAddGoodToOrderRequest(orderId, 12, givenQuantity, clientId)))
                 .andExpect(jsonPath("$.order.id").value(5))
@@ -115,7 +114,7 @@ public class OrderControllerTest {
         int clientId = 55;
         givenExistingOrder(orderId, givenQuantity, clientId);
         //ACT & ASSERT
-        mockMvc.perform(post("/order/save")
+        mockMvc.perform(post("/order/addGood")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(someAddGoodToOrderRequest(orderId, 12, givenQuantity, clientId)))
                 .andExpect(status().isBadRequest())
@@ -131,7 +130,7 @@ public class OrderControllerTest {
         int clientId = 55;
         givenExistingOrder(orderId, givenQuantity, clientId);
         //ACT & ASSERT
-        mockMvc.perform(post("/order/save")
+        mockMvc.perform(post("/order/addGood")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(someAddGoodToOrderRequest(orderId, 0, givenQuantity, clientId)))
                 .andExpect(status().isBadRequest())
@@ -146,7 +145,7 @@ public class OrderControllerTest {
                 .thenThrow(new ClientNotFoundException("Client with ID 4 not found"));
 
         //ACT & ASSERT
-        mockMvc.perform(post("/order/save")
+        mockMvc.perform(post("/order/addGood")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(someAddGoodToOrderRequest(1, 2, 3.5f, 4)))
                 .andExpect(status().isBadRequest())
@@ -161,7 +160,7 @@ public class OrderControllerTest {
                 .thenThrow(new GoodNotFoundException("Good with ID 2 not found"));
 
         //ACT & ASSERT
-        mockMvc.perform(post("/order/save")
+        mockMvc.perform(post("/order/addGood")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(someAddGoodToOrderRequest(1, 2, 3.5f, 4)))
                 .andExpect(status().isBadRequest())

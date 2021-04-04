@@ -14,7 +14,7 @@ message Order {
   Client client = 3;
   repeated Good goods = 4;
   OrderState state = 5;
-  // date in millis
+  // date in millis for UTC timezone
   int64 date = 6;
   float totalWeight = 7;
 }
