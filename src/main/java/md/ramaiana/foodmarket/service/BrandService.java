@@ -23,6 +23,6 @@ public class BrandService {
     }
 
     public List<Brand> getAllBrands() {
-        return brandDao.getAllByDeletedAtNull();
+        return brandDao.getAllByDeletedAtNullOrderByName();
     }
 }

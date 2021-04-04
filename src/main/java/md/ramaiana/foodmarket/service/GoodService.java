@@ -48,30 +48,55 @@ public class GoodService {
 
     public List<Good> findGoodsFiltered(Integer groupId, Integer brandId, String name) {
         if (groupId != null && brandId != null && name != null) {
-            return goodDao.getAllByGroupIdAndBrandIdAndNameLikeAndDeletedAtNull(groupId, brandId, name);
+            return goodDao.getAllByGroupIdAndBrandIdAndNameIgnoreCaseContainingAndDeletedAtNull(groupId, brandId, name);
         } else if (groupId != null && brandId != null) {
             return goodDao.getAllByGroupIdAndBrandIdAndDeletedAtNull(groupId, brandId);
         } else if (groupId != null && name != null) {
-            return goodDao.getAllByGroupIdAndNameAndDeletedAtNull(groupId, name);
+            return goodDao.getAllByGroupIdAndNameIgnoreCaseContainingAndDeletedAtNull(groupId, name);
         } else if (brandId != null && name != null) {
-            return goodDao.getAllByBrandIdAndNameAndDeletedAtNull(brandId, name);
+            return goodDao.getAllByBrandIdAndNameIgnoreCaseContainingAndDeletedAtNull(brandId, name);
         } else if (groupId != null) {
             return goodDao.getAllByGroupIdAndDeletedAtNull(groupId);
         } else if (brandId != null) {
             return goodDao.getAllByBrandIdAndDeletedAtNull(brandId);
         } else if (name != null) {
-            return goodDao.getAllByNameAndDeletedAtNull(name);
+            return goodDao.getAllByNameIgnoreCaseContainingAndDeletedAtNull(name);
         } else {
             return goodDao.getAllByGroupIdNullAndDeletedAtNull();
         }
     }
 
-    public List<GoodGroup> findGroupsFiltered(Integer parentGroupId) {
-        if (parentGroupId != null) {
-            return goodGroupDao.getAllByParentGroupIdAndDeletedAtNull(parentGroupId);
-        } else {
-            return goodGroupDao.getAllByParentGroupIdNullAndDeletedAtNull();
+    public List<GoodGroup> findGroupsForGoodsList(List<Good> goods) {
+        Map<Integer, GoodGroup> groupsMap = new HashMap<>();
+        List<GoodGroup> topGroups = new ArrayList<>();
+        for (Good good : goods) {
+            Integer parentGroupId = good.getGroupId();
+            addAllParentsToMap(parentGroupId, groupsMap);
         }
+        for (GoodGroup group : groupsMap.values()) {
+            if (group.getParentGroupId() == null) {
+                topGroups.add(group);
+            } else {
+                groupsMap.get(group.getParentGroupId()).addChildIfAbsent(group);
+            }
+        }
+        return topGroups;
+    }
+
+    public List<GoodGroup> getGroupsHierarchy(Integer parentGroupId) {
+        List<GoodGroup> foundGroups;
+        if (parentGroupId == null) {
+            foundGroups = goodGroupDao.findByParentGroupIdNullAndDeletedAtNullOrderByName();
+        } else {
+            foundGroups = goodGroupDao.getAllByParentGroupIdAndDeletedAtNullOrderByName(parentGroupId);
+        }
+        for (GoodGroup foundGroup : foundGroups) {
+            if (goodGroupDao.existsByParentGroupId(foundGroup.getId())) {
+                List<GoodGroup> children = getGroupsHierarchy(foundGroup.getId());
+                foundGroup.setChildGroups(children);
+            }
+        }
+        return foundGroups;
     }
 
     @Scheduled(fixedDelayString = "${dataLoadingDelay}")
@@ -175,13 +200,10 @@ public class GoodService {
         Optional<GoodGroup> optionalGroup = goodGroupDao.findByErpCode(newGroup.getErpCode());
         if (optionalGroup.isPresent()) {
             GoodGroup foundGroup = optionalGroup.get();
-            if (foundGroup.getName().equals(newGroup.getName()) && !foundGroup.idDeleted()) {
-                return foundGroup;
-            } else {
-                foundGroup.setName(newGroup.getName());
-                foundGroup.setDeletedAt(null);
-                foundGroup.setUpdatedAt(OffsetDateTime.now());
+            if (foundGroup.updateIfChanged(newGroup)) {
                 return goodGroupDao.save(foundGroup);
+            } else {
+                return foundGroup;
             }
         } else {
             newGroup.setCreatedAt(OffsetDateTime.now());
@@ -194,17 +216,7 @@ public class GoodService {
         Optional<Good> optionalGood = goodDao.findByErpCode(newGood.getErpCode());
         if (optionalGood.isPresent()) {
             Good foundGood = optionalGood.get();
-            if (foundGood.needsUpdate(newGood)) {
-                foundGood.setName(newGood.getName());
-                foundGood.setBarCode(newGood.getBarCode());
-                foundGood.setPrice(newGood.getPrice());
-                foundGood.setWeight(newGood.getWeight());
-                foundGood.setBrandId(newGood.getBrandId());
-                foundGood.setGroupId(newGood.getGroupId());
-                foundGood.setInPackage(newGood.getInPackage());
-                foundGood.setUnit(newGood.getUnit());
-                foundGood.setDeletedAt(null);
-                foundGood.setUpdatedAt(OffsetDateTime.now());
+            if (foundGood.updateIfChanged(newGood)) {
                 return goodDao.save(foundGood);
             } else {
                 return foundGood;
@@ -212,6 +224,20 @@ public class GoodService {
         } else {
             newGood.setCreatedAt(OffsetDateTime.now());
             return goodDao.save(newGood);
+        }
+    }
+
+    private void addAllParentsToMap(Integer childGroupId, Map<Integer, GoodGroup> parents) {
+        if (parents == null) {
+            parents = new HashMap<>();
+        }
+        Optional<GoodGroup> optionalGroup = goodGroupDao.findById(childGroupId);
+        if (optionalGroup.isPresent()) {
+            GoodGroup group = optionalGroup.get();
+            parents.putIfAbsent(group.getId(), group);
+            if (group.hasParent()) {
+                addAllParentsToMap(group.getParentGroupId(), parents);
+            }
         }
     }
 }

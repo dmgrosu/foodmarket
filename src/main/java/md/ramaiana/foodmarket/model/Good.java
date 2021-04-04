@@ -44,18 +44,50 @@ public class Good {
         return deletedAt != null;
     }
 
-    public boolean needsUpdate(Good other) {
+    public boolean updateIfChanged(Good other) {
         if (other == null) {
             return false;
         }
-        return (name != null && !name.equals(other.getName())) ||
-                (price != null && !price.equals(other.getPrice())) ||
-                (unit != null && !unit.equals(other.getUnit())) ||
-                (inPackage != null && !inPackage.equals(other.inPackage)) ||
-                (barCode != null && !barCode.equals(other.getBarCode())) ||
-                (weight != null && !weight.equals(other.getWeight())) ||
-                (brandId != null && brandId.equals(other.getBrandId())) ||
-                (groupId != null && groupId.equals(other.getGroupId())) ||
-                isDeleted();
+        boolean changed = false;
+        if (name == null || !name.equals(other.getName())) {
+            setName(other.getName());
+            changed = true;
+        }
+        if (barCode == null || !barCode.equals(other.getBarCode())) {
+            setBarCode(other.getBarCode());
+            changed = true;
+        }
+        if (price == null || !price.equals(other.getPrice())) {
+            setPrice(other.getPrice());
+            changed = true;
+        }
+        if (weight == null || !weight.equals(other.getWeight())) {
+            setWeight(other.getWeight());
+            changed = true;
+        }
+        if (brandId == null || brandId.equals(other.getBrandId())) {
+            setBrandId(other.getBrandId());
+            changed = true;
+        }
+        if (groupId == null || !groupId.equals(other.getGroupId())) {
+            setGroupId(other.getGroupId());
+            changed = true;
+        }
+        if (inPackage == null || !inPackage.equals(other.getInPackage())) {
+            setInPackage(other.getInPackage());
+            changed = true;
+        }
+        if (unit == null || !unit.equals(other.getUnit())) {
+            setUnit(other.getUnit());
+            changed = true;
+        }
+        if (isDeleted()) {
+            setDeletedAt(null);
+            changed = true;
+        }
+        if (changed) {
+            setUpdatedAt(OffsetDateTime.now());
+        }
+        return changed;
     }
 }

@@ -22,6 +22,6 @@ public class BrandServiceTest {
         //ACT
         brandService.getAllBrands();
         //ASSERT
-        verify(brandDaoMock, times(1)).getAllByDeletedAtNull();
+        verify(brandDaoMock, times(1)).getAllByDeletedAtNullOrderByName();
     }
 }

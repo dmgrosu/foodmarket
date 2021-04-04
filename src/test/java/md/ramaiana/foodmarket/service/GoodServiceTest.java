@@ -35,13 +35,13 @@ class GoodServiceTest {
         Integer groupId = 1;
         String goodName = "someGoodName";
         List<Good> goods = givenGoods(groupId, brandId, goodName);
-        when(goodDaoMock.getAllByGroupIdAndBrandIdAndNameLikeAndDeletedAtNull(eq(groupId), eq(brandId), eq(goodName)))
+        when(goodDaoMock.getAllByGroupIdAndBrandIdAndNameIgnoreCaseContainingAndDeletedAtNull(eq(groupId), eq(brandId), eq(goodName)))
                 .thenReturn(goods);
         //ACT
         goodService.findGoodsFiltered(groupId, brandId, goodName);
         //ASSERT
         verify(goodDaoMock, times(1))
-                .getAllByGroupIdAndBrandIdAndNameLikeAndDeletedAtNull(groupId, brandId, goodName);
+                .getAllByGroupIdAndBrandIdAndNameIgnoreCaseContainingAndDeletedAtNull(groupId, brandId, goodName);
     }
 
     @Test
@@ -66,13 +66,13 @@ class GoodServiceTest {
         Integer brandId = 2;
         String someGoodName = "someGoodName";
         List<Good> goods = givenGoods(null, brandId, someGoodName);
-        when(goodDaoMock.getAllByBrandIdAndNameAndDeletedAtNull(eq(brandId), eq(someGoodName)))
+        when(goodDaoMock.getAllByBrandIdAndNameIgnoreCaseContainingAndDeletedAtNull(eq(brandId), eq(someGoodName)))
                 .thenReturn(goods);
         //ACT
         goodService.findGoodsFiltered(null, brandId, someGoodName);
         //ASSERT
         verify(goodDaoMock, times(1))
-                .getAllByBrandIdAndNameAndDeletedAtNull(brandId, someGoodName);
+                .getAllByBrandIdAndNameIgnoreCaseContainingAndDeletedAtNull(brandId, someGoodName);
     }
 
     @Test
@@ -81,13 +81,13 @@ class GoodServiceTest {
         Integer groupId = 1;
         String someGoodName = "someGoodName";
         List<Good> goods = givenGoods(groupId, null, someGoodName);
-        when(goodDaoMock.getAllByGroupIdAndNameAndDeletedAtNull(eq(groupId), eq(someGoodName)))
+        when(goodDaoMock.getAllByGroupIdAndNameIgnoreCaseContainingAndDeletedAtNull(eq(groupId), eq(someGoodName)))
                 .thenReturn(goods);
         //ACT
         goodService.findGoodsFiltered(groupId, null, someGoodName);
         //ASSERT
         verify(goodDaoMock, times(1))
-                .getAllByGroupIdAndNameAndDeletedAtNull(groupId, someGoodName);
+                .getAllByGroupIdAndNameIgnoreCaseContainingAndDeletedAtNull(groupId, someGoodName);
     }
 
     @Test
@@ -123,13 +123,13 @@ class GoodServiceTest {
         //ARRANGE
         String someGoodName = "someName";
         List<Good> goods = givenGoods(null, null, someGoodName);
-        when(goodDaoMock.getAllByNameAndDeletedAtNull(eq(someGoodName)))
+        when(goodDaoMock.getAllByNameIgnoreCaseContainingAndDeletedAtNull(eq(someGoodName)))
                 .thenReturn(goods);
         //ACT
         goodService.findGoodsFiltered(null, null, someGoodName);
         //ASSERT
         verify(goodDaoMock, times(1))
-                .getAllByNameAndDeletedAtNull(someGoodName);
+                .getAllByNameIgnoreCaseContainingAndDeletedAtNull(someGoodName);
     }
 
     @Test
@@ -149,13 +149,13 @@ class GoodServiceTest {
     void test_findGroupsFiltered_withParentGroupIdParam_returnedList() {
         //ARRANGE
         List<GoodGroup> groups = givenGroups(5);
-        when(goodGroupDaoMock.getAllByParentGroupIdAndDeletedAtNull(5))
+        when(goodGroupDaoMock.getAllByParentGroupIdAndDeletedAtNullOrderByName(5))
                 .thenReturn(groups);
         //ACT
-        List<GoodGroup> returnedGroups = goodService.findGroupsFiltered(5);
+        List<GoodGroup> returnedGroups = goodService.getGroupsHierarchy(5);
         //ASSERT
         verify(goodGroupDaoMock, times(1))
-                .getAllByParentGroupIdAndDeletedAtNull(5);
+                .getAllByParentGroupIdAndDeletedAtNullOrderByName(5);
 
         assertThat(returnedGroups.get(0).getId()).isEqualTo(1);
     }
@@ -166,13 +166,13 @@ class GoodServiceTest {
     void test_findGroupsFiltered_withNoParams_returnedList() {
         //ARRANGE
         List<GoodGroup> groups = givenGroups(null);
-        when(goodGroupDaoMock.getAllByParentGroupIdNullAndDeletedAtNull())
+        when(goodGroupDaoMock.findByParentGroupIdNullAndDeletedAtNullOrderByName())
                 .thenReturn(groups);
         //ACT
-        List<GoodGroup> returnedGroups = goodService.findGroupsFiltered(null);
+        List<GoodGroup> returnedGroups = goodService.getGroupsHierarchy(null);
         //ASSERT
         verify(goodGroupDaoMock, times(1))
-                .getAllByParentGroupIdNullAndDeletedAtNull();
+                .findByParentGroupIdNullAndDeletedAtNullOrderByName();
 
         assertThat(returnedGroups.get(0).getId()).isEqualTo(5);
     }

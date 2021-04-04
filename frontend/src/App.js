@@ -8,7 +8,6 @@ import Home from "./components/Home";
 import {ToastContainer} from "material-react-toastify";
 import 'material-react-toastify/dist/ReactToastify.min.css';
 import {connect} from "react-redux";
-import axios from "axios";
 import Navbar from "./components/navigation/Navbar";
 import Goods from "./components/goods/Goods";
 import Profile from "./components/auth/Profile";
@@ -38,6 +37,10 @@ const App = (props) => {
     const {token} = props.auth;
     const isAuthenticated = token !== null;
 
+    if (!isAuthenticated) {
+        props.authCheckState();
+    }
+
     let routes = [
         <Route path='/signIn' component={SignIn} key={1}/>,
         <Route path='/signUp' component={SignUp} key={2}/>,
@@ -50,14 +53,7 @@ const App = (props) => {
             <Route path='/orders' component={Orders} key={5}/>,
             <Route path='/profile' component={Profile} key={6}/>,
         );
-    } else {
-        props.authCheckState();
     }
-
-    axios.interceptors.request.use(request => {
-        request.headers.common['Authorization'] = token;
-        return request;
-    });
 
     return (
         <ThemeProvider theme={theme}>
