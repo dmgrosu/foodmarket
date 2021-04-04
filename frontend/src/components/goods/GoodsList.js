@@ -61,7 +61,7 @@ const GoodsList = ({classes, goods, handleSelect, isFetching}) => {
                         >
                             <TableCell>
                                 <IconButton onClick={() => handleSelect(good.id)}>
-                                    <AddShoppingCart fontSize="small"/>
+                                    <AddShoppingCart fontSize="small" color="secondary"/>
                                 </IconButton>
                             </TableCell>
                             {columns.map(column => {
