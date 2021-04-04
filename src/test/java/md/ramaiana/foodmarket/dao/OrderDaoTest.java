@@ -71,6 +71,17 @@ class OrderDaoTest {
         assertThat(orderDao.existsById(someOrder.getId())).isFalse();
     }
 
+//    @Test
+//    void test_setOrderToDeletedState() {
+//        //ARRANGE
+//        Order someOrder = someOrder();
+//        //ACT
+//        orderDao.setOrderToDeletedState(someOrder.getId());
+//        //ASSERT
+//        Order updateOrder = orderDao.getById(someOrder.getId());
+//        assertThat(updateOrder.getDeletedAt() != null).isTrue();
+//    }
+
     private Client someSavedClient(String idno, String name) {
         return clientDao.save(Client.builder()
                 .idno(idno)
