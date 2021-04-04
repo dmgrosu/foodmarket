@@ -8,12 +8,6 @@ const styles = theme => ({
     },
     head: {
         backgroundColor: '#bdbdbd',
-    },
-    progress: {
-        margin: 'auto',
-        display: 'flex',
-        position: 'relative',
-        top: '40%',
     }
 });
 
@@ -64,4 +58,4 @@ const mapStateToProps = state => ({
     cart: state.cartReducer
 });
 
-export default connect(mapStateToProps, {})(withStyles(styles))(Cart);
+export default connect(mapStateToProps, {})(withStyles(styles)(Cart));

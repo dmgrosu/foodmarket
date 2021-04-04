@@ -20,6 +20,9 @@ export const addToCartStart = (goodId, orderId, quantity) => {
                 });
             })
             .catch(err => {
+                dispatch({
+                    type: ADD_TO_CART_FAIL
+                })
                 handleError(err);
             })
     };
