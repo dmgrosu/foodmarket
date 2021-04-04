@@ -35,13 +35,13 @@ class GoodServiceTest {
         Integer groupId = 1;
         String goodName = "someGoodName";
         List<Good> goods = givenGoods(groupId, brandId, goodName);
-        when(goodDaoMock.getAllByGroupIdAndBrandIdAndNameContainingAndDeletedAtNull(eq(groupId), eq(brandId), eq(goodName)))
+        when(goodDaoMock.getAllByGroupIdAndBrandIdAndNameIgnoreCaseContainingAndDeletedAtNull(eq(groupId), eq(brandId), eq(goodName)))
                 .thenReturn(goods);
         //ACT
         goodService.findGoodsFiltered(groupId, brandId, goodName);
         //ASSERT
         verify(goodDaoMock, times(1))
-                .getAllByGroupIdAndBrandIdAndNameContainingAndDeletedAtNull(groupId, brandId, goodName);
+                .getAllByGroupIdAndBrandIdAndNameIgnoreCaseContainingAndDeletedAtNull(groupId, brandId, goodName);
     }
 
     @Test
@@ -66,13 +66,13 @@ class GoodServiceTest {
         Integer brandId = 2;
         String someGoodName = "someGoodName";
         List<Good> goods = givenGoods(null, brandId, someGoodName);
-        when(goodDaoMock.getAllByBrandIdAndNameContainingAndDeletedAtNull(eq(brandId), eq(someGoodName)))
+        when(goodDaoMock.getAllByBrandIdAndNameIgnoreCaseContainingAndDeletedAtNull(eq(brandId), eq(someGoodName)))
                 .thenReturn(goods);
         //ACT
         goodService.findGoodsFiltered(null, brandId, someGoodName);
         //ASSERT
         verify(goodDaoMock, times(1))
-                .getAllByBrandIdAndNameContainingAndDeletedAtNull(brandId, someGoodName);
+                .getAllByBrandIdAndNameIgnoreCaseContainingAndDeletedAtNull(brandId, someGoodName);
     }
 
     @Test
@@ -81,13 +81,13 @@ class GoodServiceTest {
         Integer groupId = 1;
         String someGoodName = "someGoodName";
         List<Good> goods = givenGoods(groupId, null, someGoodName);
-        when(goodDaoMock.getAllByGroupIdAndNameContainingAndDeletedAtNull(eq(groupId), eq(someGoodName)))
+        when(goodDaoMock.getAllByGroupIdAndNameIgnoreCaseContainingAndDeletedAtNull(eq(groupId), eq(someGoodName)))
                 .thenReturn(goods);
         //ACT
         goodService.findGoodsFiltered(groupId, null, someGoodName);
         //ASSERT
         verify(goodDaoMock, times(1))
-                .getAllByGroupIdAndNameContainingAndDeletedAtNull(groupId, someGoodName);
+                .getAllByGroupIdAndNameIgnoreCaseContainingAndDeletedAtNull(groupId, someGoodName);
     }
 
     @Test
@@ -123,13 +123,13 @@ class GoodServiceTest {
         //ARRANGE
         String someGoodName = "someName";
         List<Good> goods = givenGoods(null, null, someGoodName);
-        when(goodDaoMock.getAllByNameContainingAndDeletedAtNull(eq(someGoodName)))
+        when(goodDaoMock.getAllByNameIgnoreCaseContainingAndDeletedAtNull(eq(someGoodName)))
                 .thenReturn(goods);
         //ACT
         goodService.findGoodsFiltered(null, null, someGoodName);
         //ASSERT
         verify(goodDaoMock, times(1))
-                .getAllByNameContainingAndDeletedAtNull(someGoodName);
+                .getAllByNameIgnoreCaseContainingAndDeletedAtNull(someGoodName);
     }
 
     @Test

@@ -38,8 +38,10 @@ public class GoodController {
     }
 
     @GetMapping("/listGoods")
-    public ResponseEntity<?> getGoodsByGroup(@RequestParam("groupId") Integer groupId) throws InvalidProtocolBufferException {
-        List<Good> goods = goodService.findGoodsFiltered(groupId, null, null);
+    public ResponseEntity<?> getGoodsByGroup(@RequestParam("groupId") Integer groupId,
+                                             @RequestParam(value = "brandId", required = false) Integer brandId,
+                                             @RequestParam(value = "name", required = false) String nameLike) throws InvalidProtocolBufferException {
+        List<Good> goods = goodService.findGoodsFiltered(groupId, brandId, nameLike);
         return ResponseEntity.ok(printer.print(buildGoodsListResponse(goods, Collections.emptyList())));
     }
 

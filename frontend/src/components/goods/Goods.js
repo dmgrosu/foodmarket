@@ -41,7 +41,24 @@ class Goods extends Component {
     }
 
     performSearch = () => {
-
+        const {filter} = this.state;
+        const brandId = filter.brandId === 0 ? null : filter.brandId;
+        if (brandId === null && filter.name === '') {
+            this.fetchGroups();
+            return;
+        }
+        axios.get("/good/search", {
+            params: {brandId: brandId, name: filter.name},
+            headers: {'Authorization': this.props.auth.token}
+        }).then(resp => {
+            const {data} = resp;
+            this.setState({
+                groups: data.groups,
+                goods: []
+            })
+        }).catch(err => {
+            console.log(err);
+        })
     }
 
     fetchBrands = () => {
@@ -63,6 +80,7 @@ class Goods extends Component {
                 const {data} = resp;
                 this.setState({
                     groups: data.groups,
+                    goods: []
                 })
             })
             .catch(err => {
@@ -71,8 +89,19 @@ class Goods extends Component {
     }
 
     fetchGoods = (event, groupId) => {
+        const {filter} = this.state;
+        let brandId = null;
+        let nameLike = null;
+        if (filter) {
+            brandId = filter.brandId !== 0 ? filter.brandId : null;
+            nameLike = filter.name !== '' ? filter.name : null;
+        }
         axios.get("/good/listGoods", {
-            params: {groupId: groupId},
+            params: {
+                groupId: groupId,
+                brandId: brandId,
+                name: nameLike
+            },
             headers: {'Authorization': this.props.auth.token}
         })
             .then(resp => {

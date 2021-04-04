@@ -48,19 +48,19 @@ public class GoodService {
 
     public List<Good> findGoodsFiltered(Integer groupId, Integer brandId, String name) {
         if (groupId != null && brandId != null && name != null) {
-            return goodDao.getAllByGroupIdAndBrandIdAndNameContainingAndDeletedAtNull(groupId, brandId, name);
+            return goodDao.getAllByGroupIdAndBrandIdAndNameIgnoreCaseContainingAndDeletedAtNull(groupId, brandId, name);
         } else if (groupId != null && brandId != null) {
             return goodDao.getAllByGroupIdAndBrandIdAndDeletedAtNull(groupId, brandId);
         } else if (groupId != null && name != null) {
-            return goodDao.getAllByGroupIdAndNameContainingAndDeletedAtNull(groupId, name);
+            return goodDao.getAllByGroupIdAndNameIgnoreCaseContainingAndDeletedAtNull(groupId, name);
         } else if (brandId != null && name != null) {
-            return goodDao.getAllByBrandIdAndNameContainingAndDeletedAtNull(brandId, name);
+            return goodDao.getAllByBrandIdAndNameIgnoreCaseContainingAndDeletedAtNull(brandId, name);
         } else if (groupId != null) {
             return goodDao.getAllByGroupIdAndDeletedAtNull(groupId);
         } else if (brandId != null) {
             return goodDao.getAllByBrandIdAndDeletedAtNull(brandId);
         } else if (name != null) {
-            return goodDao.getAllByNameContainingAndDeletedAtNull(name);
+            return goodDao.getAllByNameIgnoreCaseContainingAndDeletedAtNull(name);
         } else {
             return goodDao.getAllByGroupIdNullAndDeletedAtNull();
         }

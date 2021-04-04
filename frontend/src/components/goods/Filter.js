@@ -8,6 +8,10 @@ const styles = theme => ({
         margin: theme.spacing(2),
         minWidth: 200,
     },
+    formButton: {
+        position: 'relative',
+        top: '20%'
+    }
 });
 
 const Filter = ({brands, brandId, name, changeFilter, classes, search}) => {
@@ -23,7 +27,7 @@ const Filter = ({brands, brandId, name, changeFilter, classes, search}) => {
                         value={brandId}
                         onChange={(e) => changeFilter(e, 'brandId')}
                 >
-                    <MenuItem key={0} value={0}><em>None</em></MenuItem>
+                    <MenuItem key={0} value={0}><em>All</em></MenuItem>
                     {menuItems}
                 </Select>
             </FormControl>
@@ -34,8 +38,10 @@ const Filter = ({brands, brandId, name, changeFilter, classes, search}) => {
                 />
             </FormControl>
             <FormControl>
-                <IconButton onClick={search}>
-                    <SearchIcon/>
+                <IconButton onClick={search}
+                            className={classes.formButton}
+                >
+                    <SearchIcon fontSize="large"/>
                 </IconButton>
             </FormControl>
         </FormGroup>
