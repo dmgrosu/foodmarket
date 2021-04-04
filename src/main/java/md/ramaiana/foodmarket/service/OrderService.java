@@ -7,7 +7,6 @@ import md.ramaiana.foodmarket.dao.OrderGoodDao;
 import md.ramaiana.foodmarket.model.Client;
 import md.ramaiana.foodmarket.model.Good;
 import md.ramaiana.foodmarket.model.Order;
-import md.ramaiana.foodmarket.model.OrderGood;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -53,17 +52,16 @@ public class OrderService {
         }
     }
 
-
     public void deleteOrderById(Integer orderId) {
         orderDao.setOrderToDeletedState(orderId);
     }
 
     public Order addGoodToOrder(Integer orderId, Integer goodId, Float quantity, Integer clientId) throws GoodNotFoundException,
             ClientNotFoundException, OrderAlreadyProcessedException {
-        validateGood(goodId);
+        Good good = validateGood(goodId);
         validateClient(clientId);
         validateOrder(orderId);
-        Float sum = goodDao.getByIdAndDeletedAtNull(goodId).getPrice() * quantity;
+        Float sum = good.getPrice() * quantity;
         return orderDao.save(Order.builder()
                 .id(orderId)
                 .clientId(clientId)
@@ -89,11 +87,12 @@ public class OrderService {
         }
     }
 
-    private void validateGood(Integer goodId) throws GoodNotFoundException {
+    private Good validateGood(Integer goodId) throws GoodNotFoundException {
         Good good = goodDao.getByIdAndDeletedAtNull(goodId);
         if (good == null) {
             throw new GoodNotFoundException(String.format("Good with ID [%s] not found", goodId));
         }
+        return good;
     }
 
     private void validateOrder(Integer orderId) throws OrderAlreadyProcessedException {

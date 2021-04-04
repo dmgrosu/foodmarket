@@ -38,6 +38,7 @@ public class Order {
 
     public float getTotalSumForGoods() {
         float result = 0f;
+        if (goods == null) return 0f;
         for (OrderGood good : goods) {
             result += good.sum;
         }
@@ -46,6 +47,7 @@ public class Order {
 
     public float getTotalWeightForGoods() {
         float result = 0f;
+        if (goods == null) return 0f;
         for (OrderGood good : goods) {
             result += good.weight;
         }

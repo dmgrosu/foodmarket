@@ -55,7 +55,6 @@ public class OrderControllerTest {
         mockMvc.perform(post("/order/save")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(someAddGoodToOrderRequest(0, 11, givenQuantity, clientId)))
-                .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.order.id").value(2));
     }
@@ -71,7 +70,6 @@ public class OrderControllerTest {
         mockMvc.perform(post("/order/save")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(someAddGoodToOrderRequest(0, 11, givenQuantity, clientId)))
-                .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors[0].code").value("QUANTITY_IS_LESS_OR_EQUAL_TO_ZERO"));
     }
@@ -87,7 +85,6 @@ public class OrderControllerTest {
         mockMvc.perform(post("/order/save")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(someAddGoodToOrderRequest(0, 0, givenQuantity, clientId)))
-                .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors[0].code").value("GOOD_ID_IS_LESS_OR_EQUAL_TO_ZERO"));
     }
@@ -104,7 +101,6 @@ public class OrderControllerTest {
         mockMvc.perform(post("/order/save")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(someAddGoodToOrderRequest(orderId, 12, givenQuantity, clientId)))
-                .andDo(MockMvcResultHandlers.print())
                 .andExpect(jsonPath("$.order.id").value(5))
                 .andExpect(jsonPath("$.order.goods[0].id").value(11))
                 .andExpect(jsonPath("$.order.goods[1].id").value(12));
@@ -122,7 +118,6 @@ public class OrderControllerTest {
         mockMvc.perform(post("/order/save")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(someAddGoodToOrderRequest(orderId, 12, givenQuantity, clientId)))
-                .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors[0].code").value("QUANTITY_IS_LESS_OR_EQUAL_TO_ZERO"));
     }
@@ -139,7 +134,6 @@ public class OrderControllerTest {
         mockMvc.perform(post("/order/save")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(someAddGoodToOrderRequest(orderId, 0, givenQuantity, clientId)))
-                .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors[0].code").value("GOOD_ID_IS_LESS_OR_EQUAL_TO_ZERO"));
     }
@@ -155,7 +149,6 @@ public class OrderControllerTest {
         mockMvc.perform(post("/order/save")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(someAddGoodToOrderRequest(1, 2, 3.5f, 4)))
-                .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors[0].code").value("CLIENT_NOT_FOUND"));
     }
@@ -171,7 +164,6 @@ public class OrderControllerTest {
         mockMvc.perform(post("/order/save")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(someAddGoodToOrderRequest(1, 2, 3.5f, 4)))
-                .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors[0].code").value("GOOD_NOT_FOUND"));
     }
@@ -190,7 +182,6 @@ public class OrderControllerTest {
         mockMvc.perform(get("/order/getById")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(someGetByIdRequest(2)))
-                .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.order.id").value(2));
     }
@@ -205,7 +196,6 @@ public class OrderControllerTest {
         mockMvc.perform(get("/order/getById")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(someGetByIdRequest(1)))
-                .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors[0].code").value("ORDER_NOT_FOUND"));
     }
@@ -217,7 +207,6 @@ public class OrderControllerTest {
         mockMvc.perform(get("/order/getById")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(someGetByIdRequest(0)))
-                .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors[0].code").value("ORDER_ID_IS_ZERO"));
     }
@@ -264,7 +253,6 @@ public class OrderControllerTest {
         mockMvc.perform(post("/order/getOrdersByPeriod")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(someGetByPeriodRequest(from, to, clintId, pagination, sorting)))
-                .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.orders[0].id").value(1));
     }
@@ -289,7 +277,6 @@ public class OrderControllerTest {
         mockMvc.perform(post("/order/getOrdersByPeriod")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(someGetByPeriodRequest(from, to, 15, pagination, sorting)))
-                .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors[0].code").value("PAGE_IS_LESS_OR_EQUAL_TO_ZERO"));
     }
@@ -314,7 +301,6 @@ public class OrderControllerTest {
         mockMvc.perform(post("/order/getOrdersByPeriod")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(someGetByPeriodRequest(from, to, 15, pagination, sorting)))
-                .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors[0].code").value("PAGE_SIZE_IS_LESS_OR_EQUAL_TO_ZERO"));
     }
@@ -339,7 +325,6 @@ public class OrderControllerTest {
         mockMvc.perform(post("/order/getOrdersByPeriod")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(someGetByPeriodRequest(from, to, 15, pagination, sorting)))
-                .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors[0].code").value("PAGE_IS_LESS_OR_EQUAL_TO_ZERO"))
                 .andExpect(jsonPath("$.errors[1].code").value("PAGE_SIZE_IS_LESS_OR_EQUAL_TO_ZERO"));
@@ -352,7 +337,6 @@ public class OrderControllerTest {
         mockMvc.perform(post("/order/update")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(someUpdateOrderRequest(1, 2, 5.5f)))
-                .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk());
     }
 
@@ -363,7 +347,6 @@ public class OrderControllerTest {
         mockMvc.perform(post("/order/update")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(someUpdateOrderRequest(1, 2, -5.5f)))
-                .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors[0].code").value("QUANTITY_IS_LESS_OR_EQUAL_TO_ZERO"));
     }

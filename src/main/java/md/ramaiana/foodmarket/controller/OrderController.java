@@ -41,7 +41,7 @@ public class OrderController {
         //validation
         List<Common.Error> errors = validateAddGoodToOrderRequest(addGoodToOrderRequest);
         if (!errors.isEmpty()) {
-            return ResponseEntity.badRequest().body(printer.print(buildErrorResponse(errors)));
+            return ResponseEntity.badRequest().body(printer.print(buildErrorsResponse(errors)));
         }
         int orderId = addGoodToOrderRequest.getOrderId();
         int goodId = addGoodToOrderRequest.getGoodId();
@@ -52,13 +52,13 @@ public class OrderController {
             order = orderService.addGoodToOrder(orderId, goodId, quantity, clientId);
         } catch (GoodNotFoundException e) {
             log.warn(e.getMessage());
-            return ResponseEntity.badRequest().body(printer.print(buildGoodNotFoundResponse(e.getMessage())));
+            return ResponseEntity.badRequest().body(printer.print(buildErrorResponse(e.getMessage(), Common.ErrorCode.GOOD_NOT_FOUND)));
         } catch (ClientNotFoundException e) {
             log.warn(e.getMessage());
-            return ResponseEntity.badRequest().body(printer.print(buildClientNotFountResponse(e.getMessage())));
+            return ResponseEntity.badRequest().body(printer.print(buildErrorResponse(e.getMessage(), Common.ErrorCode.CLIENT_NOT_FOUND)));
         } catch (OrderAlreadyProcessedException e) {
             log.warn(e.getMessage());
-            return ResponseEntity.badRequest().body(printer.print(buildOrderAlreadyProcessedResult(e.getMessage())));
+            return ResponseEntity.badRequest().body(printer.print(buildErrorResponse(e.getMessage(), Common.ErrorCode.ORDER_ALREADY_PROCESSED)));
         }
         return ResponseEntity.ok(printer.print(buildProtoFromDomain(order)));
     }
@@ -68,20 +68,20 @@ public class OrderController {
         int orderId = getOrderByIdRequest.getOrderId();
         //validation
         if (orderId == 0) {
-            return ResponseEntity.badRequest().body(printer.print(buildOrderIdIsZeroResponse("Order ID is zero")));
+            return ResponseEntity.badRequest().body(printer.print(buildErrorResponse("Order ID is zero", Common.ErrorCode.ORDER_ID_IS_ZERO)));
         }
         Order order;
         try {
             order = orderService.findOrdersById(orderId);
         } catch (OrderNotFoundException e) {
             log.warn(e.getMessage());
-            return ResponseEntity.badRequest().body(printer.print(buildOrderNotFoundResponse(e.getMessage())));
+            return ResponseEntity.badRequest().body(printer.print(buildErrorResponse(e.getMessage(), Common.ErrorCode.ORDER_NOT_FOUND)));
         } catch (OrderIdZeroException e) {
             log.warn(e.getMessage());
-            return ResponseEntity.badRequest().body(printer.print(buildOrderIdIsZeroResponse(e.getMessage())));
+            return ResponseEntity.badRequest().body(printer.print(buildErrorResponse(e.getMessage(), Common.ErrorCode.ORDER_ID_IS_ZERO)));
         } catch (IllegalArgumentException e) {
             log.warn(e.getMessage());
-            return ResponseEntity.badRequest().body(printer.print(buildOrderIdIsNullResponse(e.getMessage())));
+            return ResponseEntity.badRequest().body(printer.print(buildErrorResponse(e.getMessage(), Common.ErrorCode.ORDER_ID_IS_NULL)));
         }
         return ResponseEntity.ok(printer.print(buildProtoFromDomain(order)));
     }
@@ -97,7 +97,7 @@ public class OrderController {
     public ResponseEntity<?> getOrdersByPeriod(@RequestBody Orders.OrderListRequest orderListRequest) throws InvalidProtocolBufferException {
         List<Common.Error> errors = validateOrderListRequest(orderListRequest);
         if (!errors.isEmpty()) {
-            return ResponseEntity.badRequest().body(printer.print(buildErrorResponse(errors)));
+            return ResponseEntity.badRequest().body(printer.print(buildErrorsResponse(errors)));
         }
         long from = orderListRequest.getDateFrom();
         long to = orderListRequest.getDateTo();
@@ -113,7 +113,7 @@ public class OrderController {
             orders = orderService.findOrdersByPeriod(dateFrom, dateTo, clientId, pageNumber, pageSize, direction, sortingColumnName);
         } catch (ClientNotFoundException e) {
             log.warn(e.getMessage());
-            return ResponseEntity.badRequest().body(printer.print(buildClientNotFountResponse(e.getMessage())));
+            return ResponseEntity.badRequest().body(printer.print(buildErrorResponse(e.getMessage(), Common.ErrorCode.CLIENT_NOT_FOUND)));
         }
         return ResponseEntity.ok(printer.print(buildListOrdersProtoFromDomain(orders)));
     }
@@ -122,7 +122,7 @@ public class OrderController {
     public ResponseEntity<?> updateOrder(@RequestBody Orders.UpdateOrderRequest updateOrderRequest) throws InvalidProtocolBufferException {
         List<Common.Error> errors = validateUpdateOrderRequest(updateOrderRequest);
         if (!errors.isEmpty()) {
-            return ResponseEntity.badRequest().body(printer.print(buildErrorResponse(errors)));
+            return ResponseEntity.badRequest().body(printer.print(buildErrorsResponse(errors)));
         }
         int orderId = updateOrderRequest.getOrderId();
         int goodId = updateOrderRequest.getGoodId();
@@ -131,7 +131,7 @@ public class OrderController {
             orderService.updateOrder(orderId, goodId, newQuantity);
         } catch (GoodNotFoundException e) {
             log.warn(e.getMessage());
-            return ResponseEntity.badRequest().body(printer.print(buildGoodNotFoundResponse(e.getMessage())));
+            return ResponseEntity.badRequest().body(printer.print(buildErrorResponse(e.getMessage(), Common.ErrorCode.GOOD_NOT_FOUND)));
         }
         return ResponseEntity.ok().build();
     }
@@ -199,64 +199,18 @@ public class OrderController {
                 .build();
     }
 
-
-    private Common.ErrorResponse buildGoodNotFoundResponse(String error) {
+    private Common.ErrorResponse buildErrorResponse(String description, Common.ErrorCode code) {
         return Common.ErrorResponse.newBuilder()
                 .addErrors(Common.Error.newBuilder()
-                        .setCode(Common.ErrorCode.GOOD_NOT_FOUND)
-                        .setDescription(error)
+                        .setCode(code)
+                        .setDescription(description)
                         .build())
                 .build();
     }
 
-    private Common.ErrorResponse buildClientNotFountResponse(String error) {
-        return Common.ErrorResponse.newBuilder()
-                .addErrors(Common.Error.newBuilder()
-                        .setCode(Common.ErrorCode.CLIENT_NOT_FOUND)
-                        .setDescription(error)
-                        .build())
-                .build();
-    }
-
-    private Common.ErrorResponse buildOrderNotFoundResponse(String error) {
-        return Common.ErrorResponse.newBuilder()
-                .addErrors(Common.Error.newBuilder()
-                        .setCode(Common.ErrorCode.ORDER_NOT_FOUND)
-                        .setDescription(error)
-                        .build())
-                .build();
-    }
-
-    private Common.ErrorResponse buildOrderIdIsZeroResponse(String error) {
-        return Common.ErrorResponse.newBuilder()
-                .addErrors(Common.Error.newBuilder()
-                        .setCode(Common.ErrorCode.ORDER_ID_IS_ZERO)
-                        .setDescription(error)
-                        .build())
-                .build();
-    }
-
-    private Common.ErrorResponse buildOrderIdIsNullResponse(String error) {
-        return Common.ErrorResponse.newBuilder()
-                .addErrors(Common.Error.newBuilder()
-                        .setCode(Common.ErrorCode.ORDER_ID_IS_NULL)
-                        .setDescription(error)
-                        .build())
-                .build();
-    }
-
-    private Common.ErrorResponse buildErrorResponse(List<Common.Error> errors) {
+    private Common.ErrorResponse buildErrorsResponse(List<Common.Error> errors) {
         return Common.ErrorResponse.newBuilder()
                 .addAllErrors(errors)
-                .build();
-    }
-
-    private Common.ErrorResponse buildOrderAlreadyProcessedResult(String error) {
-        return Common.ErrorResponse.newBuilder()
-                .addErrors(Common.Error.newBuilder()
-                        .setCode(Common.ErrorCode.ORDER_ALREADY_PROCESSED)
-                        .setDescription(error)
-                        .build())
                 .build();
     }
 
