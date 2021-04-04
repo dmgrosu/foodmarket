@@ -7,7 +7,7 @@ const styles = theme => ({
         height: 600,
     },
     head: {
-        backgroundColor: theme.palette.secondary
+        backgroundColor: '#bdbdbd',
     },
     progress: {
         margin: 'auto',
@@ -40,13 +40,14 @@ const GoodsList = ({classes, goods, handleSelect, isFetching}) => {
             <Table stickyHeader
                    size="small"
             >
-                <TableHead >
+                <TableHead>
                     <TableRow>
-                        <TableCell style={{width: 20}}/>
+                        <TableCell style={{width: 20}} className={classes.head}/>
                         {columns.map(column => (
                             <TableCell key={column.id}
                                        align={column.align}
                                        style={{minWidth: column.minWidth}}
+                                       className={classes.head}
                             >
                                 {column.label}
                             </TableCell>
