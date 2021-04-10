@@ -10,6 +10,7 @@ import md.ramaiana.foodmarket.model.Good;
 import md.ramaiana.foodmarket.model.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.data.domain.*;
@@ -18,6 +19,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.*;
@@ -53,28 +55,32 @@ public class OrderServiceTest {
 //    }
 
     @Test
-    void test_addGoodToOrder_responseOk() throws GoodNotFoundException, ClientNotFoundException, OrderAlreadyProcessedException {
+    void test_addGoodToOrder_orderSaved() throws Exception {
         //ARRANGE
         Integer orderId = 2;
-        Good someGood = Good.builder().id(1).price(15f).build();
-        Float quantity = 5f;
+        Good someGood = Good.builder()
+                .id(1)
+                .price(15f)
+                .weight(10f)
+                .build();
+        float quantity = 5f;
         Integer clientId = 3;
-        Float sum = someGood.getPrice() * quantity;
-        when(goodDaoMock.getByIdAndDeletedAtNull(someGood.getId()))
+        when(goodDaoMock.getByIdAndDeletedAtNull(eq(someGood.getId())))
                 .thenReturn(someGood);
-        when(clientDaoMock.getByIdAndDeletedAtNull(clientId))
-                .thenReturn(Client.builder().id(3).build());
-        when(orderDaoMock.getByIdAndDeletedAtNull(orderId))
-                .thenReturn(Order.builder().id(orderId).build());
-        //ACT
-        orderService.addGoodToOrder(orderId, someGood.getId(), quantity, clientId);
-        //ASSERT
-        verify(orderDaoMock, times(1))
-                .save(Order.builder()
-                        .id(orderId)
-                        .clientId(clientId)
-                        .totalSum(sum)
+        when(clientDaoMock.getByIdAndDeletedAtNull(eq(clientId)))
+                .thenReturn(Client.builder()
+                        .id(3)
                         .build());
+        when(orderDaoMock.findByIdAndDeletedAtNull(eq(orderId)))
+                .thenReturn(Optional.of(Order.builder()
+                        .id(orderId)
+                        .build()));
+        ArgumentCaptor<Order> orderCaptor = ArgumentCaptor.forClass(Order.class);
+
+        //ACT
+        Order actualOrder = orderService.addGoodToOrder(orderId, someGood.getId(), quantity, clientId);
+        //ASSERT
+        verify(orderDaoMock, times(1)).save(orderCaptor.capture());
     }
 
     @Test
@@ -104,13 +110,13 @@ public class OrderServiceTest {
         Order someOrder = Order.builder()
                 .id(orderId)
                 .build();
-        when(orderDaoMock.getByIdAndDeletedAtNull(eq(orderId)))
-                .thenReturn(someOrder);
+        when(orderDaoMock.findByIdAndDeletedAtNull(eq(orderId)))
+                .thenReturn(Optional.of(someOrder));
         //ACT
         orderService.findOrdersById(someOrder.getId());
         //ASSERT
         verify(orderDaoMock, times(1))
-                .getByIdAndDeletedAtNull(orderId);
+                .findByIdAndDeletedAtNull(orderId);
     }
 
     @Test

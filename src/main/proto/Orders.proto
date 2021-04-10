@@ -3,7 +3,6 @@ syntax = "proto3";
 option java_package = "md.ramaiana.foodmarket.proto";
 option java_outer_classname = "Orders";
 
-import "Goods.proto";
 import "Clients.proto";
 import "Common.proto";
 
@@ -12,11 +11,18 @@ message Order {
   int32 id = 1;
   float totalSum = 2;
   Client client = 3;
-  repeated Good goods = 4;
-  OrderState state = 5;
+  OrderState state = 4;
   // date in millis for UTC timezone
-  int64 date = 6;
-  float totalWeight = 7;
+  int64 date = 5;
+  float totalWeight = 6;
+  repeated OrderGood goods = 7;
+}
+
+message OrderGood {
+  int32 goodId = 1;
+  float quantity = 2;
+  float sum = 3;
+  float weight = 4;
 }
 
 message AddGoodToOrderRequest {

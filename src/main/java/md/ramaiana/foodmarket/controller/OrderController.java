@@ -7,7 +7,6 @@ import md.ramaiana.foodmarket.model.Order;
 import md.ramaiana.foodmarket.model.OrderGood;
 import md.ramaiana.foodmarket.proto.Clients;
 import md.ramaiana.foodmarket.proto.Common;
-import md.ramaiana.foodmarket.proto.Goods;
 import md.ramaiana.foodmarket.proto.Orders;
 import md.ramaiana.foodmarket.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +20,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/order")
@@ -59,6 +59,9 @@ public class OrderController {
         } catch (OrderAlreadyProcessedException e) {
             log.warn(e.getMessage());
             return ResponseEntity.badRequest().body(printer.print(buildErrorResponse(e.getMessage(), Common.ErrorCode.ORDER_ALREADY_PROCESSED)));
+        } catch (OrderNotFoundException e) {
+            log.warn(e.getMessage());
+            return ResponseEntity.badRequest().body(printer.print(buildErrorResponse(e.getMessage(), Common.ErrorCode.ORDER_NOT_FOUND)));
         }
         return ResponseEntity.ok(printer.print(buildProtoFromDomain(order)));
     }
@@ -136,22 +139,18 @@ public class OrderController {
         return ResponseEntity.ok().build();
     }
 
-
     private Orders.OrdersListResponse buildListOrdersProtoFromDomain(Page<Order> orders) {
         List<Orders.Order> protoOrders = new ArrayList<>();
         for (Order order : orders.toList()) {
             Orders.OrderState state = Orders.OrderState.NEW;
-            List<Goods.Good> protoGoods = new ArrayList<>();
+            List<Orders.OrderGood> protoGoods = new ArrayList<>();
             for (OrderGood good : order.getGoods()) {
-                protoGoods.add(Goods.Good.newBuilder()
-                        .setId(good.getId())
-                        .setWeight(good.getWeight())
-                        .build());
+                protoGoods.add(mapOrderGoodToProto(good));
             }
             protoOrders.add(Orders.Order.newBuilder()
                     .setId(order.getId())
                     .setClient(Clients.Client.newBuilder().setId(order.getClientId()).build())
-                    .setTotalSum(order.getTotalSumForGoods())
+                    .setTotalSum(order.getTotalSum())
                     .setState(state)
                     .setDate(order.getCreatedAt().toInstant().toEpochMilli())
                     .setTotalWeight(order.getTotalWeightForGoods())
@@ -171,18 +170,15 @@ public class OrderController {
 
     private Orders.AddGoodToOrderResponse buildProtoFromDomain(Order order) {
         Orders.OrderState state = Orders.OrderState.NEW;
-        if (!StringUtils.hasText(order.getProcessingResult())) {
+        if (StringUtils.hasText(order.getProcessingResult())) {
             state = Orders.OrderState.PROCESSED;
             // TODO: 3/5/2021 Make logic
         }
         Clients.Client protoClient = Clients.Client.newBuilder().setId(order.getClientId()).build();
-        List<Goods.Good> protoGoods = new ArrayList<>();
-        List<OrderGood> goods = order.getGoods();
+        List<Orders.OrderGood> protoGoods = new ArrayList<>();
+        Set<OrderGood> goods = order.getGoods();
         for (OrderGood good : goods) {
-            protoGoods.add(Goods.Good.newBuilder()
-                    .setId(good.getId())
-                    .setWeight(good.getWeight())
-                    .build());
+            protoGoods.add(mapOrderGoodToProto(good));
         }
         Orders.Order protoOrder = Orders.Order.newBuilder()
                 .setId(order.getId())
@@ -191,11 +187,20 @@ public class OrderController {
                 .setState(state)
                 .setDate(order.getCreatedAt().toInstant().toEpochMilli())
                 .setTotalWeight(order.getTotalWeightForGoods())
-                .setTotalSum(order.getTotalSumForGoods())
+                .setTotalSum(order.getTotalSum())
                 .build();
 
         return Orders.AddGoodToOrderResponse.newBuilder()
                 .setOrder(protoOrder)
+                .build();
+    }
+
+    private Orders.OrderGood mapOrderGoodToProto(OrderGood good) {
+        return Orders.OrderGood.newBuilder()
+                .setGoodId(good.getId())
+                .setQuantity(good.getQuantity())
+                .setSum(good.getSum())
+                .setWeight(good.getWeight())
                 .build();
     }
 

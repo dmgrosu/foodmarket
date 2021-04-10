@@ -27,7 +27,7 @@ const Navbar = (props) => {
 
     const getGoodsCount = () => {
         if (cart) {
-            return cart.goods.length;
+            return cart.goods ? cart.goods.length : 0;
         }
     }
 

@@ -8,7 +8,10 @@ import md.ramaiana.foodmarket.model.Order;
 import md.ramaiana.foodmarket.model.OrderGood;
 import md.ramaiana.foodmarket.proto.Common;
 import md.ramaiana.foodmarket.proto.Orders;
-import md.ramaiana.foodmarket.service.*;
+import md.ramaiana.foodmarket.service.ClientNotFoundException;
+import md.ramaiana.foodmarket.service.GoodNotFoundException;
+import md.ramaiana.foodmarket.service.OrderNotFoundException;
+import md.ramaiana.foodmarket.service.OrderService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -23,8 +26,9 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -172,7 +176,7 @@ public class OrderControllerTest {
     void test_getOrderById_responseOk() throws Exception {
         //ARRANGE
         OrderGood someOrderGood = OrderGood.builder().id(1).orderId(2).sum(200f).weight(150f).build();
-        List<OrderGood> someGoods = new ArrayList<>();
+        Set<OrderGood> someGoods = new HashSet<>();
         someGoods.add(someOrderGood);
         Order someOrder = Order.builder().id(2).clientId(15).goods(someGoods).createdAt(OffsetDateTime.now()).build();
         when(orderServiceMock.findOrdersById(2))
@@ -233,7 +237,7 @@ public class OrderControllerTest {
         String direction = "DESC";
         String column = "id";
         Pageable pageable = PageRequest.of(1, 1, Sort.Direction.valueOf(direction), column);
-        List<OrderGood> orderGoods = new ArrayList<>();
+        Set<OrderGood> orderGoods = new HashSet<>();
         orderGoods.add(givenOrderGoodForExistingOrder(1, givenGood("someName", 15f, 10f), 15, 11));
         List<Order> orders = new ArrayList<>();
         orders.add(Order.builder().id(1).createdAt(dateFrom.plusHours(2)).clientId(clintId).goods(orderGoods).build());
@@ -351,10 +355,11 @@ public class OrderControllerTest {
     }
 
 
-    private void givenNewOrder(float goodQuantity, int clientId) throws GoodNotFoundException, ClientNotFoundException, OrderAlreadyProcessedException {
+    private void givenNewOrder(float goodQuantity, int clientId) throws Exception {
         Good someGood = givenGood("someName", 10f, 1.5f);
         OrderGood givenOrderGood = givenOrderGoodForNewOrder(someGood, goodQuantity);
-        List<OrderGood> givenGoods = Collections.singletonList(givenOrderGood);
+        Set<OrderGood> givenGoods = new HashSet<>();
+        givenGoods.add(givenOrderGood);
         Order givenOrder = Order.builder()
                 .id(2)
                 .goods(givenGoods)
@@ -365,12 +370,12 @@ public class OrderControllerTest {
                 .thenReturn(givenOrder);
     }
 
-    private void givenExistingOrder(int orderId, float givenQuantity, int clientId) throws GoodNotFoundException, ClientNotFoundException, OrderAlreadyProcessedException {
+    private void givenExistingOrder(int orderId, float givenQuantity, int clientId) throws Exception {
         Good someGood1 = givenGood("someName", 10f, 1.5f);
         Good someGood2 = givenOtherGood("someName2", 10f, 1.5f);
         OrderGood givenOrderGood1 = givenOrderGoodForExistingOrder(orderId, someGood1, givenQuantity, 11);
         OrderGood givenOrderGood2 = givenOrderGoodForExistingOrder(orderId, someGood2, givenQuantity, 12);
-        List<OrderGood> givenGoods = new ArrayList<>();
+        Set<OrderGood> givenGoods = new HashSet<>();
         givenGoods.add(givenOrderGood1);
         givenGoods.add(givenOrderGood2);
         Order givenOrder = Order.builder()

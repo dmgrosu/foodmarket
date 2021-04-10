@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Paper, TextField} from "@material-ui/core";
+import {Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Paper, TextField} from "@material-ui/core";
 import {connect} from "react-redux";
 import {withStyles} from "@material-ui/styles";
 import {Redirect} from "react-router-dom";
@@ -9,12 +9,18 @@ import Groups from "./Groups";
 import Grid from "@material-ui/core/Grid";
 import GoodsList from "./GoodsList";
 import {handleError} from "../../store/actions/authActions";
+import {addGoodToCart, changeQuantity, selectGood} from "../../store/actions/cartActions";
 
 const styles = theme => ({
     root: {
         flexGrow: 1,
         padding: theme.spacing(2),
-    }
+    },
+    buttonProgress: {
+        color: theme.palette.primary,
+        position: 'absolute',
+        left: '49%',
+    },
 });
 
 class Goods extends Component {
@@ -29,7 +35,6 @@ class Goods extends Component {
         goods: [],
         groups: [],
         selectedGroupId: null,
-        selectedGoodId: null,
         isFetchingGroups: false,
         isFetchingGoods: false,
     }
@@ -146,13 +151,18 @@ class Goods extends Component {
     }
 
     handleGoodSelect = (goodId) => {
-        this.setState({
-            selectedGoodId: goodId
-        })
+        this.props.selectGood(goodId);
     }
 
     addToCart = () => {
+        const {selectedGood, orderId} = this.props.cart;
+        if (selectedGood) {
+            this.props.addGoodToCart(selectedGood.id, orderId, selectedGood.quantity);
+        }
+    }
 
+    changeSelectedGood = (event) => {
+        this.props.changeQuantity(event.target.value);
     }
 
     componentDidMount() {
@@ -162,9 +172,9 @@ class Goods extends Component {
 
     render() {
 
-        const {auth, classes} = this.props;
+        const {auth, classes, cart} = this.props;
         const isAuthorized = auth.token !== null;
-        const {filter, allBrands, goods, groups, selectedGoodId, isFetchingGroups, isFetchingGoods} = this.state;
+        const {filter, allBrands, goods, groups, isFetchingGroups, isFetchingGoods} = this.state;
 
         return (
             <Grid container className={classes.root}>
@@ -196,8 +206,8 @@ class Goods extends Component {
                         </Paper>
                     </Grid>
                 </Grid>
-                <Dialog open={selectedGoodId !== null}
-                        onClose={() => this.setState({selectedGoodId: null})}
+                <Dialog open={cart.selectedGood.id !== null}
+                        onClose={() => this.handleGoodSelect(null)}
                 >
                     <DialogTitle>
                         Add to cart
@@ -208,13 +218,22 @@ class Goods extends Component {
                         </DialogContentText>
                         <TextField autoFocus
                                    fullWidth
+                                   type="number"
+                                   value={cart.selectedGood.quantity}
+                                   onChange={this.changeSelectedGood}
+                                   disabled={cart.isAdding}
                         />
                     </DialogContent>
                     <DialogActions>
-                        <Button onClick={this.addToCart}>
+                        <Button onClick={this.addToCart}
+                                disabled={cart.isAdding}
+                        >
                             OK
                         </Button>
-                        <Button onClick={() => this.setState({selectedGoodId: null})}>
+                        {cart.isAdding && <CircularProgress size={28} className={classes.buttonProgress}/>}
+                        <Button onClick={() => this.handleGoodSelect(null)}
+                                disabled={cart.isAdding}
+                        >
                             Cancel
                         </Button>
                     </DialogActions>
@@ -225,7 +244,12 @@ class Goods extends Component {
 }
 
 const mapStateToProps = state => ({
-    auth: state.authReducer
+    auth: state.authReducer,
+    cart: state.cartReducer,
 });
 
-export default connect(mapStateToProps, {})(withStyles(styles)(Goods));
+export default connect(mapStateToProps, {
+    addGoodToCart,
+    selectGood,
+    changeQuantity
+})(withStyles(styles)(Goods));

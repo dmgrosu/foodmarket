@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.OffsetDateTime;
+import java.util.Optional;
 
 
 /**
@@ -19,11 +20,17 @@ import java.time.OffsetDateTime;
 @Repository
 public interface OrderDao extends PagingAndSortingRepository<Order, Integer> {
 
-    Order getByIdAndDeletedAtNull(Integer orderId);
+    Optional<Order> findByIdAndDeletedAtNull(Integer orderId);
 
     @Modifying
     @Query("UPDATE \"order\" SET \"deleted_at\" = now() WHERE id = :orderId")
     void setOrderToDeletedState(@Param("orderId") Integer orderId);
 
     Page<Order> findAllByDeletedAtNullAndCreatedAtBetweenAndClientId(Pageable pageable, OffsetDateTime dateFrom, OffsetDateTime dateTo, Integer clientId);
+
+    @Query("select \"processing_result\" from \"order\" where id = :orderId")
+    String getProcessingResultById(@Param("orderId") Integer orderId);
+
+    boolean existsByIdAndDeletedAtNull(Integer orderId);
+
 }
