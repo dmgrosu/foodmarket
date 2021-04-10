@@ -28,11 +28,13 @@ import java.util.Set;
 public class OrderController {
 
     private final OrderService orderService;
+    private final GoodService goodService;
     private final JsonFormat.Printer printer;
 
     @Autowired
-    public OrderController(OrderService orderService) {
+    public OrderController(OrderService orderService, GoodService goodService) {
         this.orderService = orderService;
+        this.goodService = goodService;
         this.printer = JsonFormat.printer().omittingInsignificantWhitespace();
     }
 
@@ -196,11 +198,13 @@ public class OrderController {
     }
 
     private Orders.OrderGood mapOrderGoodToProto(OrderGood good) {
+        String goodName = goodService.getGoodNameById(good.getGoodId());
         return Orders.OrderGood.newBuilder()
                 .setGoodId(good.getId())
                 .setQuantity(good.getQuantity())
                 .setSum(good.getSum())
                 .setWeight(good.getWeight())
+                .setGoodName(goodName == null ? "" : goodName)
                 .build();
     }
 

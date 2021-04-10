@@ -23,6 +23,7 @@ message OrderGood {
   float quantity = 2;
   float sum = 3;
   float weight = 4;
+  string goodName = 5;
 }
 
 message AddGoodToOrderRequest {

@@ -13,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import java.time.OffsetDateTime;
@@ -52,7 +53,7 @@ public class OrderService {
         orderDao.setOrderToDeletedState(orderId);
     }
 
-    //@Transactional
+    @Transactional
     public Order addGoodToOrder(int orderId, int goodId, float quantity, int clientId) throws GoodNotFoundException,
             ClientNotFoundException, OrderAlreadyProcessedException, OrderNotFoundException {
         Good good = validateGood(goodId);

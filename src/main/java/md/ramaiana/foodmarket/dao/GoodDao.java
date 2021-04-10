@@ -39,4 +39,7 @@ public interface GoodDao extends PagingAndSortingRepository<Good, Integer> {
     Integer setDeletedIfIdNotIn(@Param("ids") List<Integer> updatedGoodIds);
 
     Good getByIdAndDeletedAtNull(Integer goodId);
+
+    @Query("select name from good where id=:goodId")
+    String getNameById(@Param("goodId") Integer goodId);
 }
