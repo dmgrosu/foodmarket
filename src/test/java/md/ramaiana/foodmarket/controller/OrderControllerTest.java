@@ -8,10 +8,7 @@ import md.ramaiana.foodmarket.model.Order;
 import md.ramaiana.foodmarket.model.OrderGood;
 import md.ramaiana.foodmarket.proto.Common;
 import md.ramaiana.foodmarket.proto.Orders;
-import md.ramaiana.foodmarket.service.ClientNotFoundException;
-import md.ramaiana.foodmarket.service.GoodNotFoundException;
-import md.ramaiana.foodmarket.service.OrderNotFoundException;
-import md.ramaiana.foodmarket.service.OrderService;
+import md.ramaiana.foodmarket.service.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -37,7 +34,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-
 @SpringBootTest
 @AutoConfigureMockMvc
 public class OrderControllerTest {
@@ -46,6 +42,8 @@ public class OrderControllerTest {
 
     @MockBean
     private OrderService orderServiceMock;
+    @MockBean
+    private GoodService goodServiceMock;
 
     @WithMockUser("spring")
     @Test
@@ -105,8 +103,8 @@ public class OrderControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(someAddGoodToOrderRequest(orderId, 12, givenQuantity, clientId)))
                 .andExpect(jsonPath("$.order.id").value(5))
-                .andExpect(jsonPath("$.order.goods[0].id").value(11))
-                .andExpect(jsonPath("$.order.goods[1].id").value(12));
+                .andExpect(jsonPath("$.order.goods[0].goodId").value(11))
+                .andExpect(jsonPath("$.order.goods[1].goodId").value(12));
     }
 
     @WithMockUser("spring")
@@ -175,10 +173,21 @@ public class OrderControllerTest {
     @Test
     void test_getOrderById_responseOk() throws Exception {
         //ARRANGE
-        OrderGood someOrderGood = OrderGood.builder().id(1).orderId(2).sum(200f).weight(150f).build();
         Set<OrderGood> someGoods = new HashSet<>();
-        someGoods.add(someOrderGood);
-        Order someOrder = Order.builder().id(2).clientId(15).goods(someGoods).createdAt(OffsetDateTime.now()).build();
+        someGoods.add(OrderGood.builder()
+                .id(1)
+                .orderId(2)
+                .sum(200f)
+                .weight(150f)
+                .quantity(12f)
+                .build());
+        Order someOrder = Order.builder()
+                .id(2)
+                .clientId(15)
+                .goods(someGoods)
+                .totalSum(300f)
+                .createdAt(OffsetDateTime.now())
+                .build();
         when(orderServiceMock.findOrdersById(2))
                 .thenReturn(someOrder);
         //ACT & ASSERT
@@ -228,7 +237,6 @@ public class OrderControllerTest {
     @Test
     void test_getOrdersByPeriod_responseOk() throws Exception {
         //ARRANGE
-
         long from = 1615986580054L;
         long to = 1615986589387L;
         OffsetDateTime dateFrom = OffsetDateTime.ofInstant(Instant.ofEpochMilli(from), ZoneId.of("UTC"));
@@ -240,7 +248,13 @@ public class OrderControllerTest {
         Set<OrderGood> orderGoods = new HashSet<>();
         orderGoods.add(givenOrderGoodForExistingOrder(1, givenGood("someName", 15f, 10f), 15, 11));
         List<Order> orders = new ArrayList<>();
-        orders.add(Order.builder().id(1).createdAt(dateFrom.plusHours(2)).clientId(clintId).goods(orderGoods).build());
+        orders.add(Order.builder()
+                .id(1)
+                .createdAt(dateFrom.plusHours(2))
+                .clientId(clintId)
+                .totalSum(300f)
+                .goods(orderGoods)
+                .build());
         Page<Order> orderPage = new PageImpl<>(orders, pageable, pageable.getOffset());
         Common.Pagination pagination = Common.Pagination.newBuilder()
                 .setPageNo(1)
@@ -364,6 +378,7 @@ public class OrderControllerTest {
                 .id(2)
                 .goods(givenGoods)
                 .clientId(clientId)
+                .totalSum(400f)
                 .createdAt(OffsetDateTime.now())
                 .build();
         when(orderServiceMock.addGoodToOrder(eq(0), eq(someGood.getId()), eq(goodQuantity), eq(clientId)))
@@ -382,6 +397,7 @@ public class OrderControllerTest {
                 .id(orderId)
                 .goods(givenGoods)
                 .clientId(clientId)
+                .totalSum(400f)
                 .createdAt(OffsetDateTime.now())
                 .build();
         when(orderServiceMock.addGoodToOrder(eq(orderId), eq(someGood2.getId()), eq(givenQuantity), eq(clientId)))

@@ -79,6 +79,16 @@ class OrderGoodDaoTest {
 
     }
 
+    @Test
+    void test_countByOrder_countReturned() {
+        // ARRANGE
+        OrderGood someExistingGood = someExistingOrderGood();
+        // ACT
+        int actualResult = orderGoodDao.countAllByOrderId(someExistingGood.getOrderId());
+        // ASSERT
+        assertThat(actualResult).isEqualTo(1);
+    }
+
     private Client someSavedClient(String idno, String name) {
         return clientDao.save(Client.builder()
                 .idno(idno)

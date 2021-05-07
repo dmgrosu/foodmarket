@@ -1,7 +1,8 @@
 import React from 'react';
-import {Card, CardActions, CardContent, CardHeader, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, withStyles} from "@material-ui/core";
+import {Button, Card, CardActions, CardContent, CardHeader, Dialog, DialogActions, DialogTitle, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, withStyles} from "@material-ui/core";
 import {connect} from "react-redux";
 import {Delete} from "@material-ui/icons";
+import {cancelDeleteGood, deleteGoodFromCart, selectGoodToDelete} from "../../store/actions/cartActions";
 
 const styles = theme => ({
     container: {
@@ -11,10 +12,13 @@ const styles = theme => ({
     },
     head: {
         backgroundColor: '#bdbdbd',
+    },
+    total: {
+        fontWeight: 'bold'
     }
 });
 
-const Cart = ({classes, cart}) => {
+const Cart = ({classes, cart, selectGoodToDelete, cancelDeleteGood, deleteGoodFromCart}) => {
 
     const columns = [
         {id: 1, label: 'Name', align: 'left', minWidth: '40%', dataId: 'goodName'},
@@ -24,8 +28,6 @@ const Cart = ({classes, cart}) => {
     ];
 
     const goods = cart.goods;
-
-    const totalCalculator = (accumulator, currentValue) => accumulator + currentValue.sum;
 
     return (
         <Card>
@@ -57,7 +59,7 @@ const Cart = ({classes, cart}) => {
                                           hover
                                 >
                                     <TableCell>
-                                        <IconButton>
+                                        <IconButton onClick={() => selectGoodToDelete(good.goodId)}>
                                             <Delete fontSize="small" color="secondary"/>
                                         </IconButton>
                                     </TableCell>
@@ -77,9 +79,13 @@ const Cart = ({classes, cart}) => {
                                 </TableRow>
                             )) : null}
                             <TableRow>
-                                <TableCell colSpan={4}>Total</TableCell>
-                                <TableCell align="right">
-                                    {Array.isArray(goods) ? goods.reduce(totalCalculator, 0).toFixed(2) : 0}
+                                <TableCell colSpan={4} className={classes.total}>Total</TableCell>
+                                <TableCell align="right" className={classes.total}>
+                                    {Array.isArray(goods) ?
+                                        goods
+                                            .reduce((accumulator, currentValue) => accumulator + currentValue.sum, 0)
+                                            .toFixed(2) :
+                                        0}
                                 </TableCell>
                             </TableRow>
                         </TableBody>
@@ -89,6 +95,21 @@ const Cart = ({classes, cart}) => {
             <CardActions>
 
             </CardActions>
+            <Dialog
+                open={cart.deleteGoodId !== null}
+                onClose={cancelDeleteGood}
+                aria-labelledby="alert-dialog-title"
+            >
+                <DialogTitle id="alert-dialog-title">{"Remove selected good from cart?"}</DialogTitle>
+                <DialogActions>
+                    <Button onClick={() => deleteGoodFromCart(cart.orderId, cart.deleteGoodId)} color="primary">
+                        OK
+                    </Button>
+                    <Button onClick={cancelDeleteGood} color="primary" autoFocus>
+                        Cancel
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Card>
     )
 }
@@ -97,4 +118,8 @@ const mapStateToProps = state => ({
     cart: state.cartReducer
 });
 
-export default connect(mapStateToProps, {})(withStyles(styles)(Cart));
+export default connect(mapStateToProps, {
+    selectGoodToDelete,
+    deleteGoodFromCart,
+    cancelDeleteGood,
+})(withStyles(styles)(Cart));

@@ -57,7 +57,7 @@ public class OrderServiceTest {
     @Test
     void test_addGoodToOrder_orderSaved() throws Exception {
         //ARRANGE
-        Integer orderId = 2;
+        int orderId = 2;
         Good someGood = Good.builder()
                 .id(1)
                 .price(15f)
@@ -71,10 +71,8 @@ public class OrderServiceTest {
                 .thenReturn(Client.builder()
                         .id(3)
                         .build());
-        when(orderDaoMock.findByIdAndDeletedAtNull(eq(orderId)))
-                .thenReturn(Optional.of(Order.builder()
-                        .id(orderId)
-                        .build()));
+        someExistingOrder(orderId);
+        when(orderGoodDaoMock.existsByOrderIdAndGoodId(eq(orderId), eq(someGood.getId()))).thenReturn(false);
         ArgumentCaptor<Order> orderCaptor = ArgumentCaptor.forClass(Order.class);
 
         //ACT
@@ -226,4 +224,15 @@ public class OrderServiceTest {
         assertThatExceptionOfType(GoodNotFoundException.class)
                 .isThrownBy(() -> orderService.updateOrder(orderId, goodId, newQuantity));
     }
+
+    private Order someExistingOrder(int orderId) {
+        Order order = Order.builder()
+                .id(orderId)
+                .build();
+        when(orderDaoMock.save(any())).thenReturn(order);
+        when(orderDaoMock.existsByIdAndDeletedAtNull(orderId)).thenReturn(true);
+        when(orderDaoMock.findByIdAndDeletedAtNull(orderId)).thenReturn(Optional.of(order));
+        return order;
+    }
+
 }

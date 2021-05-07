@@ -35,7 +35,7 @@ message AddGoodToOrderRequest {
 
 message DeleteGoodFromOrderRequest {
   int32 orderId = 1;
-  int32 goodId = 2;
+  int32 orderGoodId = 2;
 }
 
 message GetOrderByIdRequest {

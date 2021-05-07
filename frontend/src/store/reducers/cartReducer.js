@@ -1,14 +1,16 @@
-import {ADD_TO_CART_FAIL, ADD_TO_CART_START, ADD_TO_CART_SUCCESS, CHANGE_QUANTITY, SELECT_GOOD} from "../actions/cartActions";
+import {ADD_TO_CART_FAIL, ADD_TO_CART_START, ADD_TO_CART_SUCCESS, CHANGE_QUANTITY, DELETE_FROM_CART_CANCELLED, DELETE_FROM_CART_END, DELETE_FROM_CART_START, SELECT_GOOD, SELECT_GOOD_TO_DELETE} from "../actions/cartActions";
 
 const initialState = {
     orderId: null,
     goods: [],
     isAdding: false,
+    isDeleting: false,
     error: null,
     selectedGood: {
         id: null,
         quantity: 0,
     },
+    deleteGoodId: null,
 };
 
 const cartReducer = (state = initialState, action) => {
@@ -50,6 +52,31 @@ const cartReducer = (state = initialState, action) => {
                     ...state.selectedGood,
                     quantity: action.payload.quantity
                 }
+            }
+        case SELECT_GOOD_TO_DELETE:
+            return {
+                ...state,
+                deleteGoodId: action.payload.goodId
+            }
+        case DELETE_FROM_CART_START:
+            return {
+                ...state,
+                isDeleting: true,
+            }
+        case DELETE_FROM_CART_CANCELLED:
+            return {
+                ...state,
+                deleteGoodId: null,
+                isDeleting: true,
+            }
+        case DELETE_FROM_CART_END:
+            const newGoods = state.goods.filter(good => good.goodId !== state.deleteGoodId);
+            return {
+                ...state,
+                goods: newGoods,
+                orderId: newGoods.length === 0 ? null : state.orderId,
+                deleteGoodId: null,
+                isDeleting: false
             }
         default:
             return state;

@@ -22,4 +22,6 @@ public interface OrderGoodDao extends CrudRepository<OrderGood, Integer> {
 
     boolean existsByOrderIdAndGoodId(Integer orderId, Integer goodId);
 
+    int countAllByOrderId(int orderId);
+
 }

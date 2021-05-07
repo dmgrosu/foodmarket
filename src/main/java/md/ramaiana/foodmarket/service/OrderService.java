@@ -101,6 +101,15 @@ public class OrderService {
         orderGoodDao.updateOrderGoodQuantity(orderId, goodId, newQuantity);
     }
 
+    public void deleteGoodFromOrder(int orderId, int orderGoodId) throws OrderNotFoundException {
+        orderGoodDao.deleteById(orderGoodId);
+        if (orderGoodDao.countAllByOrderId(orderId) == 0) {
+            orderDao.deleteById(orderId);
+        } else {
+            updateTotalSumAndSaveOrder(orderId);
+        }
+    }
+
     private void validateClient(Integer clientId) throws ClientNotFoundException {
         Client client = clientDao.getByIdAndDeletedAtNull(clientId);
         if (client == null) {
