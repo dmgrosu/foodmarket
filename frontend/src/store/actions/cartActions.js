@@ -87,6 +87,6 @@ export const selectGoodToDelete = (goodId) => {
 
 export const cancelDeleteGood = () => {
     return {
-        type: DELETE_FROM_CART_END
+        type: DELETE_FROM_CART_CANCELLED
     }
 }

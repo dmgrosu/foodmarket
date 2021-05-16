@@ -1,14 +1,26 @@
 import React from 'react';
-import {Button, Card, CardActions, CardContent, CardHeader, Dialog, DialogActions, DialogTitle, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, withStyles} from "@material-ui/core";
+import {Button, Dialog, DialogActions, DialogTitle, Grid, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, withStyles} from "@material-ui/core";
 import {connect} from "react-redux";
 import {Delete} from "@material-ui/icons";
 import {cancelDeleteGood, deleteGoodFromCart, selectGoodToDelete} from "../../store/actions/cartActions";
+import {Link} from "react-router-dom";
 
 const styles = theme => ({
-    container: {
-        height: 600,
-        maxWidth: 1000,
-        margin: 'auto'
+    root: {
+        padding: theme.spacing(2),
+        maxWidth: 1400,
+        margin: "auto"
+    },
+    toolbar: {
+        paddingBottom: theme.spacing(2),
+    },
+    totalBar: {
+        textAlign: "right",
+    },
+    table: {
+        maxHeight: 600,
+        margin: 'auto',
+        paddingBottom: theme.spacing(2),
     },
     head: {
         backgroundColor: '#bdbdbd',
@@ -30,12 +42,22 @@ const Cart = ({classes, cart, selectGoodToDelete, cancelDeleteGood, deleteGoodFr
     const goods = cart.goods;
 
     return (
-        <Card>
-            <CardHeader>
-
-            </CardHeader>
-            <CardContent>
-                <TableContainer className={classes.container}>
+        <Grid container className={classes.root}>
+            <Grid item container sm={10} className={classes.toolbar}>
+                <Grid item sm={8}>
+                    <Typography variant="h5">
+                        Shopping cart
+                    </Typography>
+                </Grid>
+                <Grid item sm={4} style={{textAlign: "right"}}>
+                    <Button variant="contained"
+                            component={Link} to="/goods">
+                        Back to catalogue
+                    </Button>
+                </Grid>
+            </Grid>
+            <Grid item sm={10} className={classes.table}>
+                <TableContainer>
                     <Table stickyHeader
                            size="small"
                     >
@@ -91,10 +113,13 @@ const Cart = ({classes, cart, selectGoodToDelete, cancelDeleteGood, deleteGoodFr
                         </TableBody>
                     </Table>
                 </TableContainer>
-            </CardContent>
-            <CardActions>
-
-            </CardActions>
+            </Grid>
+            <Grid item sm={2} className={classes.totalBar}>
+                <Button variant="contained"
+                        color="secondary">
+                    Place order
+                </Button>
+            </Grid>
             <Dialog
                 open={cart.deleteGoodId !== null}
                 onClose={cancelDeleteGood}
@@ -110,7 +135,7 @@ const Cart = ({classes, cart, selectGoodToDelete, cancelDeleteGood, deleteGoodFr
                     </Button>
                 </DialogActions>
             </Dialog>
-        </Card>
+        </Grid>
     )
 }
 
