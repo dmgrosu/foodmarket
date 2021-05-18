@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -368,6 +368,28 @@ public class OrderControllerTest {
                 .andExpect(jsonPath("$.errors[0].code").value("QUANTITY_IS_LESS_OR_EQUAL_TO_ZERO"));
     }
 
+    @Test
+    @WithMockUser("someUser")
+    void test_placeOrder_responseOk() throws Exception {
+        mockMvc.perform(post("/order/placeOrder")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(somePlaceOrderRequest(1)))
+                .andExpect(status().isOk());
+
+        verify(orderServiceMock, times(1)).placeOrder(eq(1));
+    }
+
+    @Test
+    @WithMockUser("someUser")
+    void test_placeOrder_noOrderId_badRequest() throws Exception {
+        mockMvc.perform(post("/order/placeOrder")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(somePlaceOrderRequest(0)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].code").value("ORDER_NOT_FOUND"));
+
+        verify(orderServiceMock, never()).placeOrder(eq(1));
+    }
 
     private void givenNewOrder(float goodQuantity, int clientId) throws Exception {
         Good someGood = givenGood("someName", 10f, 1.5f);
@@ -490,6 +512,13 @@ public class OrderControllerTest {
                 .setNewQuantity(newQuantity)
                 .build();
         return JsonFormat.printer().print(protoRequest);
+    }
+
+    private String somePlaceOrderRequest(int orderId) throws InvalidProtocolBufferException {
+        Orders.PlaceOrderRequest request = Orders.PlaceOrderRequest.newBuilder()
+                .setOrderId(orderId)
+                .build();
+        return JsonFormat.printer().print(request);
     }
 
     private String someGetByIdRequest(int orderId) throws InvalidProtocolBufferException {

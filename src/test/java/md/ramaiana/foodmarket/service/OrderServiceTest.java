@@ -8,6 +8,7 @@ import md.ramaiana.foodmarket.dao.OrderGoodDao;
 import md.ramaiana.foodmarket.model.Client;
 import md.ramaiana.foodmarket.model.Good;
 import md.ramaiana.foodmarket.model.Order;
+import md.ramaiana.foodmarket.model.OrderState;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -223,6 +224,25 @@ public class OrderServiceTest {
         //ACT & ASSERT
         assertThatExceptionOfType(GoodNotFoundException.class)
                 .isThrownBy(() -> orderService.updateOrder(orderId, goodId, newQuantity));
+    }
+
+    @Test
+    void test_placeOrder() throws Exception {
+        // ARRANGE
+        someExistingOrder(12);
+        // ACT
+        orderService.placeOrder(12);
+        // ASSERT
+        verify(orderDaoMock, times(1)).updateOrderState(eq(OrderState.PLACED), eq(12));
+    }
+
+    @Test
+    void test_placeOrder_orderNotFound_exceptionThrown() {
+        // ARRANGE
+        someExistingOrder(1);
+        // ACT & ASSERT
+        assertThatExceptionOfType(OrderNotFoundException.class)
+                .isThrownBy(() -> orderService.placeOrder(2));
     }
 
     private Order someExistingOrder(int orderId) {

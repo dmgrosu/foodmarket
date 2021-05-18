@@ -163,7 +163,16 @@ public class OrderController {
     @PostMapping("/placeOrder")
     public ResponseEntity<?> placeOrder(@RequestBody Orders.PlaceOrderRequest placeOrderRequest) throws InvalidProtocolBufferException {
         int orderId = placeOrderRequest.getOrderId();
-        orderService.placeOrder(orderId);
+        if (orderId == 0) {
+            return ResponseEntity.badRequest().body(printer.print(buildErrorResponse("Missing required order ID", ErrorCode.ORDER_NOT_FOUND)));
+        }
+        try {
+            orderService.placeOrder(orderId);
+        } catch (OrderNotFoundException e) {
+            return ResponseEntity.badRequest().body(printer.print(buildErrorResponse("Missing required order ID", ErrorCode.ORDER_NOT_FOUND)));
+        } catch (Exception e) {
+            internalErrorResponse(e);
+        }
         return ResponseEntity.ok().build();
     }
 

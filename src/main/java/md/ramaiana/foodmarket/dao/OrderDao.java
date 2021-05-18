@@ -1,6 +1,7 @@
 package md.ramaiana.foodmarket.dao;
 
 import md.ramaiana.foodmarket.model.Order;
+import md.ramaiana.foodmarket.model.OrderState;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jdbc.repository.query.Modifying;
@@ -32,5 +33,9 @@ public interface OrderDao extends PagingAndSortingRepository<Order, Integer> {
     String getProcessingResultById(@Param("orderId") Integer orderId);
 
     boolean existsByIdAndDeletedAtNull(Integer orderId);
+
+    @Modifying
+    @Query("update \"order\" set \"status\"=:state where id=:orderId")
+    int updateOrderState(@Param("state") OrderState state, @Param("orderId") int orderId);
 
 }

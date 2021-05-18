@@ -4,10 +4,7 @@ import md.ramaiana.foodmarket.dao.ClientDao;
 import md.ramaiana.foodmarket.dao.GoodDao;
 import md.ramaiana.foodmarket.dao.OrderDao;
 import md.ramaiana.foodmarket.dao.OrderGoodDao;
-import md.ramaiana.foodmarket.model.Client;
-import md.ramaiana.foodmarket.model.Good;
-import md.ramaiana.foodmarket.model.Order;
-import md.ramaiana.foodmarket.model.OrderGood;
+import md.ramaiana.foodmarket.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -110,8 +107,11 @@ public class OrderService {
         }
     }
 
-    public void placeOrder(int orderId) {
-
+    public void placeOrder(int orderId) throws OrderNotFoundException {
+        if (!orderDao.existsByIdAndDeletedAtNull(orderId)) {
+            throw new OrderNotFoundException(String.format("Order with id [%s] not found", orderId));
+        }
+        orderDao.updateOrderState(OrderState.PLACED, orderId);
     }
 
     private void validateClient(Integer clientId) throws ClientNotFoundException {
