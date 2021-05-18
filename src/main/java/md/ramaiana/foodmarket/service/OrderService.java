@@ -110,6 +110,10 @@ public class OrderService {
         }
     }
 
+    public void placeOrder(int orderId) {
+
+    }
+
     private void validateClient(Integer clientId) throws ClientNotFoundException {
         Client client = clientDao.getByIdAndDeletedAtNull(clientId);
         if (client == null) {

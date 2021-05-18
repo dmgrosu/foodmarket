@@ -57,7 +57,9 @@ message AddGoodToOrderResponse {
 }
 
 message OrderListRequest {
+  // date in millis
   int64 dateFrom = 1;
+  // date in millis
   int64 dateTo = 2;
   int32 clientId = 3;
   Pagination pagination = 4;
@@ -67,6 +69,10 @@ message OrderListRequest {
 message OrdersListResponse {
   repeated Order orders = 1;
   Pagination pagination = 2;
+}
+
+message PlaceOrderRequest {
+  int32 orderId = 1;
 }
 
 enum OrderState {

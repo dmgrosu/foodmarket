@@ -160,6 +160,13 @@ public class OrderController {
         return ResponseEntity.ok().build();
     }
 
+    @PostMapping("/placeOrder")
+    public ResponseEntity<?> placeOrder(@RequestBody Orders.PlaceOrderRequest placeOrderRequest) throws InvalidProtocolBufferException {
+        int orderId = placeOrderRequest.getOrderId();
+        orderService.placeOrder(orderId);
+        return ResponseEntity.ok().build();
+    }
+
     private ResponseEntity<?> internalErrorResponse(Exception e) throws InvalidProtocolBufferException {
         log.error(e.getMessage(), e);
         return ResponseEntity.status(500).body(printer.print(buildErrorResponse(e.getMessage(), ErrorCode.INTERNAL_SERVER_ERROR)));

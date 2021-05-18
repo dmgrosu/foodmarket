@@ -33,6 +33,8 @@ public class Order {
     OffsetDateTime processedAt;
     @Column("processing_result")
     String processingResult;
+    @Column("status")
+    OrderState state;
     @MappedCollection(idColumn = "order_id")
     Set<OrderGood> goods;
 
