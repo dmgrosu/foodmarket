@@ -1,9 +1,10 @@
 import React from 'react';
-import {Button, Dialog, DialogActions, DialogTitle, Grid, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, withStyles} from "@material-ui/core";
+import {Button, Grid, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, withStyles} from "@material-ui/core";
 import {connect} from "react-redux";
 import {Delete} from "@material-ui/icons";
-import {cancelDeleteGood, deleteGoodFromCart, selectGoodToDelete} from "../../store/actions/cartActions";
+import {cancelDeleteGood, closePlaceOrderDialog, deleteGoodFromCart, openPlaceOrderDialog, placeOrder, selectGoodToDelete} from "../../store/actions/cartActions";
 import {Link} from "react-router-dom";
+import ConfirmDialog from "../ConfirmDialog";
 
 const styles = theme => ({
     root: {
@@ -30,7 +31,8 @@ const styles = theme => ({
     }
 });
 
-const Cart = ({classes, cart, selectGoodToDelete, cancelDeleteGood, deleteGoodFromCart}) => {
+const Cart = ({classes, cart, selectGoodToDelete, cancelDeleteGood, deleteGoodFromCart,
+                  openPlaceOrderDialog, closePlaceOrderDialog, placeOrder}) => {
 
     const columns = [
         {id: 1, label: 'Name', align: 'left', minWidth: '40%', dataId: 'goodName'},
@@ -116,25 +118,22 @@ const Cart = ({classes, cart, selectGoodToDelete, cancelDeleteGood, deleteGoodFr
             </Grid>
             <Grid item sm={2} className={classes.totalBar}>
                 <Button variant="contained"
-                        color="secondary">
+                        color="secondary"
+                        onClick={openPlaceOrderDialog}
+                >
                     Place order
                 </Button>
             </Grid>
-            <Dialog
-                open={cart.deleteGoodId !== null}
-                onClose={cancelDeleteGood}
-                aria-labelledby="alert-dialog-title"
-            >
-                <DialogTitle id="alert-dialog-title">{"Remove selected good from cart?"}</DialogTitle>
-                <DialogActions>
-                    <Button onClick={() => deleteGoodFromCart(cart.orderId, cart.deleteGoodId)} color="primary">
-                        OK
-                    </Button>
-                    <Button onClick={cancelDeleteGood} color="primary" autoFocus>
-                        Cancel
-                    </Button>
-                </DialogActions>
-            </Dialog>
+            <ConfirmDialog isOpen={cart.deleteGoodId !== null}
+                           onCancel={cancelDeleteGood}
+                           onOk={() => deleteGoodFromCart(cart.orderId, cart.deleteGoodId)}
+                           title="Remove selected good from cart?"
+            />
+            <ConfirmDialog isOpen={cart.placeOrderDialogOpen}
+                           onCancel={closePlaceOrderDialog}
+                           onOk={() => placeOrder(cart.orderId)}
+                           title="You are about to place the new order. Please confirm!"
+            />
         </Grid>
     )
 }
@@ -147,4 +146,7 @@ export default connect(mapStateToProps, {
     selectGoodToDelete,
     deleteGoodFromCart,
     cancelDeleteGood,
+    closePlaceOrderDialog,
+    openPlaceOrderDialog,
+    placeOrder
 })(withStyles(styles)(Cart));

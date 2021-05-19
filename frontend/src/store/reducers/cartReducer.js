@@ -1,10 +1,27 @@
-import {ADD_TO_CART_FAIL, ADD_TO_CART_START, ADD_TO_CART_SUCCESS, CHANGE_QUANTITY, DELETE_FROM_CART_CANCELLED, DELETE_FROM_CART_END, DELETE_FROM_CART_START, SELECT_GOOD, SELECT_GOOD_TO_DELETE} from "../actions/cartActions";
+import {
+    ADD_TO_CART_FAIL,
+    ADD_TO_CART_START,
+    ADD_TO_CART_SUCCESS,
+    CHANGE_QUANTITY,
+    CLOSE_PLACE_ORDER_DIALOG,
+    DELETE_FROM_CART_CANCELLED,
+    DELETE_FROM_CART_END,
+    DELETE_FROM_CART_START,
+    OPEN_PLACE_ORDER_DIALOG,
+    PLACE_ORDER_FAIL,
+    PLACE_ORDER_START,
+    PLACE_ORDER_SUCCESS,
+    SELECT_GOOD,
+    SELECT_GOOD_TO_DELETE
+} from "../actions/cartActions";
 
 const initialState = {
     orderId: null,
     goods: [],
     isAdding: false,
     isDeleting: false,
+    isPlacing: false,
+    placeOrderDialogOpen: false,
     error: null,
     selectedGood: {
         id: null,
@@ -77,6 +94,34 @@ const cartReducer = (state = initialState, action) => {
                 orderId: newGoods.length === 0 ? null : state.orderId,
                 deleteGoodId: null,
                 isDeleting: false
+            }
+        case PLACE_ORDER_START:
+            return {
+                ...state,
+                isPlacing: true
+            }
+        case PLACE_ORDER_SUCCESS:
+            return {
+                ...state,
+                orderId: null,
+                goods: [],
+                isPlacing: false,
+                placeOrderDialogOpen: false
+            }
+        case PLACE_ORDER_FAIL:
+            return {
+                ...state,
+                isPlacing: false
+            }
+        case OPEN_PLACE_ORDER_DIALOG:
+            return {
+                ...state,
+                placeOrderDialogOpen: true
+            }
+        case CLOSE_PLACE_ORDER_DIALOG:
+            return {
+                ...state,
+                placeOrderDialogOpen: false
             }
         default:
             return state;

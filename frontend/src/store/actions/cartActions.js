@@ -10,6 +10,12 @@ export const DELETE_FROM_CART_START = "DELETE_FROM_CART_START";
 export const DELETE_FROM_CART_CANCELLED = "DELETE_FROM_CART_CANCELLED";
 export const DELETE_FROM_CART_END = "DELETE_FROM_CART_END";
 export const SELECT_GOOD_TO_DELETE = "SELECT_GOOD_TO_DELETE";
+export const PLACE_ORDER_START = "PLACE_ORDER_START";
+export const PLACE_ORDER_SUCCESS = "PLACE_ORDER_SUCCESS";
+export const PLACE_ORDER_FAIL = "PLACE_ORDER_FAIL";
+export const OPEN_PLACE_ORDER_DIALOG = "OPEN_PLACE_ORDER_DIALOG";
+export const CLOSE_PLACE_ORDER_DIALOG = "CLOSE_PLACE_ORDER_DIALOG";
+
 
 export const addGoodToCart = (goodId, orderId, quantity) => {
     return (dispatch, getState) => {
@@ -58,6 +64,24 @@ export const deleteGoodFromCart = (orderId, orderGoodId) => {
     };
 }
 
+export const placeOrder = (orderId) => {
+    return (dispatch, getState) => {
+        const {token} = getState().authReducer;
+        dispatch({type: PLACE_ORDER_START});
+        axios.post("/order/placeOrder",
+            {orderId: orderId},
+            {headers: {'Authorization': token}})
+            .then(resp => {
+                dispatch({
+                    type: PLACE_ORDER_SUCCESS,
+                });
+            })
+            .catch(err => {
+                handleError(err);
+            })
+    };
+}
+
 export const selectGood = (goodId) => {
     return {
         type: SELECT_GOOD,
@@ -88,5 +112,17 @@ export const selectGoodToDelete = (goodId) => {
 export const cancelDeleteGood = () => {
     return {
         type: DELETE_FROM_CART_CANCELLED
+    }
+}
+
+export const openPlaceOrderDialog = () => {
+    return {
+        type: OPEN_PLACE_ORDER_DIALOG
+    }
+}
+
+export const closePlaceOrderDialog = () => {
+    return {
+        type: CLOSE_PLACE_ORDER_DIALOG
     }
 }
