@@ -85,7 +85,7 @@ create table if not exists rama_fm."order"
     deleted_at        timestamp,
     processed_at      timestamp,
     processing_result text,
-    status            text      default 'new'::text not null
+    status            text      default 'NEW'::text not null
 );
 
 create table if not exists rama_fm.order_good

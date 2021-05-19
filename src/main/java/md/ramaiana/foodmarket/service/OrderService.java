@@ -60,6 +60,7 @@ public class OrderService {
                     .clientId(clientId)
                     .totalSum(good.getPrice() * quantity)
                     .createdAt(OffsetDateTime.now(ZoneId.of("UTC")))
+                    .state(OrderState.NEW)
                     .build());
             orderId = savedOrder.getId();
         } else {
