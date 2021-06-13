@@ -3,6 +3,7 @@ import {LOGIN_FAIL, LOGIN_START, LOGIN_SUCCESS, LOGOUT} from "../actions/authAct
 const initialState = {
     token: null,
     userId: null,
+    clientId: {},
     isLoading: false,
     error: null
 };

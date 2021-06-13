@@ -20,4 +20,8 @@ public interface OrderGoodDao extends CrudRepository<OrderGood, Integer> {
                                  @Param("goodId") Integer goodId,
                                  @Param("newQuantity") Float newQuantity);
 
+    boolean existsByOrderIdAndGoodId(Integer orderId, Integer goodId);
+
+    int countAllByOrderId(int orderId);
+
 }

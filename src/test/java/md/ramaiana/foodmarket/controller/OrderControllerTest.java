@@ -18,22 +18,21 @@ import org.springframework.data.domain.*;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -43,6 +42,8 @@ public class OrderControllerTest {
 
     @MockBean
     private OrderService orderServiceMock;
+    @MockBean
+    private GoodService goodServiceMock;
 
     @WithMockUser("spring")
     @Test
@@ -52,7 +53,7 @@ public class OrderControllerTest {
         int clientId = 55;
         givenNewOrder(givenQuantity, clientId);
         //ACT & ASSERT
-        mockMvc.perform(post("/order/save")
+        mockMvc.perform(post("/order/addGood")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(someAddGoodToOrderRequest(0, 11, givenQuantity, clientId)))
                 .andExpect(status().isOk())
@@ -67,7 +68,7 @@ public class OrderControllerTest {
         int clientId = 55;
         givenNewOrder(givenQuantity, clientId);
         //ACT & ASSERT
-        mockMvc.perform(post("/order/save")
+        mockMvc.perform(post("/order/addGood")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(someAddGoodToOrderRequest(0, 11, givenQuantity, clientId)))
                 .andExpect(status().isBadRequest())
@@ -82,7 +83,7 @@ public class OrderControllerTest {
         int clientId = 55;
         givenNewOrder(givenQuantity, clientId);
         //ACT & ASSERT
-        mockMvc.perform(post("/order/save")
+        mockMvc.perform(post("/order/addGood")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(someAddGoodToOrderRequest(0, 0, givenQuantity, clientId)))
                 .andExpect(status().isBadRequest())
@@ -98,12 +99,12 @@ public class OrderControllerTest {
         int clientId = 55;
         givenExistingOrder(orderId, givenQuantity, clientId);
         //ACT & ASSERT
-        mockMvc.perform(post("/order/save")
+        mockMvc.perform(post("/order/addGood")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(someAddGoodToOrderRequest(orderId, 12, givenQuantity, clientId)))
                 .andExpect(jsonPath("$.order.id").value(5))
-                .andExpect(jsonPath("$.order.goods[0].id").value(11))
-                .andExpect(jsonPath("$.order.goods[1].id").value(12));
+                .andExpect(jsonPath("$.order.goods[0].goodId").value(11))
+                .andExpect(jsonPath("$.order.goods[1].goodId").value(12));
     }
 
     @WithMockUser("spring")
@@ -115,7 +116,7 @@ public class OrderControllerTest {
         int clientId = 55;
         givenExistingOrder(orderId, givenQuantity, clientId);
         //ACT & ASSERT
-        mockMvc.perform(post("/order/save")
+        mockMvc.perform(post("/order/addGood")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(someAddGoodToOrderRequest(orderId, 12, givenQuantity, clientId)))
                 .andExpect(status().isBadRequest())
@@ -131,7 +132,7 @@ public class OrderControllerTest {
         int clientId = 55;
         givenExistingOrder(orderId, givenQuantity, clientId);
         //ACT & ASSERT
-        mockMvc.perform(post("/order/save")
+        mockMvc.perform(post("/order/addGood")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(someAddGoodToOrderRequest(orderId, 0, givenQuantity, clientId)))
                 .andExpect(status().isBadRequest())
@@ -146,7 +147,7 @@ public class OrderControllerTest {
                 .thenThrow(new ClientNotFoundException("Client with ID 4 not found"));
 
         //ACT & ASSERT
-        mockMvc.perform(post("/order/save")
+        mockMvc.perform(post("/order/addGood")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(someAddGoodToOrderRequest(1, 2, 3.5f, 4)))
                 .andExpect(status().isBadRequest())
@@ -161,7 +162,7 @@ public class OrderControllerTest {
                 .thenThrow(new GoodNotFoundException("Good with ID 2 not found"));
 
         //ACT & ASSERT
-        mockMvc.perform(post("/order/save")
+        mockMvc.perform(post("/order/addGood")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(someAddGoodToOrderRequest(1, 2, 3.5f, 4)))
                 .andExpect(status().isBadRequest())
@@ -172,10 +173,21 @@ public class OrderControllerTest {
     @Test
     void test_getOrderById_responseOk() throws Exception {
         //ARRANGE
-        OrderGood someOrderGood = OrderGood.builder().id(1).orderId(2).sum(200f).weight(150f).build();
-        List<OrderGood> someGoods = new ArrayList<>();
-        someGoods.add(someOrderGood);
-        Order someOrder = Order.builder().id(2).clientId(15).goods(someGoods).createdAt(OffsetDateTime.now()).build();
+        Set<OrderGood> someGoods = new HashSet<>();
+        someGoods.add(OrderGood.builder()
+                .id(1)
+                .orderId(2)
+                .sum(200f)
+                .weight(150f)
+                .quantity(12f)
+                .build());
+        Order someOrder = Order.builder()
+                .id(2)
+                .clientId(15)
+                .goods(someGoods)
+                .totalSum(300f)
+                .createdAt(OffsetDateTime.now())
+                .build();
         when(orderServiceMock.findOrdersById(2))
                 .thenReturn(someOrder);
         //ACT & ASSERT
@@ -225,7 +237,6 @@ public class OrderControllerTest {
     @Test
     void test_getOrdersByPeriod_responseOk() throws Exception {
         //ARRANGE
-
         long from = 1615986580054L;
         long to = 1615986589387L;
         OffsetDateTime dateFrom = OffsetDateTime.ofInstant(Instant.ofEpochMilli(from), ZoneId.of("UTC"));
@@ -234,10 +245,16 @@ public class OrderControllerTest {
         String direction = "DESC";
         String column = "id";
         Pageable pageable = PageRequest.of(1, 1, Sort.Direction.valueOf(direction), column);
-        List<OrderGood> orderGoods = new ArrayList<>();
+        Set<OrderGood> orderGoods = new HashSet<>();
         orderGoods.add(givenOrderGoodForExistingOrder(1, givenGood("someName", 15f, 10f), 15, 11));
         List<Order> orders = new ArrayList<>();
-        orders.add(Order.builder().id(1).createdAt(dateFrom.plusHours(2)).clientId(clintId).goods(orderGoods).build());
+        orders.add(Order.builder()
+                .id(1)
+                .createdAt(dateFrom.plusHours(2))
+                .clientId(clintId)
+                .totalSum(300f)
+                .goods(orderGoods)
+                .build());
         Page<Order> orderPage = new PageImpl<>(orders, pageable, pageable.getOffset());
         Common.Pagination pagination = Common.Pagination.newBuilder()
                 .setPageNo(1)
@@ -351,33 +368,58 @@ public class OrderControllerTest {
                 .andExpect(jsonPath("$.errors[0].code").value("QUANTITY_IS_LESS_OR_EQUAL_TO_ZERO"));
     }
 
+    @Test
+    @WithMockUser("someUser")
+    void test_placeOrder_responseOk() throws Exception {
+        mockMvc.perform(post("/order/placeOrder")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(somePlaceOrderRequest(1)))
+                .andExpect(status().isOk());
 
-    private void givenNewOrder(float goodQuantity, int clientId) throws GoodNotFoundException, ClientNotFoundException, OrderAlreadyProcessedException {
+        verify(orderServiceMock, times(1)).placeOrder(eq(1));
+    }
+
+    @Test
+    @WithMockUser("someUser")
+    void test_placeOrder_noOrderId_badRequest() throws Exception {
+        mockMvc.perform(post("/order/placeOrder")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(somePlaceOrderRequest(0)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].code").value("ORDER_NOT_FOUND"));
+
+        verify(orderServiceMock, never()).placeOrder(eq(1));
+    }
+
+    private void givenNewOrder(float goodQuantity, int clientId) throws Exception {
         Good someGood = givenGood("someName", 10f, 1.5f);
         OrderGood givenOrderGood = givenOrderGoodForNewOrder(someGood, goodQuantity);
-        List<OrderGood> givenGoods = Collections.singletonList(givenOrderGood);
+        Set<OrderGood> givenGoods = new HashSet<>();
+        givenGoods.add(givenOrderGood);
         Order givenOrder = Order.builder()
                 .id(2)
                 .goods(givenGoods)
                 .clientId(clientId)
+                .totalSum(400f)
                 .createdAt(OffsetDateTime.now())
                 .build();
         when(orderServiceMock.addGoodToOrder(eq(0), eq(someGood.getId()), eq(goodQuantity), eq(clientId)))
                 .thenReturn(givenOrder);
     }
 
-    private void givenExistingOrder(int orderId, float givenQuantity, int clientId) throws GoodNotFoundException, ClientNotFoundException, OrderAlreadyProcessedException {
+    private void givenExistingOrder(int orderId, float givenQuantity, int clientId) throws Exception {
         Good someGood1 = givenGood("someName", 10f, 1.5f);
         Good someGood2 = givenOtherGood("someName2", 10f, 1.5f);
         OrderGood givenOrderGood1 = givenOrderGoodForExistingOrder(orderId, someGood1, givenQuantity, 11);
         OrderGood givenOrderGood2 = givenOrderGoodForExistingOrder(orderId, someGood2, givenQuantity, 12);
-        List<OrderGood> givenGoods = new ArrayList<>();
+        Set<OrderGood> givenGoods = new HashSet<>();
         givenGoods.add(givenOrderGood1);
         givenGoods.add(givenOrderGood2);
         Order givenOrder = Order.builder()
                 .id(orderId)
                 .goods(givenGoods)
                 .clientId(clientId)
+                .totalSum(400f)
                 .createdAt(OffsetDateTime.now())
                 .build();
         when(orderServiceMock.addGoodToOrder(eq(orderId), eq(someGood2.getId()), eq(givenQuantity), eq(clientId)))
@@ -470,6 +512,13 @@ public class OrderControllerTest {
                 .setNewQuantity(newQuantity)
                 .build();
         return JsonFormat.printer().print(protoRequest);
+    }
+
+    private String somePlaceOrderRequest(int orderId) throws InvalidProtocolBufferException {
+        Orders.PlaceOrderRequest request = Orders.PlaceOrderRequest.newBuilder()
+                .setOrderId(orderId)
+                .build();
+        return JsonFormat.printer().print(request);
     }
 
     private String someGetByIdRequest(int orderId) throws InvalidProtocolBufferException {

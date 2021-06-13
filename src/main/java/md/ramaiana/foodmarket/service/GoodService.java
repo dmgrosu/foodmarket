@@ -240,4 +240,9 @@ public class GoodService {
             }
         }
     }
+
+    public String getGoodNameById(Integer goodId) {
+        return goodDao.getNameById(goodId);
+    }
+
 }

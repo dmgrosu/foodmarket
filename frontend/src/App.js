@@ -14,6 +14,7 @@ import Profile from "./components/auth/Profile";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import Orders from "./components/orders/Orders";
 import {authCheckState} from "./store/actions/authActions";
+import Cart from "./components/orders/Cart";
 
 const theme = createMuiTheme({
     palette: {
@@ -52,6 +53,7 @@ const App = (props) => {
             <Route path='/goods' component={Goods} key={4}/>,
             <Route path='/orders' component={Orders} key={5}/>,
             <Route path='/profile' component={Profile} key={6}/>,
+            <Route path='/cart' component={Cart} key={7}/>,
         );
     }
 
