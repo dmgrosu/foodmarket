@@ -2,10 +2,7 @@ package md.ramaiana.foodmarket.dao;
 
 
 import md.ramaiana.foodmarket.config.DataJdbcConfig;
-import md.ramaiana.foodmarket.model.Client;
-import md.ramaiana.foodmarket.model.Good;
-import md.ramaiana.foodmarket.model.Order;
-import md.ramaiana.foodmarket.model.OrderGood;
+import md.ramaiana.foodmarket.model.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.jdbc.DataJdbcTest;
@@ -79,6 +76,16 @@ class OrderGoodDaoTest {
 
     }
 
+    @Test
+    void test_countByOrder_countReturned() {
+        // ARRANGE
+        OrderGood someExistingGood = someExistingOrderGood();
+        // ACT
+        int actualResult = orderGoodDao.countAllByOrderId(someExistingGood.getOrderId());
+        // ASSERT
+        assertThat(actualResult).isEqualTo(1);
+    }
+
     private Client someSavedClient(String idno, String name) {
         return clientDao.save(Client.builder()
                 .idno(idno)
@@ -95,6 +102,7 @@ class OrderGoodDaoTest {
                 .deletedAt(null)
                 .processedAt(OffsetDateTime.now())
                 .processingResult("Done")
+                .state(OrderState.PLACED)
                 .totalSum(150.3f)
                 .build());
     }

@@ -1,6 +1,7 @@
 package md.ramaiana.foodmarket.dao;
 
 import md.ramaiana.foodmarket.model.Order;
+import md.ramaiana.foodmarket.model.OrderState;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jdbc.repository.query.Modifying;
@@ -10,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.OffsetDateTime;
+import java.util.Optional;
 
 
 /**
@@ -19,11 +21,21 @@ import java.time.OffsetDateTime;
 @Repository
 public interface OrderDao extends PagingAndSortingRepository<Order, Integer> {
 
-    Order getByIdAndDeletedAtNull(Integer orderId);
+    Optional<Order> findByIdAndDeletedAtNull(Integer orderId);
 
     @Modifying
     @Query("UPDATE \"order\" SET \"deleted_at\" = now() WHERE id = :orderId")
     void setOrderToDeletedState(@Param("orderId") Integer orderId);
 
     Page<Order> findAllByDeletedAtNullAndCreatedAtBetweenAndClientId(Pageable pageable, OffsetDateTime dateFrom, OffsetDateTime dateTo, Integer clientId);
+
+    @Query("select \"processing_result\" from \"order\" where id = :orderId")
+    String getProcessingResultById(@Param("orderId") Integer orderId);
+
+    boolean existsByIdAndDeletedAtNull(Integer orderId);
+
+    @Modifying
+    @Query("update \"order\" set \"status\"=:state where id=:orderId")
+    int updateOrderState(@Param("state") OrderState state, @Param("orderId") int orderId);
+
 }

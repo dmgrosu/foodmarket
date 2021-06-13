@@ -4,18 +4,17 @@ import md.ramaiana.foodmarket.dao.ClientDao;
 import md.ramaiana.foodmarket.dao.GoodDao;
 import md.ramaiana.foodmarket.dao.OrderDao;
 import md.ramaiana.foodmarket.dao.OrderGoodDao;
-import md.ramaiana.foodmarket.model.Client;
-import md.ramaiana.foodmarket.model.Good;
-import md.ramaiana.foodmarket.model.Order;
+import md.ramaiana.foodmarket.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 
 /**
  * @author Grosu Kirill (grosukirill009@gmail.com), 2/12/2021
@@ -44,29 +43,49 @@ public class OrderService {
         if (orderId == 0) {
             throw new OrderIdZeroException("Order ID is zero");
         }
-        Order order = orderDao.getByIdAndDeletedAtNull(orderId);
-        if (order == null) {
-            throw new OrderNotFoundException(String.format("Order with ID [%s] not found", orderId));
-        } else {
-            return order;
-        }
+        return getOrderById(orderId);
     }
 
     public void deleteOrderById(Integer orderId) {
         orderDao.setOrderToDeletedState(orderId);
     }
 
-    public Order addGoodToOrder(Integer orderId, Integer goodId, Float quantity, Integer clientId) throws GoodNotFoundException,
-            ClientNotFoundException, OrderAlreadyProcessedException {
+    @Transactional
+    public Order addGoodToOrder(int orderId, int goodId, float quantity, int clientId) throws GoodNotFoundException,
+            ClientNotFoundException, OrderAlreadyProcessedException, OrderNotFoundException {
         Good good = validateGood(goodId);
         validateClient(clientId);
-        validateOrder(orderId);
-        Float sum = good.getPrice() * quantity;
-        return orderDao.save(Order.builder()
-                .id(orderId)
-                .clientId(clientId)
-                .totalSum(sum)
-                .build());
+        if (orderId == 0) {
+            Order savedOrder = orderDao.save(Order.builder()
+                    .clientId(clientId)
+                    .totalSum(good.getPrice() * quantity)
+                    .createdAt(OffsetDateTime.now(ZoneId.of("UTC")))
+                    .state(OrderState.NEW)
+                    .build());
+            orderId = savedOrder.getId();
+        } else {
+            if (!orderDao.existsByIdAndDeletedAtNull(orderId)) {
+                throw new OrderNotFoundException(String.format("Order with ID [%s] not found", orderId));
+            } else {
+                validateOrderState(orderId);
+            }
+        }
+        createOrUpdateOrderGood(orderId, good, quantity);
+        return updateTotalSumAndSaveOrder(orderId);
+    }
+
+    private void createOrUpdateOrderGood(int orderId, Good good, float quantity) {
+        if (orderGoodDao.existsByOrderIdAndGoodId(orderId, good.getId())) {
+            orderGoodDao.updateOrderGoodQuantity(orderId, good.getId(), quantity);
+        } else {
+            orderGoodDao.save(OrderGood.builder()
+                    .goodId(good.getId())
+                    .orderId(orderId)
+                    .quantity(quantity)
+                    .sum(good.getPrice() * quantity)
+                    .weight(good.getWeight() * quantity)
+                    .build());
+        }
     }
 
     public Page<Order> findOrdersByPeriod(OffsetDateTime from, OffsetDateTime to, Integer clientId, Integer page, Integer pageSize, String direction, String column) throws ClientNotFoundException {
@@ -78,6 +97,22 @@ public class OrderService {
     public void updateOrder(int orderId, int goodId, float newQuantity) throws GoodNotFoundException {
         validateGood(goodId);
         orderGoodDao.updateOrderGoodQuantity(orderId, goodId, newQuantity);
+    }
+
+    public void deleteGoodFromOrder(int orderId, int orderGoodId) throws OrderNotFoundException {
+        orderGoodDao.deleteById(orderGoodId);
+        if (orderGoodDao.countAllByOrderId(orderId) == 0) {
+            orderDao.deleteById(orderId);
+        } else {
+            updateTotalSumAndSaveOrder(orderId);
+        }
+    }
+
+    public void placeOrder(int orderId) throws OrderNotFoundException {
+        if (!orderDao.existsByIdAndDeletedAtNull(orderId)) {
+            throw new OrderNotFoundException(String.format("Order with id [%s] not found", orderId));
+        }
+        orderDao.updateOrderState(OrderState.PLACED, orderId);
     }
 
     private void validateClient(Integer clientId) throws ClientNotFoundException {
@@ -95,11 +130,22 @@ public class OrderService {
         return good;
     }
 
-    private void validateOrder(Integer orderId) throws OrderAlreadyProcessedException {
-        Order order = orderDao.getByIdAndDeletedAtNull(orderId);
-        if (StringUtils.hasText(order.getProcessingResult())) {
+    private void validateOrderState(int orderId) throws OrderAlreadyProcessedException {
+        String processingResult = orderDao.getProcessingResultById(orderId);
+        if (processingResult != null) {
             throw new OrderAlreadyProcessedException(String.format("Order with ID [%s] has been already processed", orderId));
         }
+    }
+
+    private Order getOrderById(int orderId) throws OrderNotFoundException {
+        return orderDao.findByIdAndDeletedAtNull(orderId)
+                .orElseThrow(() -> new OrderNotFoundException(String.format("Order with ID [%s] not found", orderId)));
+    }
+
+    private Order updateTotalSumAndSaveOrder(Integer orderId) throws OrderNotFoundException {
+        Order order = getOrderById(orderId);
+        order.updateTotalSum();
+        return orderDao.save(order);
     }
 
 }

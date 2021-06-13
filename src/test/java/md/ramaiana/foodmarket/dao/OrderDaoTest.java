@@ -3,6 +3,8 @@ package md.ramaiana.foodmarket.dao;
 import md.ramaiana.foodmarket.config.DataJdbcConfig;
 import md.ramaiana.foodmarket.model.Client;
 import md.ramaiana.foodmarket.model.Order;
+import md.ramaiana.foodmarket.model.OrderState;
+import md.ramaiana.foodmarket.service.OrderNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.jdbc.DataJdbcTest;
@@ -33,6 +35,7 @@ class OrderDaoTest {
                 .createdAt(OffsetDateTime.now())
                 .processedAt(OffsetDateTime.now())
                 .processingResult("done")
+                .state(OrderState.NEW)
                 .totalSum(150.3f)
                 .build());
         // ASSERT
@@ -42,7 +45,7 @@ class OrderDaoTest {
     @Test
     void test_read() {
         // ARRANGE
-        Order existingOrder = someOrder();
+        Order existingOrder = someOrder(OrderState.NEW);
         // ACT
         boolean exists = orderDao.existsById(existingOrder.getId());
         // ASSERT
@@ -52,7 +55,7 @@ class OrderDaoTest {
     @Test
     void test_update() {
         // ARRANGE
-        Order someOrder = someOrder();
+        Order someOrder = someOrder(OrderState.NEW);
         // ACT
         someOrder.setProcessingResult("Reviewing");
         someOrder.setProcessedAt(OffsetDateTime.now());
@@ -64,12 +67,27 @@ class OrderDaoTest {
     @Test
     void test_delete() {
         // ARRANGE
-        Order someOrder = someOrder();
+        Order someOrder = someOrder(OrderState.NEW);
         // ACT
         orderDao.deleteById(someOrder.getId());
         // ASSERT
         assertThat(orderDao.existsById(someOrder.getId())).isFalse();
     }
+
+    @Test
+    void test_updateOrderState() throws Exception {
+        // ARRANGE
+        Order givenOrder = someOrder(OrderState.NEW);
+        int givenOrderId = givenOrder.getId();
+        // ACT
+        orderDao.updateOrderState(OrderState.PLACED, givenOrderId);
+        Order actualOrder = orderDao.findById(givenOrderId)
+                .orElseThrow(() -> new OrderNotFoundException("Order not found"));
+        // ASSERT
+        assertThat(actualOrder).isNotNull();
+        assertThat(actualOrder.getState()).isEqualTo(OrderState.PLACED);
+    }
+
 
 //    @Test
 //    void test_setOrderToDeletedState() {
@@ -90,7 +108,7 @@ class OrderDaoTest {
                 .build());
     }
 
-    private Order someOrder() {
+    private Order someOrder(OrderState orderState) {
         Client someSavedClient = someSavedClient("123123", "Kirill");
         return orderDao.save(Order.builder()
                 .clientId(someSavedClient.getId())
@@ -98,6 +116,7 @@ class OrderDaoTest {
                 .deletedAt(null)
                 .processedAt(OffsetDateTime.now())
                 .processingResult("Done")
+                .state(orderState)
                 .totalSum(150.3f)
                 .build());
     }
