@@ -1,5 +1,6 @@
 import React from 'react';
-import {CircularProgress, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, withStyles} from "@material-ui/core";
+import {CircularProgress, Table, TableBody, TableCell, TableContainer, TableFooter, TableHead, TablePagination, TableRow, withStyles} from "@material-ui/core";
+import moment from "moment";
 
 const styles = () => ({
     container: {
@@ -16,13 +17,16 @@ const styles = () => ({
     }
 });
 
-const OrdersList = ({isFetching, classes, orders}) => {
+const OrdersList = ({
+                        isFetching, classes, orders, pagination,
+                        changeCurrentPage, changePageSize
+                    }) => {
 
     const columns = [
-        {id: 1, label: 'Date', align: 'left', minWidth: '20%', dataId: 'date'},
-        {id: 2, label: 'Sum', align: 'right', minWidth: '20%', dataId: 'totalSum'},
-        {id: 3, label: 'Weight', align: 'right', minWidth: '20%', dataId: 'totalWeight'},
-        {id: 4, label: 'State', align: 'center', minWidth: '40%', dataId: 'state'},
+        {id: 1, label: 'Date', align: 'left', minWidth: '20%', dataId: 'date', dataType: 'date'},
+        {id: 2, label: 'Sum', align: 'right', minWidth: '20%', dataId: 'totalSum', dataType: 'number'},
+        {id: 3, label: 'Weight', align: 'right', minWidth: '20%', dataId: 'totalWeight', dataType: 'number'},
+        {id: 4, label: 'State', align: 'center', minWidth: '40%', dataId: 'state', dataType: 'string'},
     ];
 
     if (isFetching) {
@@ -40,7 +44,6 @@ const OrdersList = ({isFetching, classes, orders}) => {
             >
                 <TableHead>
                     <TableRow>
-                        <TableCell style={{width: 20}} className={classes.head}/>
                         {columns.map(column => (
                             <TableCell key={column.id}
                                        align={column.align}
@@ -62,14 +65,33 @@ const OrdersList = ({isFetching, classes, orders}) => {
                                 return (
                                     <TableCell key={column.id}
                                                align={column.align}
+                                               style={{minWidth: column.minWidth}}
                                     >
-                                        {typeof value === 'number' ? value.toFixed(2) : value}
+                                        {
+                                            column.dataType === 'number' ?
+                                                value.toFixed(2) :
+                                                column.dataType === 'date' ?
+                                                    moment(Number(value)).local().format("DD.MM.YYYY HH:mm") :
+                                                    value
+                                        }
                                     </TableCell>
                                 )
                             })}
                         </TableRow>
                     )) : null}
                 </TableBody>
+                <TableFooter>
+                    <TableRow>
+                        <TablePagination
+                            colSpan={4}
+                            count={pagination.totalCount}
+                            page={pagination.currentPage}
+                            onChangePage={changeCurrentPage}
+                            rowsPerPage={pagination.pageSize}
+                            onChangeRowsPerPage={changePageSize}
+                        />
+                    </TableRow>
+                </TableFooter>
             </Table>
         </TableContainer>
     )

@@ -34,7 +34,7 @@ enum ErrorCode {
 message Pagination {
   int32 pageNo = 1;
   int32 perPage = 2;
-  int32 totalCount = 3;
+  int64 totalCount = 3;
 }
 
 message Sorting {

@@ -5,6 +5,7 @@ import com.google.protobuf.util.JsonFormat;
 import lombok.extern.slf4j.Slf4j;
 import md.ramaiana.foodmarket.model.Order;
 import md.ramaiana.foodmarket.model.OrderGood;
+import md.ramaiana.foodmarket.model.OrderState;
 import md.ramaiana.foodmarket.proto.Clients;
 import md.ramaiana.foodmarket.proto.Common;
 import md.ramaiana.foodmarket.proto.Common.ErrorCode;
@@ -193,7 +194,7 @@ public class OrderController {
                     .setId(order.getId())
                     .setClient(Clients.Client.newBuilder().setId(order.getClientId()).build())
                     .setTotalSum(order.getTotalSum())
-                    .setState(state)
+                    .setState(mapOrderStateToProto(order.getState()))
                     .setDate(order.getCreatedAt().toInstant().toEpochMilli())
                     .setTotalWeight(order.getTotalWeightForGoods())
                     .addAllGoods(protoGoods)
@@ -202,12 +203,25 @@ public class OrderController {
         Common.Pagination protoPagination = Common.Pagination.newBuilder()
                 .setPageNo(orders.getNumber())
                 .setPerPage(orders.getSize())
-                .setTotalCount(orders.getTotalPages())
+                .setTotalCount(orders.getTotalElements())
                 .build();
         return Orders.OrdersListResponse.newBuilder()
                 .addAllOrders(protoOrders)
                 .setPagination(protoPagination)
                 .build();
+    }
+
+    private Orders.OrderState mapOrderStateToProto(OrderState state) {
+        switch (state) {
+            case PLACED:
+                return Orders.OrderState.PLACED;
+            case PROCESSED:
+                return Orders.OrderState.PROCESSED;
+            case NOT_PROCESSED:
+                return Orders.OrderState.NOT_PROCESSED;
+            default:
+                return Orders.OrderState.NEW;
+        }
     }
 
     private Orders.AddGoodToOrderResponse buildProtoFromDomain(Order order) {
@@ -284,12 +298,12 @@ public class OrderController {
         List<Common.Error> errors = new ArrayList<>();
         int pageNumber = request.getPagination().getPageNo();
         int perPage = request.getPagination().getPerPage();
-        if (pageNumber <= 0) {
+        if (pageNumber < 0) {
             errors.add(Common.Error.newBuilder()
                     .setCode(ErrorCode.PAGE_IS_LESS_OR_EQUAL_TO_ZERO)
                     .build());
         }
-        if (perPage <= 0) {
+        if (perPage < 0) {
             errors.add(Common.Error.newBuilder()
                     .setCode(ErrorCode.PAGE_SIZE_IS_LESS_OR_EQUAL_TO_ZERO)
                     .build());

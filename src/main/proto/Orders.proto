@@ -80,4 +80,5 @@ enum OrderState {
   PROCESSED = 1;
   NOT_PROCESSED = 2;
   ERRONEOUS = 3;
+  PLACED = 4;
 }
