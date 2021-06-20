@@ -1,6 +1,8 @@
 import React from 'react';
-import {CircularProgress, Table, TableBody, TableCell, TableContainer, TableFooter, TableHead, TablePagination, TableRow, withStyles} from "@material-ui/core";
+import {CircularProgress, IconButton, Table, TableBody, TableCell, TableContainer, TableFooter, TableHead, TablePagination, TableRow, withStyles} from "@material-ui/core";
 import moment from "moment";
+import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
+import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward';
 
 const styles = () => ({
     container: {
@@ -18,15 +20,15 @@ const styles = () => ({
 });
 
 const OrdersList = ({
-                        isFetching, classes, orders, pagination,
-                        changeCurrentPage, changePageSize
+                        isFetching, classes, orders, pagination, changeSorting,
+                        changeCurrentPage, changePageSize, sortColumn, sortDirection
                     }) => {
 
     const columns = [
-        {id: 1, label: 'Date', align: 'left', minWidth: '20%', dataId: 'date', dataType: 'date'},
-        {id: 2, label: 'Sum', align: 'right', minWidth: '20%', dataId: 'totalSum', dataType: 'number'},
-        {id: 3, label: 'Weight', align: 'right', minWidth: '20%', dataId: 'totalWeight', dataType: 'number'},
-        {id: 4, label: 'State', align: 'center', minWidth: '40%', dataId: 'state', dataType: 'string'},
+        {id: 1, label: 'Date', align: 'left', minWidth: '20%', dataId: 'createdAt', dataType: 'date', sortable: true},
+        {id: 2, label: 'Sum', align: 'right', minWidth: '20%', dataId: 'totalSum', dataType: 'number', sortable: true},
+        {id: 3, label: 'Weight', align: 'right', minWidth: '20%', dataId: 'totalWeight', dataType: 'number', sortable: false},
+        {id: 4, label: 'State', align: 'center', minWidth: '40%', dataId: 'state', dataType: 'string', sortable: true},
     ];
 
     if (isFetching) {
@@ -50,7 +52,13 @@ const OrdersList = ({
                                        style={{minWidth: column.minWidth}}
                                        className={classes.head}
                             >
-                                {column.label}
+                                <IconButton size="small"
+                                            onClick={() => column.sortable ? changeSorting(column.dataId) : null}
+                                >
+                                    {column.label}
+                                    {column.dataId === sortColumn && sortDirection && <ArrowDownwardIcon fontSize="small"/>}
+                                    {column.dataId === sortColumn && !sortDirection && <ArrowUpwardIcon fontSize="small"/>}
+                                </IconButton>
                             </TableCell>
                         ))}
                     </TableRow>

@@ -13,7 +13,7 @@ message Order {
   Client client = 3;
   OrderState state = 4;
   // date in millis for UTC timezone
-  int64 date = 5;
+  int64 createdAt = 5;
   float totalWeight = 6;
   repeated OrderGood goods = 7;
 }

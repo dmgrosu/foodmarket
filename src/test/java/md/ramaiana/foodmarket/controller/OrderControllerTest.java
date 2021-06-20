@@ -6,6 +6,7 @@ import com.google.protobuf.util.JsonFormat;
 import md.ramaiana.foodmarket.model.Good;
 import md.ramaiana.foodmarket.model.Order;
 import md.ramaiana.foodmarket.model.OrderGood;
+import md.ramaiana.foodmarket.model.OrderState;
 import md.ramaiana.foodmarket.proto.Common;
 import md.ramaiana.foodmarket.proto.Orders;
 import md.ramaiana.foodmarket.service.*;
@@ -253,6 +254,7 @@ public class OrderControllerTest {
                 .createdAt(dateFrom.plusHours(2))
                 .clientId(clintId)
                 .totalSum(300f)
+                .state(OrderState.NEW)
                 .goods(orderGoods)
                 .build());
         Page<Order> orderPage = new PageImpl<>(orders, pageable, pageable.getOffset());

@@ -195,7 +195,7 @@ public class OrderController {
                     .setClient(Clients.Client.newBuilder().setId(order.getClientId()).build())
                     .setTotalSum(order.getTotalSum())
                     .setState(mapOrderStateToProto(order.getState()))
-                    .setDate(order.getCreatedAt().toInstant().toEpochMilli())
+                    .setCreatedAt(order.getCreatedAt().toInstant().toEpochMilli())
                     .setTotalWeight(order.getTotalWeightForGoods())
                     .addAllGoods(protoGoods)
                     .build());
@@ -241,7 +241,7 @@ public class OrderController {
                 .setClient(protoClient)
                 .addAllGoods(protoGoods)
                 .setState(state)
-                .setDate(order.getCreatedAt().toInstant().toEpochMilli())
+                .setCreatedAt(order.getCreatedAt().toInstant().toEpochMilli())
                 .setTotalWeight(order.getTotalWeightForGoods())
                 .setTotalSum(order.getTotalSum())
                 .build();

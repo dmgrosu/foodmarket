@@ -31,9 +31,11 @@ class Orders extends Component {
         },
         dateFrom: moment().utc().startOf("month"),
         dateTo: moment().utc(),
+        sortColumn: 'createdAt',
+        sortDirection: true // true - ascending, false - descending
     }
 
-    fetchOrders = (currentPage, pageSize, dateFrom, dateTo) => {
+    fetchOrders = (currentPage, pageSize, dateFrom, dateTo, sortColumn, sortDirection) => {
         this.setState({
             isLoadingOrders: true
         });
@@ -46,8 +48,8 @@ class Orders extends Component {
                 perPage: pageSize
             },
             sorting: {
-                columnName: 'createdAt',
-                direction: 0
+                columnName: sortColumn || 'createdAt',
+                direction: sortDirection ? 0 : 1
             }
         }, {
             headers: {'Authorization': this.props.auth.token}
@@ -73,18 +75,27 @@ class Orders extends Component {
     }
 
     componentDidMount() {
-        const {pagination, dateFrom, dateTo} = this.state;
-        this.fetchOrders(pagination.currentPage, pagination.pageSize, dateFrom, dateTo);
+        const {pagination, dateFrom, dateTo, sortColumn, sortDirection} = this.state;
+        this.fetchOrders(pagination.currentPage, pagination.pageSize, dateFrom, dateTo, sortColumn, sortDirection);
     }
 
     changePageSize = (event) => {
-        const {pagination, dateFrom, dateTo} = this.state;
-        this.fetchOrders(pagination.currentPage, parseInt(event.target.value, 10), dateFrom, dateTo);
+        const {pagination, dateFrom, dateTo, sortColumn, sortDirection} = this.state;
+        this.fetchOrders(pagination.currentPage, parseInt(event.target.value, 10), dateFrom, dateTo, sortColumn, sortDirection);
     }
 
     changePage = (event, newPage) => {
-        const {pagination, dateFrom, dateTo} = this.state;
-        this.fetchOrders(newPage, pagination.pageSize, dateFrom, dateTo);
+        const {pagination, dateFrom, dateTo, sortColumn, sortDirection} = this.state;
+        this.fetchOrders(newPage, pagination.pageSize, dateFrom, dateTo, sortColumn, sortDirection);
+    }
+
+    changeSorting = (columnName) => {
+        const {pagination, dateFrom, dateTo, sortDirection} = this.state;
+        this.setState(state => ({
+            sortColumn: columnName,
+            sortDirection: !state.sortDirection
+        }));
+        this.fetchOrders(pagination.currentPage, pagination.pageSize, dateFrom, dateTo, columnName, !sortDirection);
     }
 
     changeDateFrom = (newDate) => {
@@ -95,8 +106,8 @@ class Orders extends Component {
         this.setState({
             dateFrom: newDate
         });
-        const {pagination, dateTo} = this.state;
-        this.fetchOrders(pagination.currentPage, pagination.pageSize, newDate, dateTo);
+        const {pagination, dateTo, sortColumn, sortDirection} = this.state;
+        this.fetchOrders(pagination.currentPage, pagination.pageSize, newDate, dateTo, sortColumn, sortDirection);
     }
 
     changeDateTo = (newDate) => {
@@ -107,15 +118,18 @@ class Orders extends Component {
         this.setState({
             dateTo: newDate
         });
-        const {pagination, dateFrom} = this.state;
-        this.fetchOrders(pagination.currentPage, pagination.pageSize, dateFrom, newDate);
+        const {pagination, dateFrom, sortColumn, sortDirection} = this.state;
+        this.fetchOrders(pagination.currentPage, pagination.pageSize, dateFrom, newDate, sortColumn, sortDirection);
     }
 
     render() {
 
         const {auth, classes} = this.props;
         const isAuthorized = auth.token !== null;
-        const {orders, isLoadingOrders, pagination, dateFrom, dateTo} = this.state;
+        const {
+            orders, isLoadingOrders, pagination,
+            dateFrom, dateTo, sortColumn, sortDirection
+        } = this.state;
 
         return (
             <Grid container className={classes.root}>
@@ -133,6 +147,9 @@ class Orders extends Component {
                                 pagination={pagination}
                                 changePageSize={this.changePageSize}
                                 changeCurrentPage={this.changePage}
+                                sortColumn={sortColumn}
+                                sortDirection={sortDirection}
+                                changeSorting={this.changeSorting}
                     />
                 </Grid>
             </Grid>
