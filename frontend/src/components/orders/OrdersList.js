@@ -16,11 +16,14 @@ const styles = () => ({
         display: 'flex',
         position: 'relative',
         top: '40%',
+    },
+    row: {
+        cursor: 'pointer'
     }
 });
 
 const OrdersList = ({
-                        isFetching, classes, orders, pagination, changeSorting,
+                        isFetching, classes, orders, pagination, changeSorting, viewOrder,
                         changeCurrentPage, changePageSize, sortColumn, sortDirection
                     }) => {
 
@@ -67,6 +70,8 @@ const OrdersList = ({
                     {Array.isArray(orders) ? orders.map(order => (
                         <TableRow key={order.id}
                                   hover
+                                  onClick={() => viewOrder(order)}
+                                  className={classes.row}
                         >
                             {columns.map(column => {
                                 const value = order[column.dataId];

@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {connect} from "react-redux";
 import {withStyles} from "@material-ui/styles";
-import {Grid} from "@material-ui/core";
+import {Button, Grid, Typography} from "@material-ui/core";
 import {Redirect} from "react-router-dom";
 import OrdersList from "./OrdersList";
 import axios from "axios";
@@ -9,6 +9,7 @@ import {handleError} from "../../store/actions/authActions";
 import moment from "moment";
 import DateRange from "./DateRange";
 import {toast} from "material-react-toastify";
+import Order from "./Order";
 
 const styles = theme => ({
     root: {
@@ -32,7 +33,8 @@ class Orders extends Component {
         dateFrom: moment().utc().startOf("month"),
         dateTo: moment().utc(),
         sortColumn: 'createdAt',
-        sortDirection: true // true - ascending, false - descending
+        sortDirection: true, // true - ascending, false - descending
+        selectedOrder: null,
     }
 
     fetchOrders = (currentPage, pageSize, dateFrom, dateTo, sortColumn, sortDirection) => {
@@ -122,26 +124,44 @@ class Orders extends Component {
         this.fetchOrders(pagination.currentPage, pagination.pageSize, dateFrom, newDate, sortColumn, sortDirection);
     }
 
+    viewOrder = (order) => {
+        this.setState({
+            selectedOrder: order
+        })
+    }
+
     render() {
 
         const {auth, classes} = this.props;
         const isAuthorized = auth.token !== null;
         const {
-            orders, isLoadingOrders, pagination,
+            orders, isLoadingOrders, pagination, selectedOrder,
             dateFrom, dateTo, sortColumn, sortDirection
         } = this.state;
 
         return (
             <Grid container className={classes.root}>
                 {!isAuthorized && <Redirect to="/signIn"/>}
-                <Grid item sm={12}>
+                <Typography variant="h6">
+                    {selectedOrder ? "Order view" : "Orders list"}
+                </Typography>
+                {selectedOrder && <Grid item sm={12} style={{textAlign: "right", marginBottom: 10}}>
+                    <Button variant="contained"
+                            onClick={() => this.viewOrder(null)}>
+                        Back to orders
+                    </Button>
+                </Grid>}
+                {selectedOrder && <Grid item sm={12}>
+                    <Order order={selectedOrder}/>
+                </Grid>}
+                {!selectedOrder && <Grid item sm={12}>
                     <DateRange dateFrom={dateFrom}
                                dateTo={dateTo}
                                changeDateFrom={this.changeDateFrom}
                                changeDateTo={this.changeDateTo}
                     />
-                </Grid>
-                <Grid item sm={12}>
+                </Grid>}
+                {!selectedOrder && <Grid item sm={12}>
                     <OrdersList orders={orders}
                                 isFetching={isLoadingOrders}
                                 pagination={pagination}
@@ -150,8 +170,9 @@ class Orders extends Component {
                                 sortColumn={sortColumn}
                                 sortDirection={sortDirection}
                                 changeSorting={this.changeSorting}
+                                viewOrder={this.viewOrder}
                     />
-                </Grid>
+                </Grid>}
             </Grid>
         )
     }

@@ -47,7 +47,7 @@ const Cart = ({classes, cart, selectGoodToDelete, cancelDeleteGood, deleteGoodFr
         <Grid container className={classes.root}>
             <Grid item container sm={10} className={classes.toolbar}>
                 <Grid item sm={8}>
-                    <Typography variant="h5">
+                    <Typography variant="h6" gutterBottom>
                         Shopping cart
                     </Typography>
                 </Grid>
