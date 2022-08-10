@@ -86,6 +86,11 @@
             <artifactId>javadbf</artifactId>
             <version>1.11.2</version>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+            <version>2.3.4.RELEASE</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -115,6 +120,9 @@
                 <groupId>org.xolstice.maven.plugins</groupId>
                 <artifactId>protobuf-maven-plugin</artifactId>
                 <version>0.6.1</version>
+                <configuration>
+                    <protocExecutable>D:\Soft\Protobuf\bin\protoc</protocExecutable>
+                </configuration>
                 <executions>
                     <execution>
                         <goals>

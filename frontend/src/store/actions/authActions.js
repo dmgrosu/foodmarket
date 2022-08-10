@@ -6,6 +6,11 @@ export const LOGIN_START = "LOGIN_START";
 export const LOGIN_SUCCESS = "LOGIN_SUCCESS";
 export const LOGIN_FAIL = "LOGIN_FAIL";
 export const LOGOUT = "LOGOUT";
+export const RESET_PASSWORD_TOKEN_VALID = "TOKEN_VALID";
+export const RESET_PASSWORD_TOKEN_EXPIRED = "RESET_PASSWORD_TOKEN_EXPIRED";
+export const RESET_PASSWORD_START = "RESET_PASSWORD_START";
+export const RESET_PASSWORD_SUCCESS = "RESET_PASSWORD_SUCCESS";
+export const RESET_PASSWORD_FAIL = "RESET_PASSWORD_FAIL";
 
 
 export const loginStart = (email, password) => {
@@ -58,6 +63,50 @@ export const signUpStart = (email, password, clientId) => {
             })
     };
 };
+
+export const resetPasswordStart = (email) => {
+    return dispatch => {
+        dispatch({type: RESET_PASSWORD_START});
+        axios.post("/auth/resetPassword", {email: email});
+    }
+}
+
+export const requestResetPasswordTokenValidation = (token) => {
+    return dispatch => {
+        axios.post("/auth/validateResetPasswordToken", {token: token})
+            .then(resp => {
+                dispatch({
+                    type: RESET_PASSWORD_TOKEN_VALID,
+                })
+            })
+            .catch(err => {
+                dispatch({
+                    type: RESET_PASSWORD_TOKEN_EXPIRED,
+                    payload: err.response.data
+                })
+                handleError(err);
+            })
+    }
+}
+
+export const setNewPassword =  (token, newPassword) => {
+    return dispatch => {
+        axios.post("/auth/newPassword", {token: token, newPassword: newPassword})
+            .then(resp => {
+                dispatch({
+                    type: RESET_PASSWORD_SUCCESS,
+                });
+            })
+            .catch(err => {
+                dispatch({
+                    RESET_PASSWORD_FAIL,
+                    payload: err.response.data
+                });
+                handleError(err);
+            });
+    }
+}
+
 
 export const checkAuthTimeout = (seconds) => {
     return dispatch => {

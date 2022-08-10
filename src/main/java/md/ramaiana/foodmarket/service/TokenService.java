@@ -74,4 +74,20 @@ public class TokenService {
         UserDetails userDetails = appUserService.findById(Integer.parseInt(userData.get("id")));
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
+
+    public String generatePasswordResetToken(AppUser appUser) {
+        try {
+            Algorithm algorithm = Algorithm.HMAC256(TOKEN_SECRET);
+            Date now = new Date();
+            return JWT.create()
+                    .withClaim("username", appUser.getUsername())
+                    .withClaim("userId", appUser.getId().toString())
+                    .withClaim("createdAt", now)
+                    .withExpiresAt(new Date(now.getTime() + TOKEN_VALIDITY))
+                    .sign(algorithm);
+        } catch (JWTCreationException exception) {
+            exception.printStackTrace();
+        }
+        return null;
+    }
 }

@@ -6,14 +6,10 @@ import lombok.extern.slf4j.Slf4j;
 import md.ramaiana.foodmarket.model.AppUser;
 import md.ramaiana.foodmarket.model.Client;
 import md.ramaiana.foodmarket.model.Role;
-import md.ramaiana.foodmarket.proto.Authorization.LoginRequest;
-import md.ramaiana.foodmarket.proto.Authorization.LoginResponse;
-import md.ramaiana.foodmarket.proto.Authorization.SignUpRequest;
-import md.ramaiana.foodmarket.proto.Authorization.UserProto;
+import md.ramaiana.foodmarket.proto.Authorization.*;
 import md.ramaiana.foodmarket.proto.Clients;
 import md.ramaiana.foodmarket.proto.Common;
-import md.ramaiana.foodmarket.service.AppUserService;
-import md.ramaiana.foodmarket.service.TokenService;
+import md.ramaiana.foodmarket.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,11 +17,9 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -82,6 +76,62 @@ public class AppUserController {
         appUser.addRole(Role.USER);
         AppUser savedUser = appUserService.registerNewUser(appUser);
         return ResponseEntity.ok(buildSuccessfulLoginResponse(savedUser));
+    }
+
+    @PostMapping("/resetPassword")
+    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest requestBody) throws InvalidProtocolBufferException {
+        List<Common.Error> errors = validateResetPasswordRequest(requestBody);
+        if (!errors.isEmpty()) {
+            return ResponseEntity.badRequest().body(buildErrorResponse(errors));
+        }
+        try {
+            AppUser existingUser = appUserService.findByEmail(requestBody.getEmail())
+                    .orElseThrow(() -> new UserNotFoundException(String.format("User with email [%s] not found", requestBody.getEmail())));
+            String resetPasswordToken = tokenService.generatePasswordResetToken(existingUser);
+            appUserService.resetPassword(resetPasswordToken, existingUser);
+        } catch (UserNotFoundException e) {
+            log.warn(e.getMessage());
+            errors.add(Common.Error.newBuilder().setCode(Common.ErrorCode.CLIENT_NOT_FOUND).setDescription(e.getMessage()).build());
+            return ResponseEntity.badRequest().body(buildErrorResponse(errors));
+        }
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/validateResetPasswordToken")
+    public ResponseEntity<?> validateResetPasswordToken(@RequestBody ResetPasswordTokenRequest request) throws InvalidProtocolBufferException {
+        try {
+            appUserService.validateResetPasswordToken(request.getToken());
+        } catch (ResetPasswordTokenExpiredException e) {
+            log.warn(e.getMessage());
+            List<Common.Error> errors = new ArrayList<>();
+            errors.add(Common.Error.newBuilder().setCode(Common.ErrorCode.RESET_PASSWORD_TOKEN_EXPIRED).setDescription(e.getMessage()).build());
+            return ResponseEntity.badRequest().body(buildErrorResponse(errors));
+        } catch (ResetPasswordTokenNotFoundException e) {
+            log.warn(e.getMessage());
+            List<Common.Error> errors = new ArrayList<>();
+            errors.add(Common.Error.newBuilder().setCode(Common.ErrorCode.RESET_PASSWORD_TOKEN_NOT_FOUND).setDescription(e.getMessage()).build());
+            return ResponseEntity.badRequest().body(buildErrorResponse(errors));
+        }
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/newPassword")
+    public ResponseEntity<?> setNewPassword(@RequestBody NewPasswordRequest request) {
+        String resetPasswordToken = request.getToken();
+        String newHashedPassword = passwordEncoder.encode(request.getNewPassword());
+        appUserService.setNewPassword(resetPasswordToken, newHashedPassword);
+        return ResponseEntity.ok().build();
+    }
+
+    private List<Common.Error> validateResetPasswordRequest(ResetPasswordRequest request) {
+        List<Common.Error> errors = new ArrayList<>();
+        if (request.getEmail().isEmpty()) {
+            errors.add(Common.Error.newBuilder()
+                    .setCode(Common.ErrorCode.EMAIL_EMPTY)
+                    .setDescription("Missing required user email")
+                    .build());
+        }
+        return errors;
     }
 
     private List<Common.Error> validateSignUpRequest(SignUpRequest signUpRequest) {

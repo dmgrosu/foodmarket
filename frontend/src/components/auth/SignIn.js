@@ -161,9 +161,9 @@ class SignIn extends Component {
                     {isLoading && <CircularProgress size={24} className={classes.buttonProgress}/>}
                     <Grid container>
                         <Grid item xs={6}>
-                            {/*<Link to="/" >*/}
-                            {/*    Forgot password?*/}
-                            {/*</Link>*/}
+                            <Link to="/resetPassword/" >
+                                Forgot password?
+                            </Link>
                         </Grid>
                         <Grid item xs={6}>
                             <Link to="/signUp">

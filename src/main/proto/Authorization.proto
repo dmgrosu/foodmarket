@@ -23,8 +23,21 @@ message SignUpRequest {
   int32 clientId = 3;
 }
 
+message ResetPasswordRequest {
+  string email = 1;
+}
+
 message UserProto {
   int32 id = 1;
   string email = 2;
   Client client = 3;
+}
+
+message ResetPasswordTokenRequest {
+  string token = 1;
+}
+
+message NewPasswordRequest {
+  string token = 1;
+  string newPassword = 2;
 }

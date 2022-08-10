@@ -1,11 +1,17 @@
-import {LOGIN_FAIL, LOGIN_START, LOGIN_SUCCESS, LOGOUT} from "../actions/authActions";
+import {
+    LOGIN_FAIL,
+    LOGIN_START,
+    LOGIN_SUCCESS,
+    LOGOUT, RESET_PASSWORD_TOKEN_EXPIRED, RESET_PASSWORD_TOKEN_VALID
+} from "../actions/authActions";
 
 const initialState = {
     token: null,
     userId: null,
     clientId: {},
     isLoading: false,
-    error: null
+    error: null,
+    isResetPasswordTokenValid: false
 };
 
 const authReducer = (state = initialState, action) => {
@@ -31,6 +37,16 @@ const authReducer = (state = initialState, action) => {
         case LOGOUT:
             return {
                 ...initialState
+            };
+        case RESET_PASSWORD_TOKEN_VALID:
+            return {
+                ...state,
+                isResetPasswordTokenValid: true
+            };
+        case RESET_PASSWORD_TOKEN_EXPIRED:
+            return {
+                ...state,
+                error: action.payload
             }
         default:
             return state;
