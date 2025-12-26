@@ -1,11 +1,8 @@
 package md.ramaiana.foodmarket.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.PersistenceConstructor;
-import org.springframework.data.annotation.Transient;
+import org.springframework.data.jdbc.core.mapping.AggregateReference;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.MappedCollection;
 import org.springframework.data.relational.core.mapping.Table;
@@ -16,43 +13,31 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-/**
- * @author Dmitri Grosu (dmitri.grosu@gmail.com), 2/6/21
- */
 @AllArgsConstructor
-@Data
+@Getter
 @Builder
 @Table("app_user")
 public class AppUser implements UserDetails {
     @Id
-    Integer id;
-    String email;
-    String passwd;
+    @With
+    private final Integer id;
+    private final String email;
+    private final String passwd;
     @Column("created_at")
-    OffsetDateTime createdAt;
+    private final OffsetDateTime createdAt;
     @Column("deleted_at")
-    OffsetDateTime deletedAt;
+    private final OffsetDateTime deletedAt;
+    @Builder.Default
     @MappedCollection(idColumn = "user_id")
-    Set<AppRole> roles;
+    private final Set<AppRole> roles = new HashSet<>();
     @Column("client_id")
-    Integer clientId;
-    @Transient
-    Client client;
+    private final AggregateReference<@NonNull Client, @NonNull Integer> client;
 
-    @PersistenceConstructor
-    public AppUser(Integer id, String email, String passwd, OffsetDateTime createdAt, OffsetDateTime deletedAt, Set<AppRole> roles, Integer clientId) {
-        this.id = id;
-        this.email = email;
-        this.passwd = passwd;
-        this.createdAt = createdAt;
-        this.deletedAt = deletedAt;
-        this.roles = roles;
-        this.clientId = clientId;
-    }
-
+    @NonNull
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return roles.stream()
@@ -65,6 +50,7 @@ public class AppUser implements UserDetails {
         return this.passwd;
     }
 
+    @NonNull
     @Override
     public String getUsername() {
         return this.email;
@@ -90,17 +76,25 @@ public class AppUser implements UserDetails {
         return deletedAt == null;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof AppUser appUser)) return false;
+        return Objects.equals(id, appUser.id) && Objects.equals(email, appUser.email);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, email);
+    }
+
     public void addRole(Role role) {
-        if (roles == null) {
-            roles = new HashSet<>();
-        }
         roles.add(AppRole.builder()
                 .role(role)
                 .build());
     }
 
     public boolean hasClient() {
-        return clientId != null && clientId != 0;
+        return client != null;
     }
 
 }

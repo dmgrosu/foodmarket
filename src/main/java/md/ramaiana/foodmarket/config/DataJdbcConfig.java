@@ -1,5 +1,6 @@
 package md.ramaiana.foodmarket.config;
 
+import lombok.NonNull;
 import md.ramaiana.foodmarket.model.Role;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
@@ -18,6 +19,8 @@ import java.util.Arrays;
  */
 @Configuration
 public class DataJdbcConfig extends AbstractJdbcConfiguration {
+
+    @NonNull
     @Override
     public JdbcCustomConversions jdbcCustomConversions() {
         return new JdbcCustomConversions(Arrays.asList(

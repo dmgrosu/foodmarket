@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.data.jdbc.core.mapping.AggregateReference;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -71,7 +72,7 @@ class AppUserServiceTest {
         // ARRANGE
         AppUser givenUser = AppUser.builder()
                 .email("someEmail")
-                .clientId(123)
+                .client(AggregateReference.to(123))
                 .build();
         when(userDaoMock.save(any(AppUser.class))).thenReturn(givenUser);
         when(clientDaoMock.findById(eq(123)))
@@ -87,6 +88,6 @@ class AppUserServiceTest {
         assertThat(actualUser.hasClient()).isTrue();
         assertThat(actualUser.getEmail()).isEqualTo("someEmail");
         assertThat(actualUser.getClient().getId()).isEqualTo(123);
-        assertThat(actualUser.getClient().getIdno()).isEqualTo("123456");
     }
+
 }

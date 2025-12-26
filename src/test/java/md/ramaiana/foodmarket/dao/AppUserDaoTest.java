@@ -5,7 +5,7 @@ import md.ramaiana.foodmarket.model.AppUser;
 import md.ramaiana.foodmarket.model.Role;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.data.jdbc.DataJdbcTest;
+import org.springframework.boot.data.jdbc.test.autoconfigure.DataJdbcTest;
 import org.springframework.context.annotation.Import;
 
 import java.time.OffsetDateTime;

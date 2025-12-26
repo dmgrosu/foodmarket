@@ -1,10 +1,10 @@
 package md.ramaiana.foodmarket.service;
 
-import md.ramaiana.foodmarket.dao.GoodDao;
-import md.ramaiana.foodmarket.dao.GoodGroupDao;
+import md.ramaiana.foodmarket.dao.ProductDao;
+import md.ramaiana.foodmarket.dao.ProductGroupDao;
 import md.ramaiana.foodmarket.model.Brand;
-import md.ramaiana.foodmarket.model.Good;
-import md.ramaiana.foodmarket.model.GoodGroup;
+import md.ramaiana.foodmarket.model.Product;
+import md.ramaiana.foodmarket.model.ProductGroup;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -18,143 +18,143 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
-class GoodServiceTest {
+class ProductServiceTest {
     @Mock
-    private GoodDao goodDaoMock;
+    private ProductDao productDaoMock;
 
     @Mock
-    private GoodGroupDao goodGroupDaoMock;
+    private ProductGroupDao productGroupDaoMock;
 
     @InjectMocks
-    private GoodService goodService;
+    private ProductService productService;
 
     @Test
-    void test_findGoodsFiltered_allParams_returnedList() {
+    void test_findProductsFiltered_allParams_returnedList() {
         //ARRANGE
         Integer brandId = 2;
         Integer groupId = 1;
         String goodName = "someGoodName";
-        List<Good> goods = givenGoods(groupId, brandId, goodName);
-        when(goodDaoMock.getAllByGroupIdAndBrandIdAndNameIgnoreCaseContainingAndDeletedAtNull(eq(groupId), eq(brandId), eq(goodName)))
-                .thenReturn(goods);
+        List<Product> products = givenGoods(groupId, brandId, goodName);
+        when(productDaoMock.getAllByGroupIdAndBrandIdAndNameIgnoreCaseContainingAndDeletedAtNull(eq(groupId), eq(brandId), eq(goodName)))
+                .thenReturn(products);
         //ACT
-        goodService.findGoodsFiltered(groupId, brandId, goodName);
+        productService.findProductsFiltered(groupId, brandId, goodName);
         //ASSERT
-        verify(goodDaoMock, times(1))
+        verify(productDaoMock, times(1))
                 .getAllByGroupIdAndBrandIdAndNameIgnoreCaseContainingAndDeletedAtNull(groupId, brandId, goodName);
     }
 
     @Test
-    void test_findGoodsFiltered_groupIdAndBrandIdParams_returnedList() {
+    void test_findProductsFiltered_groupIdAndBrandIdParams_returnedList() {
         //ARRANGE
         Integer brandId = 2;
         Integer groupId = 1;
-        List<Good> goods = givenGoods(groupId, brandId, null);
-        when(goodDaoMock.getAllByGroupIdAndBrandIdAndDeletedAtNull(eq(groupId), eq(brandId)))
-                .thenReturn(goods);
+        List<Product> products = givenGoods(groupId, brandId, null);
+        when(productDaoMock.getAllByGroupIdAndBrandIdAndDeletedAtNull(eq(groupId), eq(brandId)))
+                .thenReturn(products);
         //ACT
-        goodService.findGoodsFiltered(groupId, brandId, null);
+        productService.findProductsFiltered(groupId, brandId, null);
         //ASSERT
-        verify(goodDaoMock, times(1))
+        verify(productDaoMock, times(1))
                 .getAllByGroupIdAndBrandIdAndDeletedAtNull(groupId, brandId);
     }
 
 
     @Test
-    void test_findGoodsFiltered_brandIdAndNameParams_returnedList() {
+    void test_findProductsFiltered_brandIdAndNameParams_returnedList() {
         //ARRANGE
         Integer brandId = 2;
         String someGoodName = "someGoodName";
-        List<Good> goods = givenGoods(null, brandId, someGoodName);
-        when(goodDaoMock.getAllByBrandIdAndNameIgnoreCaseContainingAndDeletedAtNull(eq(brandId), eq(someGoodName)))
-                .thenReturn(goods);
+        List<Product> products = givenGoods(null, brandId, someGoodName);
+        when(productDaoMock.getAllByBrandIdAndNameIgnoreCaseContainingAndDeletedAtNull(eq(brandId), eq(someGoodName)))
+                .thenReturn(products);
         //ACT
-        goodService.findGoodsFiltered(null, brandId, someGoodName);
+        productService.findProductsFiltered(null, brandId, someGoodName);
         //ASSERT
-        verify(goodDaoMock, times(1))
+        verify(productDaoMock, times(1))
                 .getAllByBrandIdAndNameIgnoreCaseContainingAndDeletedAtNull(brandId, someGoodName);
     }
 
     @Test
-    void test_findGoodsFiltered_groupIdAndNameParam_returnedList() {
+    void test_findProductsFiltered_groupIdAndNameParam_returnedList() {
         //ARRANGE
         Integer groupId = 1;
         String someGoodName = "someGoodName";
-        List<Good> goods = givenGoods(groupId, null, someGoodName);
-        when(goodDaoMock.getAllByGroupIdAndNameIgnoreCaseContainingAndDeletedAtNull(eq(groupId), eq(someGoodName)))
-                .thenReturn(goods);
+        List<Product> products = givenGoods(groupId, null, someGoodName);
+        when(productDaoMock.getAllByGroupIdAndNameIgnoreCaseContainingAndDeletedAtNull(eq(groupId), eq(someGoodName)))
+                .thenReturn(products);
         //ACT
-        goodService.findGoodsFiltered(groupId, null, someGoodName);
+        productService.findProductsFiltered(groupId, null, someGoodName);
         //ASSERT
-        verify(goodDaoMock, times(1))
+        verify(productDaoMock, times(1))
                 .getAllByGroupIdAndNameIgnoreCaseContainingAndDeletedAtNull(groupId, someGoodName);
     }
 
     @Test
-    void test_findGoodsFiltered_withOnlyGroupIdParam_returnedList() {
+    void test_findProductsFiltered_withOnlyGroupIdParam_returnedList() {
         //ARRANGE
         Integer groupId = 1;
-        List<Good> goods = givenGoods(groupId, null, null);
-        when(goodDaoMock.getAllByGroupIdAndDeletedAtNull(eq(groupId)))
-                .thenReturn(goods);
+        List<Product> products = givenGoods(groupId, null, null);
+        when(productDaoMock.getAllByGroupIdAndDeletedAtNull(eq(groupId)))
+                .thenReturn(products);
         //ACT
-        goodService.findGoodsFiltered(groupId, null, null);
+        productService.findProductsFiltered(groupId, null, null);
         //ASSERT
-        verify(goodDaoMock, times(1))
+        verify(productDaoMock, times(1))
                 .getAllByGroupIdAndDeletedAtNull(groupId);
     }
 
     @Test
-    void test_findGoodsFiltered_withOnlyBrandIdParam_returnedList() {
+    void test_findProductsFiltered_withOnlyBrandIdParam_returnedList() {
         //ARRANGE
         Integer brandId = 2;
-        List<Good> goods = givenGoods(null, brandId, null);
-        when(goodDaoMock.getAllByBrandIdAndDeletedAtNull(eq(brandId)))
-                .thenReturn(goods);
+        List<Product> products = givenGoods(null, brandId, null);
+        when(productDaoMock.getAllByBrandIdAndDeletedAtNull(eq(brandId)))
+                .thenReturn(products);
         //ACT
-        goodService.findGoodsFiltered(null, brandId, null);
+        productService.findProductsFiltered(null, brandId, null);
         //ASSERT
-        verify(goodDaoMock, times(1))
+        verify(productDaoMock, times(1))
                 .getAllByBrandIdAndDeletedAtNull(brandId);
     }
 
     @Test
-    void test_findGoodsFiltered_withOnlyNameParam_returnedList() {
+    void test_findProductsFiltered_withOnlyNameParam_returnedList() {
         //ARRANGE
         String someGoodName = "someName";
-        List<Good> goods = givenGoods(null, null, someGoodName);
-        when(goodDaoMock.getAllByNameIgnoreCaseContainingAndDeletedAtNull(eq(someGoodName)))
-                .thenReturn(goods);
+        List<Product> products = givenGoods(null, null, someGoodName);
+        when(productDaoMock.getAllByNameIgnoreCaseContainingAndDeletedAtNull(eq(someGoodName)))
+                .thenReturn(products);
         //ACT
-        goodService.findGoodsFiltered(null, null, someGoodName);
+        productService.findProductsFiltered(null, null, someGoodName);
         //ASSERT
-        verify(goodDaoMock, times(1))
+        verify(productDaoMock, times(1))
                 .getAllByNameIgnoreCaseContainingAndDeletedAtNull(someGoodName);
     }
 
     @Test
-    void test_findGoodsFiltered_withNoParams_returnedList() {
+    void test_findProductsFiltered_withNoParams_returnedList() {
         //ARRANGE
-        List<Good> goods = givenGoods(null, null, null);
-        when(goodDaoMock.getAllByGroupIdNullAndDeletedAtNull())
-                .thenReturn(goods);
+        List<Product> products = givenGoods(null, null, null);
+        when(productDaoMock.getAllByGroupIdNullAndDeletedAtNull())
+                .thenReturn(products);
         //ACT
-        goodService.findGoodsFiltered(null, null, null);
+        productService.findProductsFiltered(null, null, null);
         //ASSERT
-        verify(goodDaoMock, times(1))
+        verify(productDaoMock, times(1))
                 .getAllByGroupIdNullAndDeletedAtNull();
     }
 
     @Test
     void test_findGroupsFiltered_withParentGroupIdParam_returnedList() {
         //ARRANGE
-        List<GoodGroup> groups = givenGroups(5);
-        when(goodGroupDaoMock.getAllByParentGroupIdAndDeletedAtNullOrderByName(5))
+        List<ProductGroup> groups = givenGroups(5);
+        when(productGroupDaoMock.getAllByParentGroupIdAndDeletedAtNullOrderByName(5))
                 .thenReturn(groups);
         //ACT
-        List<GoodGroup> returnedGroups = goodService.getGroupsHierarchy(5);
+        List<ProductGroup> returnedGroups = productService.getGroupsHierarchy(5);
         //ASSERT
-        verify(goodGroupDaoMock, times(1))
+        verify(productGroupDaoMock, times(1))
                 .getAllByParentGroupIdAndDeletedAtNullOrderByName(5);
 
         assertThat(returnedGroups.get(0).getId()).isEqualTo(1);
@@ -165,186 +165,186 @@ class GoodServiceTest {
     @Test
     void test_findGroupsFiltered_withNoParams_returnedList() {
         //ARRANGE
-        List<GoodGroup> groups = givenGroups(null);
-        when(goodGroupDaoMock.findByParentGroupIdNullAndDeletedAtNullOrderByName())
+        List<ProductGroup> groups = givenGroups(null);
+        when(productGroupDaoMock.findByParentGroupIdNullAndDeletedAtNullOrderByName())
                 .thenReturn(groups);
         //ACT
-        List<GoodGroup> returnedGroups = goodService.getGroupsHierarchy(null);
+        List<ProductGroup> returnedGroups = productService.getGroupsHierarchy(null);
         //ASSERT
-        verify(goodGroupDaoMock, times(1))
+        verify(productGroupDaoMock, times(1))
                 .findByParentGroupIdNullAndDeletedAtNullOrderByName();
 
         assertThat(returnedGroups.get(0).getId()).isEqualTo(5);
     }
 
-    private List<Good> givenGoods(Integer groupId, Integer brandId, String name) {
+    private List<Product> givenGoods(Integer groupId, Integer brandId, String name) {
         if (groupId != null && brandId != null && name != null){
             Brand someBrand = Brand.builder()
                     .id(brandId)
                     .name("someName")
                     .build();
-            GoodGroup someGroup = GoodGroup.builder()
+            ProductGroup someGroup = ProductGroup.builder()
                     .id(groupId)
                     .name("someName")
                     .build();
-            List<Good> goods = new ArrayList<>();
-            goods.add(Good.builder()
+            List<Product> products = new ArrayList<>();
+            products.add(Product.builder()
                     .id(3)
                     .name(name)
                     .brandId(someBrand.getId())
                     .groupId(someGroup.getId())
                     .price(15f)
                     .build());
-            return goods;
+            return products;
         } else if (groupId != null && brandId != null) {
             Brand someBrand = Brand.builder()
                     .id(brandId)
                     .name("someName")
                     .build();
-            GoodGroup someGroup = GoodGroup.builder()
+            ProductGroup someGroup = ProductGroup.builder()
                     .id(groupId)
                     .name("someName")
                     .build();
-            List<Good> goods = new ArrayList<>();
-            goods.add(Good.builder()
+            List<Product> products = new ArrayList<>();
+            products.add(Product.builder()
                     .id(3)
                     .name("someName")
                     .brandId(someBrand.getId())
                     .groupId(someGroup.getId())
                     .price(15f)
                     .build());
-            return goods;
+            return products;
         } else if (groupId != null && name != null) {
             Brand someBrand = Brand.builder()
                     .id(2)
                     .name(name)
                     .build();
-            GoodGroup someGroup = GoodGroup.builder()
+            ProductGroup someGroup = ProductGroup.builder()
                     .id(groupId)
                     .name("someName")
                     .build();
-            List<Good> goods = new ArrayList<>();
-            goods.add(Good.builder()
+            List<Product> products = new ArrayList<>();
+            products.add(Product.builder()
                     .id(3)
                     .name("someName")
                     .brandId(someBrand.getId())
                     .groupId(someGroup.getId())
                     .price(15f)
                     .build());
-            return goods;
+            return products;
         } else if (brandId != null && name != null) {
             Brand someBrand = Brand.builder()
                     .id(brandId)
                     .name(name)
                     .build();
-            GoodGroup someGroup = GoodGroup.builder()
+            ProductGroup someGroup = ProductGroup.builder()
                     .id(1)
                     .name("someName")
                     .build();
-            List<Good> goods = new ArrayList<>();
-            goods.add(Good.builder()
+            List<Product> products = new ArrayList<>();
+            products.add(Product.builder()
                     .id(3)
                     .name("someName")
                     .brandId(someBrand.getId())
                     .groupId(someGroup.getId())
                     .price(15f)
                     .build());
-            return goods;
+            return products;
         } else if (groupId != null) {
             Brand someBrand = Brand.builder()
                     .id(2)
                     .name("someName")
                     .build();
-            GoodGroup someGroup = GoodGroup.builder()
+            ProductGroup someGroup = ProductGroup.builder()
                     .id(groupId)
                     .name("someName")
                     .build();
-            List<Good> goods = new ArrayList<>();
-            goods.add(Good.builder()
+            List<Product> products = new ArrayList<>();
+            products.add(Product.builder()
                     .id(3)
                     .name("someName")
                     .brandId(someBrand.getId())
                     .groupId(someGroup.getId())
                     .price(15f)
                     .build());
-            return goods;
+            return products;
         } else if (brandId != null) {
             Brand someBrand = Brand.builder()
                     .id(brandId)
                     .name("someName")
                     .build();
-            GoodGroup someGroup = GoodGroup.builder()
+            ProductGroup someGroup = ProductGroup.builder()
                     .id(1)
                     .name("someName")
                     .build();
-            List<Good> goods = new ArrayList<>();
-            goods.add(Good.builder()
+            List<Product> products = new ArrayList<>();
+            products.add(Product.builder()
                     .id(3)
                     .name("someName")
                     .brandId(someBrand.getId())
                     .groupId(someGroup.getId())
                     .price(15f)
                     .build());
-            return goods;
+            return products;
         } else if (name != null) {
             Brand someBrand = Brand.builder()
                     .id(2)
                     .name("someName")
                     .build();
-            GoodGroup someGroup = GoodGroup.builder()
+            ProductGroup someGroup = ProductGroup.builder()
                     .id(1)
                     .name("someName")
                     .build();
-            List<Good> goods = new ArrayList<>();
-            goods.add(Good.builder()
+            List<Product> products = new ArrayList<>();
+            products.add(Product.builder()
                     .id(3)
                     .name("someName")
                     .brandId(someBrand.getId())
                     .groupId(someGroup.getId())
                     .price(15f)
                     .build());
-            return goods;
+            return products;
         } else {
             Brand someBrand = Brand.builder()
                     .id(2)
                     .name("someName")
                     .build();
-            GoodGroup someGroup = GoodGroup.builder()
+            ProductGroup someGroup = ProductGroup.builder()
                     .id(1)
                     .name("someName")
                     .build();
-            List<Good> goods = new ArrayList<>();
-            goods.add(Good.builder()
+            List<Product> products = new ArrayList<>();
+            products.add(Product.builder()
                     .id(3)
                     .name("someName")
                     .brandId(someBrand.getId())
                     .groupId(someGroup.getId())
                     .price(15f)
                     .build());
-            return goods;
+            return products;
         }
     }
 
-    private List<GoodGroup> givenGroups(Integer groupId) {
+    private List<ProductGroup> givenGroups(Integer groupId) {
         if (groupId != null) {
-            GoodGroup parentGroup = GoodGroup.builder()
+            ProductGroup parentGroup = ProductGroup.builder()
                     .id(groupId)
                     .name("someParentGroupName")
                     .build();
-            GoodGroup someGroup = GoodGroup.builder()
+            ProductGroup someGroup = ProductGroup.builder()
                     .id(1)
                     .name("someName")
                     .parentGroupId(parentGroup.getId())
                     .build();
-            List<GoodGroup> groups = new ArrayList<>();
+            List<ProductGroup> groups = new ArrayList<>();
             groups.add(someGroup);
             return groups;
         } else {
-            GoodGroup parentGroup = GoodGroup.builder()
+            ProductGroup parentGroup = ProductGroup.builder()
                     .id(5)
                     .name("someParentGroupName")
                     .build();
-            List<GoodGroup> groups = new ArrayList<>();
+            List<ProductGroup> groups = new ArrayList<>();
             groups.add(parentGroup);
             return groups;
         }

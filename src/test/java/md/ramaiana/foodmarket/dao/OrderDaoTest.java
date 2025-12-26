@@ -7,8 +7,9 @@ import md.ramaiana.foodmarket.model.OrderState;
 import md.ramaiana.foodmarket.service.OrderNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.data.jdbc.DataJdbcTest;
+import org.springframework.boot.data.jdbc.test.autoconfigure.DataJdbcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.jdbc.core.mapping.AggregateReference;
 
 import java.time.OffsetDateTime;
 
@@ -31,7 +32,7 @@ class OrderDaoTest {
         Client someSavedClient = someSavedClient("123123", "Kirill");
         // ACT
         Order saved = orderDao.save(Order.builder()
-                .clientId(someSavedClient.getId())
+                .client(AggregateReference.to(someSavedClient.getId()))
                 .createdAt(OffsetDateTime.now())
                 .processedAt(OffsetDateTime.now())
                 .processingResult("done")
@@ -55,11 +56,21 @@ class OrderDaoTest {
     @Test
     void test_update() {
         // ARRANGE
-        Order someOrder = someOrder(OrderState.NEW);
+        Order existingOrder = someOrder(OrderState.NEW);
+        OffsetDateTime now = OffsetDateTime.now();
         // ACT
-        someOrder.setProcessingResult("Reviewing");
-        someOrder.setProcessedAt(OffsetDateTime.now());
-        Order updatedOrder =  orderDao.save(someOrder);
+        Order updateOrder = new Order(
+                existingOrder.getId(),
+                existingOrder.getClient(),
+                existingOrder.getTotalSum(),
+                existingOrder.getCreatedAt(),
+                existingOrder.getDeletedAt(),
+                now,
+                "Reviewing",
+                existingOrder.getState(),
+                existingOrder.getProducts()
+        );
+        Order updatedOrder =  orderDao.save(existingOrder);
         // ASSERT
         assertThat(updatedOrder.getProcessingResult().equals("Reviewing")).isTrue();
     }
@@ -111,7 +122,7 @@ class OrderDaoTest {
     private Order someOrder(OrderState orderState) {
         Client someSavedClient = someSavedClient("123123", "Kirill");
         return orderDao.save(Order.builder()
-                .clientId(someSavedClient.getId())
+                .client(AggregateReference.to(someSavedClient.getId()))
                 .createdAt(OffsetDateTime.now())
                 .deletedAt(null)
                 .processedAt(OffsetDateTime.now())

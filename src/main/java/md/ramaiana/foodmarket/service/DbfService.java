@@ -4,9 +4,9 @@ import com.linuxense.javadbf.DBFReader;
 import com.linuxense.javadbf.DBFRow;
 import lombok.extern.slf4j.Slf4j;
 import md.ramaiana.foodmarket.model.Brand;
-import md.ramaiana.foodmarket.model.Good;
-import md.ramaiana.foodmarket.model.GoodGroup;
-import md.ramaiana.foodmarket.model.GoodsReadResult;
+import md.ramaiana.foodmarket.model.Product;
+import md.ramaiana.foodmarket.model.ProductGroup;
+import md.ramaiana.foodmarket.model.ProductReadResult;
 import org.springframework.stereotype.Service;
 
 import java.io.FileInputStream;
@@ -40,9 +40,9 @@ public class DbfService {
      * </p>
      * @return instance of GoodsReadResult, containing lists of Good, Groups and Brands that were read from file
      */
-    public GoodsReadResult readGoodsFromFile(String filePath) throws FileNotFoundException {
-        Map<String, GoodGroup> groups = new HashMap<>();
-        Map<String, Good> goods = new HashMap<>();
+    public ProductReadResult readGoodsFromFile(String filePath) throws FileNotFoundException {
+        Map<String, ProductGroup> groups = new HashMap<>();
+        Map<String, Product> products = new HashMap<>();
         Map<String, Brand> brands = new HashMap<>();
         Map<String, String[]> erpCodes = new HashMap<>();
 
@@ -50,12 +50,12 @@ public class DbfService {
             DBFRow dbfRow;
             while ((dbfRow = dbfReader.nextRow()) != null) {
                 try {
-                    int goodType = Integer.parseInt(dbfRow.getString("TYPE"));
-                    String goodErpCode = dbfRow.getString("ERP_ID");
-                    if (goodType == 0) {
-                        goods.put(goodErpCode, mapDbfRowToGood(dbfRow));
+                    int productType = Integer.parseInt(dbfRow.getString("TYPE"));
+                    String productErpCode = dbfRow.getString("ERP_ID");
+                    if (productType == 0) {
+                        products.put(productErpCode, mapDbfRowToProduct(dbfRow));
                     } else {
-                        groups.put(goodErpCode, mapDbfRowToGroup(dbfRow));
+                        groups.put(productErpCode, mapDbfRowToGroup(dbfRow));
                     }
                     String brandErpCode = dbfRow.getString("BR_ID");
                     brands.put(brandErpCode, Brand.builder()
@@ -66,33 +66,33 @@ public class DbfService {
                     String[] codes = new String[2];
                     codes[0] = parentErpCode.isEmpty() ? null : parentErpCode;
                     codes[1] = brandErpCode.isEmpty() ? null : brandErpCode;
-                    erpCodes.put(goodErpCode, codes);
+                    erpCodes.put(productErpCode, codes);
                 } catch (Exception ex) {
-                    log.error("Error reading DBF row: " + ex.getMessage());
+                    log.error("Error reading DBF row: {}", ex.getMessage());
                 }
             }
         } catch (FileNotFoundException ex) {
             throw ex;
         } catch (Exception e) {
-            log.error("Error loading goods from file: " + e.getMessage());
+            log.error("Error loading products from file: {}", e.getMessage());
         }
-        return GoodsReadResult.builder()
-                .goods(goods)
+        return ProductReadResult.builder()
+                .products(products)
                 .groups(groups)
                 .brands(brands)
                 .erpCodes(erpCodes)
                 .build();
     }
 
-    private GoodGroup mapDbfRowToGroup(DBFRow dbfRow) {
-        return GoodGroup.builder()
+    private ProductGroup mapDbfRowToGroup(DBFRow dbfRow) {
+        return ProductGroup.builder()
                 .erpCode(dbfRow.getString("ERP_ID"))
                 .name(dbfRow.getString("NAME"))
                 .build();
     }
 
-    private Good mapDbfRowToGood(DBFRow dbfRow) {
-        return Good.builder()
+    private Product mapDbfRowToProduct(DBFRow dbfRow) {
+        return Product.builder()
                 .erpCode(dbfRow.getString("ERP_ID"))
                 .name(dbfRow.getString("NAME"))
                 .unit(dbfRow.getString("UNIT"))

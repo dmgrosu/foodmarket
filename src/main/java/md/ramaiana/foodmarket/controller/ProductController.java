@@ -2,10 +2,10 @@ package md.ramaiana.foodmarket.controller;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;
-import md.ramaiana.foodmarket.model.Good;
-import md.ramaiana.foodmarket.model.GoodGroup;
-import md.ramaiana.foodmarket.proto.Goods;
-import md.ramaiana.foodmarket.service.GoodService;
+import md.ramaiana.foodmarket.model.Product;
+import md.ramaiana.foodmarket.model.ProductGroup;
+import md.ramaiana.foodmarket.proto.Products;
+import md.ramaiana.foodmarket.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,20 +20,20 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/good")
-public class GoodController {
+public class ProductController {
 
-    private final GoodService goodService;
+    private final ProductService productService;
     private final JsonFormat.Printer printer;
 
     @Autowired
-    public GoodController(GoodService goodService) {
-        this.goodService = goodService;
+    public ProductController(ProductService productService) {
+        this.productService = productService;
         this.printer = JsonFormat.printer().omittingInsignificantWhitespace();
     }
 
     @GetMapping("/listGroups")
     public ResponseEntity<?> getGroupsByParent(@RequestParam(value = "parentGroupId", required = false) Integer parentGroupId) throws InvalidProtocolBufferException {
-        List<GoodGroup> groups = goodService.getGroupsHierarchy(parentGroupId);
+        List<ProductGroup> groups = productService.getGroupsHierarchy(parentGroupId);
         return ResponseEntity.ok(printer.print(buildGoodsListResponse(Collections.emptyList(), groups)));
     }
 
@@ -41,28 +41,28 @@ public class GoodController {
     public ResponseEntity<?> getGoodsByGroup(@RequestParam("groupId") Integer groupId,
                                              @RequestParam(value = "brandId", required = false) Integer brandId,
                                              @RequestParam(value = "name", required = false) String nameLike) throws InvalidProtocolBufferException {
-        List<Good> goods = goodService.findGoodsFiltered(groupId, brandId, nameLike);
-        return ResponseEntity.ok(printer.print(buildGoodsListResponse(goods, Collections.emptyList())));
+        List<Product> products = productService.findProductsFiltered(groupId, brandId, nameLike);
+        return ResponseEntity.ok(printer.print(buildGoodsListResponse(products, Collections.emptyList())));
     }
 
     @GetMapping("/search")
     public ResponseEntity<?> searchGoods(@RequestParam(value = "groupId", required = false) Integer groupId,
                                          @RequestParam(value = "brandId", required = false) Integer brandId,
                                          @RequestParam(value = "name", required = false) String nameLike) throws InvalidProtocolBufferException {
-        List<Good> goods = goodService.findGoodsFiltered(groupId, brandId, nameLike);
-        List<GoodGroup> groups = goodService.findGroupsForGoodsList(goods);
-        return ResponseEntity.ok(printer.print(buildGoodsListResponse(goods, groups)));
+        List<Product> products = productService.findProductsFiltered(groupId, brandId, nameLike);
+        List<ProductGroup> groups = productService.findProductsForProductsList(products);
+        return ResponseEntity.ok(printer.print(buildGoodsListResponse(products, groups)));
     }
 
-    private Goods.GoodsListResponse buildGoodsListResponse(List<Good> goods, List<GoodGroup> groups) {
-        return Goods.GoodsListResponse.newBuilder()
-                .addAllGoods(mapGoodsToProto(goods))
+    private Products.GoodsListResponse buildGoodsListResponse(List<Product> products, List<ProductGroup> groups) {
+        return Products.GoodsListResponse.newBuilder()
+                .addAllProducts(mapGoodsToProto(products))
                 .addAllGroups(mapGroupsToProto(groups))
                 .build();
     }
 
-    private List<Goods.Good> mapGoodsToProto(List<Good> goods) {
-        return goods.stream().map(good -> Goods.Good.newBuilder()
+    private List<Products.Product> mapGoodsToProto(List<Product> products) {
+        return products.stream().map(good -> Products.Product.newBuilder()
                 .setId(good.getId())
                 .setName(good.getName())
                 .setBrandId(good.getBrandId())
@@ -75,14 +75,14 @@ public class GoodController {
                 .build()).collect(Collectors.toList());
     }
 
-    private List<Goods.Group> mapGroupsToProto(List<GoodGroup> groups) {
-        List<Goods.Group> protoGroups = new ArrayList<>();
-        for (GoodGroup group : groups) {
-            List<Goods.Group> childrenProto = null;
+    private List<Products.Group> mapGroupsToProto(List<ProductGroup> groups) {
+        List<Products.Group> protoGroups = new ArrayList<>();
+        for (ProductGroup group : groups) {
+            List<Products.Group> childrenProto = null;
             if (group.hasChildren()) {
                 childrenProto = mapGroupsToProto(group.getChildGroups());
             }
-            Goods.Group protoGroup = Goods.Group.newBuilder()
+            Products.Group protoGroup = Products.Group.newBuilder()
                     .setId(group.getId())
                     .setName(group.getName())
                     .addAllGroups(childrenProto != null ? childrenProto : Collections.emptyList())

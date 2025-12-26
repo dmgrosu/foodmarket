@@ -9,10 +9,10 @@ create table if not exists "brand"
     "deleted_at" timestamp
 );
 
-create table if not exists "good_group"
+create table if not exists "product_group"
 (
     id                int       not null
-        constraint good_group_pk
+        constraint product_group_pk
             primary key auto_increment,
     name              text      not null,
     "parent_group_id" integer,
@@ -22,25 +22,25 @@ create table if not exists "good_group"
     "updated_at"      timestamp
 );
 
-create table if not exists "good"
+create table if not exists "product"
 (
-    id           int       not null
-        constraint good_pk
+    id           int               not null
+        constraint product_pk
             primary key auto_increment,
-    name         text      not null,
-    price        numeric            default 0 not null,
+    name         text              not null,
+    price        numeric default 0 not null,
     "brand_id"   integer
-        constraint good_brand_id_fk
+        constraint product_brand_id_fk
             references "brand",
     "group_id"   integer
-        constraint good_group_id_fk
-            references "good_group" (id),
+        constraint product_group_id_fk
+            references "product_group" (id),
     unit         text,
     "package"    numeric,
     "erp_code"   text,
     "bar_code"   text,
     weight       numeric,
-    "created_at" timestamp not null default now(),
+    "created_at" timestamp         not null default now(),
     "deleted_at" timestamp,
     "updated_at" timestamp
 );
@@ -72,16 +72,17 @@ create table if not exists "order"
     "status"            text      not null default 'new'
 );
 
-create table if not exists "order_good"
+create table if not exists "order_product"
 (
-    id         int               not null
-        constraint order_good_pk
+    id           int               not null
+        constraint order_product_pk
             primary key auto_increment,
-    "order_id" integer           not null,
-    "good_id"  integer           not null,
-    quantity   numeric default 0 not null,
-    sum        numeric default 0 not null,
-    weight     numeric default 0 not null
+    "order_id"   integer           not null,
+    "product_id" integer           not null,
+    quantity     numeric default 0 not null,
+    price        numeric default 0 not null,
+    sum          numeric default 0 not null,
+    weight       numeric default 0 not null
 );
 
 create table if not exists "app_user"

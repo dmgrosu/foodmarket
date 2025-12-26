@@ -3,40 +3,35 @@ package md.ramaiana.foodmarket.dao;
 
 import md.ramaiana.foodmarket.config.DataJdbcConfig;
 import md.ramaiana.foodmarket.model.Brand;
-import md.ramaiana.foodmarket.model.Good;
-import md.ramaiana.foodmarket.model.GoodGroup;
+import md.ramaiana.foodmarket.model.Product;
+import md.ramaiana.foodmarket.model.ProductGroup;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.data.jdbc.DataJdbcTest;
+import org.springframework.boot.data.jdbc.test.autoconfigure.DataJdbcTest;
 import org.springframework.context.annotation.Import;
 
 import java.time.OffsetDateTime;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
-/**
- * @author Grosu Kirill (grosukirill009@gmail.com), 2/11/2021
- */
-
-
 @DataJdbcTest
 @Import(DataJdbcConfig.class)
-class GoodDaoTest {
+class ProductDaoTest {
     @Autowired
-    private GoodDao goodDao;
+    private ProductDao productDao;
     @Autowired
     private BrandDao brandDao;
     @Autowired
-    private GoodGroupDao goodGroupDao;
+    private ProductGroupDao productGroupDao;
 
     @Test
     void test_create() {
         // ARRANGE
         Brand someBrand = someBrand();
-        GoodGroup someGroup = someGroup();
+        ProductGroup someGroup = someGroup();
         // ACT
-        Good saved = goodDao.save(Good.builder()
+        Product saved = productDao.save(Product.builder()
                 .name("WaterOm")
                 .price(15f)
                 .brandId(someBrand.getId())
@@ -49,15 +44,15 @@ class GoodDaoTest {
                 .createdAt(OffsetDateTime.now())
                 .build());
         // ASSERT
-        assertThat(goodDao.existsById(saved.getId())).isTrue();
+        assertThat(productDao.existsById(saved.getId())).isTrue();
     }
 
     @Test
     void test_read() {
         // ARRANGE
-        Good someExistingGood = someExistingGood();
+        Product someExistingProduct = someExistingProduct();
         // ACT
-        boolean exists = goodDao.existsById(someExistingGood.getId());
+        boolean exists = productDao.existsById(someExistingProduct.getId());
         // ASSERT
         assertThat(exists).isTrue();
     }
@@ -65,37 +60,53 @@ class GoodDaoTest {
     @Test
     void test_update() {
         // ARRANGE
-        Good someExistingGood = someExistingGood();
+        Product existingProduct = someExistingProduct();
+        Product updated = new Product(
+                existingProduct.getId(),
+                "new name",
+                20f,
+                existingProduct.getUnit(),
+                existingProduct.getInPackage(),
+                existingProduct.getErpCode(),
+                existingProduct.getBarCode(),
+                1.35f,
+                existingProduct.getBrandId(),
+                existingProduct.getGroupId(),
+                existingProduct.getCreatedAt(),
+                existingProduct.getDeletedAt(),
+                OffsetDateTime.now()
+        );
         // ACT
-        someExistingGood.setPrice(20f);
-        Good saved = goodDao.save(someExistingGood);
+        Product saved = productDao.save(updated);
         // ASSERT
-        assertThat(saved.getPrice().equals(20f)).isTrue();
+        assertThat(saved.getPrice()).isEqualTo(20f);
+        assertThat(saved.getWeight()).isEqualTo(1.35f);
+        assertThat(saved.getName()).isEqualTo("new name");
     }
 
     @Test
     void test_delete() {
         // ARRANGE
-        Good someExistingGood = someExistingGood();
+        Product someExistingProduct = someExistingProduct();
         // ACT
-        goodDao.deleteById(someExistingGood.getId());
+        productDao.deleteById(someExistingProduct.getId());
         // ASSERT
-        assertThat(goodDao.existsById(someExistingGood.getId())).isFalse();
+        assertThat(productDao.existsById(someExistingProduct.getId())).isFalse();
     }
 
     @Test
     void test_saveGood_saved() {
         // ARRANGE
-        Good givenGood = Good.builder()
+        Product givenProduct = Product.builder()
                 .name("someName")
                 .erpCode("1234455")
                 .price(123.55f)
                 .createdAt(OffsetDateTime.now())
                 .build();
         // ACT
-        Good actualGood = goodDao.save(givenGood);
+        Product actualProduct = productDao.save(givenProduct);
         // ASSERT
-        Assertions.assertThat(actualGood.getId()).isNotNull();
+        Assertions.assertThat(actualProduct.getId()).isNotNull();
     }
 
     private Brand someBrand() {
@@ -106,8 +117,8 @@ class GoodDaoTest {
                 .build());
     }
 
-    private GoodGroup someGroup() {
-        return goodGroupDao.save(GoodGroup.builder()
+    private ProductGroup someGroup() {
+        return productGroupDao.save(ProductGroup.builder()
                 .name("Liquids")
                 .parentGroupId(1)
                 .erpCode("ytrewq")
@@ -115,10 +126,10 @@ class GoodDaoTest {
                 .build());
     }
 
-    private Good someExistingGood() {
+    private Product someExistingProduct() {
         Brand someBrand = someBrand();
-        GoodGroup someGroup = someGroup();
-        return goodDao.save(Good.builder()
+        ProductGroup someGroup = someGroup();
+        return productDao.save(Product.builder()
                 .name("WaterOm")
                 .price(15f)
                 .brandId(someBrand.getId())

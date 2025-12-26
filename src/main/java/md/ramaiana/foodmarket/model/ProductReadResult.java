@@ -13,19 +13,19 @@ import java.util.Map;
 @Getter
 @Value
 @Builder
-public class GoodsReadResult {
+public class ProductReadResult {
     /**
      * Map, containing groups, read from file
      * key - group ERP code, value - group itself
      */
     @Builder.Default
-    Map<String, GoodGroup> groups = new HashMap<>();
+    Map<String, ProductGroup> groups = new HashMap<>();
     /**
-     * Map containing good, read from file
-     * key - good ERP code, value - good itself
+     * Map containing products, read from file
+     * key - product ERP code, value - good itself
      */
     @Builder.Default
-    Map<String, Good> goods = new HashMap<>();
+    Map<String, Product> products = new HashMap<>();
     /**
      * Map containing brands, read from file
      * key - brand ERP code, value - brand itself

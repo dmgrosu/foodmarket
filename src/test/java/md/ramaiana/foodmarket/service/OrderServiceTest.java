@@ -2,11 +2,10 @@ package md.ramaiana.foodmarket.service;
 
 
 import md.ramaiana.foodmarket.dao.ClientDao;
-import md.ramaiana.foodmarket.dao.GoodDao;
+import md.ramaiana.foodmarket.dao.ProductDao;
 import md.ramaiana.foodmarket.dao.OrderDao;
-import md.ramaiana.foodmarket.dao.OrderGoodDao;
 import md.ramaiana.foodmarket.model.Client;
-import md.ramaiana.foodmarket.model.Good;
+import md.ramaiana.foodmarket.model.Product;
 import md.ramaiana.foodmarket.model.Order;
 import md.ramaiana.foodmarket.model.OrderState;
 import org.junit.jupiter.api.Test;
@@ -14,6 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.*;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -26,16 +26,13 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.*;
 
 
-@ExtendWith({SpringExtension.class})
+@ExtendWith({SpringExtension.class, MockitoExtension.class})
 public class OrderServiceTest {
     @Mock
     OrderDao orderDaoMock;
 
     @Mock
-    GoodDao goodDaoMock;
-
-    @Mock
-    OrderGoodDao orderGoodDaoMock;
+    ProductDao productDaoMock;
 
     @Mock
     ClientDao clientDaoMock;
@@ -56,59 +53,56 @@ public class OrderServiceTest {
 //    }
 
     @Test
-    void test_addGoodToOrder_orderSaved() throws Exception {
+    void test_addProductToOrder_orderSaved() throws Exception {
         //ARRANGE
         int orderId = 2;
-        Good someGood = Good.builder()
+        Product someProduct = Product.builder()
                 .id(1)
                 .price(15f)
                 .weight(10f)
                 .build();
         float quantity = 5f;
         Integer clientId = 3;
-        when(goodDaoMock.getByIdAndDeletedAtNull(eq(someGood.getId())))
-                .thenReturn(someGood);
-        when(clientDaoMock.getByIdAndDeletedAtNull(eq(clientId)))
-                .thenReturn(Client.builder()
+        when(productDaoMock.findByIdAndDeletedAtNull(eq(someProduct.getId())))
+                .thenReturn(Optional.of(someProduct));
+        when(clientDaoMock.findByIdAndDeletedAtNull(eq(clientId)))
+                .thenReturn(Optional.of(Client.builder()
                         .id(3)
-                        .build());
+                        .build()));
         someExistingOrder(orderId);
-        when(orderGoodDaoMock.existsByOrderIdAndGoodId(eq(orderId), eq(someGood.getId()))).thenReturn(false);
         ArgumentCaptor<Order> orderCaptor = ArgumentCaptor.forClass(Order.class);
 
         //ACT
-        Order actualOrder = orderService.addGoodToOrder(orderId, someGood.getId(), quantity, clientId);
+        Order actualOrder = orderService.addProductToOrder(orderId, someProduct.getId(), quantity, clientId);
         //ASSERT
-        verify(orderDaoMock, times(1)).save(orderCaptor.capture());
+        verify(orderDaoMock).save(orderCaptor.capture());
     }
 
     @Test
-    void test_addGoodToOrder_responseGoodValidationError_exceptionThrown() {
+    void test_addProductToOrder_responseProductValidationError_exceptionThrown() {
         //ARRANGE
-        int goodId = 1;
+        int productId = 1;
         //ACT & ASSERT
-        assertThatExceptionOfType(GoodNotFoundException.class)
-                .isThrownBy(() -> orderService.addGoodToOrder(2, goodId, 15f, 5));
+        assertThatExceptionOfType(ProductNotFoundException.class)
+                .isThrownBy(() -> orderService.addProductToOrder(2, productId, 15f, 5));
     }
 
     @Test
-    void test_addGoodToOrder_responseClientValidationError_exceptionThrown() {
+    void test_addProductToOrder_responseClientValidationError_exceptionThrown() {
         //ARRANGE
         int clientId = 1;
-        when(goodDaoMock.getByIdAndDeletedAtNull(6))
-                .thenReturn(Good.builder().id(6).build());
+        when(productDaoMock.findByIdAndDeletedAtNull(6))
+                .thenReturn(Optional.of(Product.builder().id(6).build()));
         //ACT & ASSERT
         assertThatExceptionOfType(ClientNotFoundException.class)
-                .isThrownBy(() -> orderService.addGoodToOrder(2, 6, 15f, clientId));
+                .isThrownBy(() -> orderService.addProductToOrder(2, 6, 15f, clientId));
     }
 
     @Test
     void test_findOrderById_responseOk() throws Exception {
         //ARRANGE
         Integer orderId = 1;
-        Order someOrder = Order.builder()
-                .id(orderId)
-                .build();
+        Order someOrder = Order.builder().build().withId(orderId);
         when(orderDaoMock.findByIdAndDeletedAtNull(eq(orderId)))
                 .thenReturn(Optional.of(someOrder));
         //ACT
@@ -132,7 +126,7 @@ public class OrderServiceTest {
         //ARRANGE
         Integer orderId = null;
         //ACT & ASSERT
-        assertThatExceptionOfType(IllegalArgumentException.class)
+        assertThatExceptionOfType(OrderNotFoundException.class)
                 .isThrownBy(() -> orderService.findOrdersById(orderId));
     }
 
@@ -170,15 +164,15 @@ public class OrderServiceTest {
         List<Order> orders = new ArrayList<>();
         orders.add(Order.builder().id(1).build());
         Page<Order> orderPage = new PageImpl<>(orders, pageable, pageable.getOffset());
-        when(orderDaoMock.findAllByDeletedAtNullAndCreatedAtBetweenAndClientId(pageable, from, to, clientId))
+        when(orderDaoMock.findAllByDeletedAtNullAndCreatedAtBetweenAndClient(pageable, from, to, clientId))
                 .thenReturn(orderPage);
-        when(clientDaoMock.getByIdAndDeletedAtNull(clientId))
-                .thenReturn(Client.builder().id(clientId).build());
+        when(clientDaoMock.findByIdAndDeletedAtNull(clientId))
+                .thenReturn(Optional.of(Client.builder().id(clientId).build()));
         //ACT
         orderService.findOrdersByPeriod(from, to, clientId, page, perPage, direction, column);
         //ASSERT
         verify(orderDaoMock, times(1))
-                .findAllByDeletedAtNullAndCreatedAtBetweenAndClientId(pageable, from, to, clientId);
+                .findAllByDeletedAtNullAndCreatedAtBetweenAndClient(pageable, from, to, clientId);
     }
 
     @Test
@@ -191,7 +185,7 @@ public class OrderServiceTest {
         int perPage = 2;
         String direction = "DESC";
         String column = "id";
-        when(clientDaoMock.getByIdAndDeletedAtNull(clientId))
+        when(clientDaoMock.findByIdAndDeletedAtNull(clientId))
                 .thenReturn(null);
         //ACT & ASSERT
         assertThatExceptionOfType(ClientNotFoundException.class)
@@ -199,31 +193,33 @@ public class OrderServiceTest {
     }
 
     @Test
-    void test_updateOrder() throws GoodNotFoundException {
+    void test_updateProductQuantity() throws Exception {
         //ARRANGE
         int orderId = 1;
-        int goodId = 2;
+        int productId = 2;
         float newQuantity = 5.5f;
-        Good someGood = Good.builder().id(goodId).build();
-        when(goodDaoMock.getByIdAndDeletedAtNull(goodId))
-                .thenReturn(someGood);
+        Order someOrder = mock(Order.class);
+        when(orderDaoMock.findByIdAndDeletedAtNull(orderId))
+                .thenReturn(Optional.of(someOrder));
+        Order updated = mock(Order.class);
+        when(someOrder.updateQuantity(productId, newQuantity))
+                .thenReturn(updated);
         //ACT
-        orderService.updateOrder(orderId, goodId, newQuantity);
+        orderService.updateProductQuantity(orderId, productId, newQuantity);
         //ASSERT
-        verify(orderGoodDaoMock, times(1))
-                .updateOrderGoodQuantity(orderId, goodId, newQuantity);
+        verify(orderDaoMock).save(updated);
     }
 
     @Test
-    void test_updateOrder_validationNotPassed() {
+    void test_updateProductQuantity_validationNotPassed() {
         int orderId = 1;
         int goodId = 2;
         float newQuantity = 5.5f;
-        when(goodDaoMock.getByIdAndDeletedAtNull(goodId))
-                .thenReturn(null);
+        when(orderDaoMock.findByIdAndDeletedAtNull(orderId))
+                .thenReturn(Optional.empty());
         //ACT & ASSERT
-        assertThatExceptionOfType(GoodNotFoundException.class)
-                .isThrownBy(() -> orderService.updateOrder(orderId, goodId, newQuantity));
+        assertThatExceptionOfType(OrderNotFoundException.class)
+                .isThrownBy(() -> orderService.updateProductQuantity(orderId, goodId, newQuantity));
     }
 
     @Test
@@ -249,9 +245,9 @@ public class OrderServiceTest {
         Order order = Order.builder()
                 .id(orderId)
                 .build();
-        when(orderDaoMock.save(any())).thenReturn(order);
-        when(orderDaoMock.existsByIdAndDeletedAtNull(orderId)).thenReturn(true);
-        when(orderDaoMock.findByIdAndDeletedAtNull(orderId)).thenReturn(Optional.of(order));
+        lenient().when(orderDaoMock.save(any())).thenReturn(order);
+        lenient().when(orderDaoMock.existsByIdAndDeletedAtNull(orderId)).thenReturn(true);
+        lenient().when(orderDaoMock.findByIdAndDeletedAtNull(orderId)).thenReturn(Optional.of(order));
         return order;
     }
 

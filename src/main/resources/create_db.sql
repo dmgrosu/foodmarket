@@ -1,3 +1,5 @@
+create schema if not exists rama_fm;
+
 create table if not exists rama_fm.brand
 (
     id         serial                   not null
@@ -12,10 +14,10 @@ create table if not exists rama_fm.brand
 create unique index brand_erp_code_uindex
     on rama_fm.brand (erp_code);
 
-create table if not exists rama_fm.good_group
+create table if not exists rama_fm.product_group
 (
     id              serial                   not null
-        constraint good_group_pk
+        constraint product_group_pk
             primary key,
     name            text                     not null,
     parent_group_id integer,
@@ -25,22 +27,22 @@ create table if not exists rama_fm.good_group
     updated_at      timestamp with time zone
 );
 
-create unique index good_group_erp_code_uindex
-    on rama_fm.good_group (erp_code);
+create unique index product_group_erp_code_uindex
+    on rama_fm.product_group (erp_code);
 
-create table if not exists rama_fm.good
+create table if not exists rama_fm.product
 (
     id         serial                   not null
-        constraint good_pk
+        constraint product_pk
             primary key,
     name       text                     not null,
     price      numeric                           default 0 not null,
     brand_id   integer
-        constraint good_brand_id_fk
+        constraint product_brand_id_fk
             references rama_fm.brand (id),
     group_id   integer
-        constraint good_group_id_fk
-            references rama_fm.good_group (id),
+        constraint product_group_id_fk
+            references rama_fm.product_group (id),
     unit       text,
     package    numeric,
     erp_code   text,
@@ -51,12 +53,12 @@ create table if not exists rama_fm.good
     updated_at timestamp with time zone
 );
 
-create unique index good_erp_code_uindex
-    on rama_fm.good (erp_code);
-create index good_brand_id_index
-    on rama_fm.good (brand_id);
-create index good_group_id_index
-    on rama_fm.good (group_id);
+create unique index product_erp_code_uindex
+    on rama_fm.product (erp_code);
+create index product_brand_id_index
+    on rama_fm.product (brand_id);
+create index product_group_id_index
+    on rama_fm.product (group_id);
 
 create table if not exists rama_fm.client
 (
@@ -74,34 +76,35 @@ create unique index client_idno_uindex
 
 create table if not exists rama_fm."order"
 (
-    id                serial    not null
+    id                serial                      not null
         constraint order_pk
             primary key,
     client_id         integer
         constraint order_client_id_fk
             references rama_fm.client (id),
-    total_sum         numeric            default 0 not null,
-    created_at        timestamp not null default now(),
+    total_sum         numeric default 0           not null,
+    created_at        timestamp                   not null default now(),
     deleted_at        timestamp,
     processed_at      timestamp,
     processing_result text,
-    status            text      default 'NEW'::text not null
+    status            text    default 'NEW'::text not null
 );
 
-create table if not exists rama_fm.order_good
+create table if not exists rama_fm.order_product
 (
-    id       serial            not null
-        constraint order_good_pk
+    id         serial            not null
+        constraint order_product_pk
             primary key,
-    order_id integer           not null
-        constraint order_good_order_id_fk
+    order_id   integer           not null
+        constraint order_product_order_id_fk
             references rama_fm.order (id),
-    good_id  integer           not null
-        constraint order_good_good_id_fk
-            references rama_fm.good (id),
-    quantity numeric default 0 not null,
-    sum      numeric default 0 not null,
-    weight   numeric
+    product_id integer           not null
+        constraint order_product_product_id_fk
+            references rama_fm.product (id),
+    quantity   numeric default 0 not null,
+    price      numeric default 0 not null,
+    sum        numeric default 0 not null,
+    weight     numeric
 );
 
 create table if not exists rama_fm."app_user"

@@ -15,27 +15,27 @@ message Order {
   // date in millis for UTC timezone
   int64 date = 5;
   float totalWeight = 6;
-  repeated OrderGood goods = 7;
+  repeated OrderProduct products = 7;
 }
 
-message OrderGood {
-  int32 goodId = 1;
+message OrderProduct {
+  int32 productId = 1;
   float quantity = 2;
   float sum = 3;
   float weight = 4;
-  string goodName = 5;
+  string productName = 5;
 }
 
-message AddGoodToOrderRequest {
+message AddProductToOrderRequest {
   int32 orderId = 1; // could be 0, in this case new order is created
-  int32 goodId = 2;
+  int32 productId = 2;
   float quantity = 3;
   int32 clientId = 4;
 }
 
-message DeleteGoodFromOrderRequest {
+message DeleteProductFromOrderRequest {
   int32 orderId = 1;
-  int32 orderGoodId = 2;
+  int32 orderProductId = 2;
 }
 
 message GetOrderByIdRequest {
@@ -44,7 +44,7 @@ message GetOrderByIdRequest {
 
 message UpdateOrderRequest {
   int32 orderId = 1;
-  int32 goodId = 2;
+  int32 productId = 2;
   float newQuantity = 3;
 }
 
@@ -52,7 +52,7 @@ message DeleteOrderRequest {
   int32 orderId = 1;
 }
 
-message AddGoodToOrderResponse {
+message AddProductToOrderResponse {
   Order order = 1;
 }
 

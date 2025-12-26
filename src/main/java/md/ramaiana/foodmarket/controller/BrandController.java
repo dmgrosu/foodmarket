@@ -9,7 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import md.ramaiana.foodmarket.proto.Goods;
+import md.ramaiana.foodmarket.proto.Products;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,15 +38,15 @@ public class BrandController {
         return ResponseEntity.ok(printer.print(buildProtoFromDomain(brands)));
     }
 
-    private Goods.BrandListResponse buildProtoFromDomain(List<Brand> brands) {
-        List<Goods.Brand> protoBrands = new ArrayList<>();
+    private Products.BrandListResponse buildProtoFromDomain(List<Brand> brands) {
+        List<Products.Brand> protoBrands = new ArrayList<>();
         for (Brand brand : brands) {
-            protoBrands.add(Goods.Brand.newBuilder()
+            protoBrands.add(Products.Brand.newBuilder()
             .setId(brand.getId())
             .setName(brand.getName())
             .build());
         }
-        return Goods.BrandListResponse.newBuilder()
+        return Products.BrandListResponse.newBuilder()
                 .addAllBrands(protoBrands)
                 .build();
     }

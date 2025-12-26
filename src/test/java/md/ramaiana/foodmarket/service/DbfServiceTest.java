@@ -1,6 +1,6 @@
 package md.ramaiana.foodmarket.service;
 
-import md.ramaiana.foodmarket.model.GoodsReadResult;
+import md.ramaiana.foodmarket.model.ProductReadResult;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -23,11 +23,11 @@ class DbfServiceTest {
         // ARRANGE
         String filePath = "src/test/resources/testData.dbf";
         // ACT
-        GoodsReadResult actualResult = dbfService.readGoodsFromFile(filePath);
+        ProductReadResult actualResult = dbfService.readGoodsFromFile(filePath);
         // ASSERT
-        assertThat(actualResult.getGoods()).containsKeys("00014170", "00014172", "00021303")
+        assertThat(actualResult.getProducts()).containsKeys("00014170", "00014172", "00021303")
                 .doesNotContainKeys("00000005", "00000002");
-        assertThat(actualResult.getGoods().values()).extracting("name")
+        assertThat(actualResult.getProducts().values()).extracting("name")
                 .contains("ПЕЧЕНЬЕ/Нефис/Фасованые/Роно-крем 45-55гр/Роно крем кокос 45гр 1/12",
                         "СУШКА/Франзелуца/pentru amatori/1/6кг",
                         "МАКАРОНЫ/BUNETTO/1кг 1/10/трубка больш,",

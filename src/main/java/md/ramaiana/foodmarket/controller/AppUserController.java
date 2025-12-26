@@ -13,6 +13,8 @@ import md.ramaiana.foodmarket.proto.Authorization.UserProto;
 import md.ramaiana.foodmarket.proto.Clients;
 import md.ramaiana.foodmarket.proto.Common;
 import md.ramaiana.foodmarket.service.AppUserService;
+import md.ramaiana.foodmarket.service.ClientNotFoundException;
+import md.ramaiana.foodmarket.service.ClientService;
 import md.ramaiana.foodmarket.service.TokenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -39,6 +41,7 @@ import java.util.List;
 public class AppUserController {
 
     private final AppUserService appUserService;
+    private final ClientService clientService;
     private final TokenService tokenService;
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
@@ -46,10 +49,12 @@ public class AppUserController {
 
     @Autowired
     public AppUserController(AppUserService appUserService,
+                             ClientService clientService,
                              TokenService tokenService,
                              AuthenticationManager authenticationManager,
                              PasswordEncoder passwordEncoder) {
         this.appUserService = appUserService;
+        this.clientService = clientService;
         this.tokenService = tokenService;
         this.authenticationManager = authenticationManager;
         this.passwordEncoder = passwordEncoder;
@@ -57,7 +62,7 @@ public class AppUserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) throws InvalidProtocolBufferException {
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) throws InvalidProtocolBufferException, ClientNotFoundException {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword())
         );
@@ -69,7 +74,7 @@ public class AppUserController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> signUp(@RequestBody SignUpRequest signUpRequest) throws InvalidProtocolBufferException {
+    public ResponseEntity<?> signUp(@RequestBody SignUpRequest signUpRequest) throws InvalidProtocolBufferException, ClientNotFoundException {
         List<Common.Error> errors = validateSignUpRequest(signUpRequest);
         if (!errors.isEmpty()) {
             return ResponseEntity.badRequest().body(buildErrorResponse(errors));
@@ -116,7 +121,7 @@ public class AppUserController {
                 .build());
     }
 
-    private String buildSuccessfulLoginResponse(AppUser appUser) throws InvalidProtocolBufferException {
+    private String buildSuccessfulLoginResponse(AppUser appUser) throws InvalidProtocolBufferException, ClientNotFoundException {
         UserProto userProto = buildProtoFromAppUser(appUser);
         String token = tokenService.createToken(appUser);
         int tokenTtl = tokenService.getTOKEN_VALIDITY() / 1000;
@@ -127,18 +132,19 @@ public class AppUserController {
                 .build());
     }
 
-    private UserProto buildProtoFromAppUser(AppUser appUser) {
-        Client userClient = appUser.getClient();
-        if (userClient == null) {
+    private UserProto buildProtoFromAppUser(AppUser appUser) throws ClientNotFoundException {
+        Integer clientId = appUser.getClient().getId();
+        if (appUser.hasClient()) {
+            Client userClient = clientService.getClientById(clientId);
             return UserProto.newBuilder()
                     .setEmail(appUser.getEmail())
                     .setId(appUser.getId())
+                    .setClient(buildClientProtoFromClient(userClient))
                     .build();
         }
         return UserProto.newBuilder()
                 .setEmail(appUser.getEmail())
                 .setId(appUser.getId())
-                .setClient(buildClientProtoFromClient(userClient))
                 .build();
     }
 

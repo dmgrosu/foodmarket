@@ -1,9 +1,9 @@
 syntax = "proto3";
 
 option java_package = "md.ramaiana.foodmarket.proto";
-option java_outer_classname = "Goods";
+option java_outer_classname = "Products";
 
-message Good {
+message Product {
   int32 id = 1;
   string name = 2;
   double price = 3;
@@ -27,7 +27,7 @@ message Group {
   int32 id = 1;
   string name = 2;
   repeated Group groups = 3;
-  repeated Good goods = 4;
+  repeated Product products = 4;
 }
 
 message BrandListResponse {
@@ -39,6 +39,6 @@ message GroupListResponse {
 }
 
 message GoodsListResponse {
-  repeated Good goods = 1;
+  repeated Product products = 1;
   repeated Group groups = 2;
 }

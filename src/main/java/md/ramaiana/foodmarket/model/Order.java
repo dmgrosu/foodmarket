@@ -1,58 +1,91 @@
 package md.ramaiana.foodmarket.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.jdbc.core.mapping.AggregateReference;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.MappedCollection;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.OffsetDateTime;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
-/**
- * @author Kirill Grosu (grosukirill009@gmail.com), 2/11/2021
- */
 @AllArgsConstructor
-@Data
+@Getter
 @Builder
 @Table("order")
 public class Order {
     @Id
-    Integer id;
+    @With
+    private final Integer id;
     @Column("client_id")
-    Integer clientId;
+    private final AggregateReference<@NonNull Client, @NonNull Integer> client;
     @Column("total_sum")
-    Float totalSum;
+    private Float totalSum;
     @Column("created_at")
-    OffsetDateTime createdAt;
+    @Builder.Default
+    private final OffsetDateTime createdAt = OffsetDateTime.now();
     @Column("deleted_at")
-    OffsetDateTime deletedAt;
+    private final OffsetDateTime deletedAt;
     @Column("processed_at")
-    OffsetDateTime processedAt;
+    private final OffsetDateTime processedAt;
     @Column("processing_result")
-    String processingResult;
+    private final String processingResult;
     @Column("status")
-    OrderState state;
-    @MappedCollection(idColumn = "order_id")
-    Set<OrderGood> goods;
+    private final OrderState state;
+    @MappedCollection(idColumn = "id", keyColumn = "order_id")
+    @Builder.Default
+    private final List<OrderProduct> products = new ArrayList<>();
 
-    public void updateTotalSum() {
-        if (goods != null) {
-            float total = 0f;
-            for (OrderGood good : goods) {
-                total += good.sum;
-            }
-            this.totalSum = total;
-        }
+    public void addProduct(Product product, Float quantity) {
+        products.add(OrderProduct.builder()
+                .product(AggregateReference.to(product.getId()))
+                .weight(product.getWeight() * quantity)
+                .quantity(quantity)
+                .sum(product.getPrice() * quantity)
+                .build());
+        updateTotalSum();
     }
 
-    public float getTotalWeightForGoods() {
+    public Order updateQuantity(int productId, Float newQuantity) {
+        List<OrderProduct> updatedProducts = products.stream()
+                .map(op -> op.getProduct().getId() == productId ?
+                        new OrderProduct(
+                                op.getId(),
+                                AggregateReference.to(productId),
+                                newQuantity,
+                                op.getPrice(),
+                                op.getPrice() * newQuantity,
+                                op.getWeight() * newQuantity
+                        ) :
+                        op)
+                .toList();
+        Float total = updatedProducts.stream()
+                .map(OrderProduct::getSum)
+                .reduce(Float::sum)
+                .orElse(0f);
+        return new Order(id, client, total, createdAt, deletedAt,
+                processedAt, processingResult, state, updatedProducts);
+    }
+
+    public void removeProduct(int orderProductId) {
+        products.removeIf(op -> op.getId() == orderProductId);
+        updateTotalSum();
+    }
+
+    private void updateTotalSum() {
+        this.totalSum = products.stream()
+                .map(OrderProduct::getSum)
+                .reduce(Float::sum)
+                .orElse(0f);
+    }
+
+    public float getTotalWeightForProducts() {
         float result = 0f;
-        if (goods == null) return 0f;
-        for (OrderGood good : goods) {
-            result += good.weight;
+        if (products == null) return 0f;
+        for (OrderProduct product : products) {
+            result += product.getWeight();
         }
         return result;
     }

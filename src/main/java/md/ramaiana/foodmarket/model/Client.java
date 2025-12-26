@@ -3,26 +3,38 @@ package md.ramaiana.foodmarket.model;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.With;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.OffsetDateTime;
+import java.util.Objects;
 
-/**
- * @author Dmitri Grosu (dmitri.grosu@gmail.com), 2/7/21
- */
 @AllArgsConstructor
 @Builder
 @Getter
 @Table("client")
 public class Client {
     @Id
-    Integer id;
-    String name;
-    String idno;
+    @With
+    private final Integer id;
+    private final String name;
+    private final String idno;
     @Column("created_at")
-    OffsetDateTime createdAt;
+    @Builder.Default
+    private final OffsetDateTime createdAt = OffsetDateTime.now();
     @Column("deleted_at")
-    OffsetDateTime deletedAt;
+    private final OffsetDateTime deletedAt;
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof Client client)) return false;
+        return Objects.equals(id, client.id) && Objects.equals(idno, client.idno);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, idno);
+    }
 }

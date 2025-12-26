@@ -1,15 +1,14 @@
 package md.ramaiana.foodmarket.controller;
 
-import md.ramaiana.foodmarket.model.Good;
-import md.ramaiana.foodmarket.model.GoodGroup;
-import md.ramaiana.foodmarket.service.GoodService;
+import md.ramaiana.foodmarket.model.Product;
+import md.ramaiana.foodmarket.model.ProductGroup;
+import md.ramaiana.foodmarket.service.ProductService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.lang.Nullable;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.ArrayList;
@@ -23,13 +22,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
-@AutoConfigureMockMvc
-public class GoodControllerTest {
+public class ProductControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
-    private GoodService goodServiceMock;
+    @MockitoBean
+    private ProductService productServiceMock;
 
     @WithMockUser("spring")
     @Test
@@ -101,25 +99,25 @@ public class GoodControllerTest {
     }
 
     private void givenGroupsForList() {
-        List<GoodGroup> groups = someGroups(1);
-        when(goodServiceMock.findGroupsForGoodsList(anyList()))
+        List<ProductGroup> groups = someGroups(1);
+        when(productServiceMock.findProductsForProductsList(anyList()))
                 .thenReturn(groups);
     }
 
     private void givenGroupsForParent(Integer parentGroupId) {
-        List<GoodGroup> groups = someGroups(parentGroupId);
-        when(goodServiceMock.getGroupsHierarchy(eq(parentGroupId)))
+        List<ProductGroup> groups = someGroups(parentGroupId);
+        when(productServiceMock.getGroupsHierarchy(eq(parentGroupId)))
                 .thenReturn(groups);
     }
 
-    private List<GoodGroup> someGroups(Integer parentGroupId) {
-        List<GoodGroup> groups = new ArrayList<>();
-        groups.add(GoodGroup.builder()
+    private List<ProductGroup> someGroups(Integer parentGroupId) {
+        List<ProductGroup> groups = new ArrayList<>();
+        groups.add(ProductGroup.builder()
                 .id(15)
                 .name("someGroupName")
                 .parentGroupId(parentGroupId)
                 .build());
-        groups.add(GoodGroup.builder()
+        groups.add(ProductGroup.builder()
                 .id(16)
                 .name("someOtherGroupName")
                 .parentGroupId(parentGroupId)
@@ -128,8 +126,8 @@ public class GoodControllerTest {
     }
 
     private void givenGoodsFilteredBy(Integer groupId, @Nullable Integer brandId, @Nullable String name) {
-        List<Good> goods = new ArrayList<>();
-        goods.add(Good.builder()
+        List<Product> products = new ArrayList<>();
+        products.add(Product.builder()
                 .id(1)
                 .name(name == null ? "someName" : name)
                 .price(15f)
@@ -140,7 +138,7 @@ public class GoodControllerTest {
                 .barCode("111222333444")
                 .weight(1000f)
                 .build());
-        goods.add(Good.builder()
+        products.add(Product.builder()
                 .id(2)
                 .name(name == null ? "someOtherName" : name)
                 .price(20f)
@@ -151,8 +149,8 @@ public class GoodControllerTest {
                 .barCode("222333444555")
                 .weight(2000f)
                 .build());
-        when(goodServiceMock.findGoodsFiltered(eq(groupId), eq(brandId), eq(name)))
-                .thenReturn(goods);
+        when(productServiceMock.findProductsFiltered(eq(groupId), eq(brandId), eq(name)))
+                .thenReturn(products);
     }
 
 }

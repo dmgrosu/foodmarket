@@ -4,7 +4,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;
 import lombok.extern.slf4j.Slf4j;
 import md.ramaiana.foodmarket.model.Order;
-import md.ramaiana.foodmarket.model.OrderGood;
+import md.ramaiana.foodmarket.model.OrderProduct;
 import md.ramaiana.foodmarket.proto.Clients;
 import md.ramaiana.foodmarket.proto.Common;
 import md.ramaiana.foodmarket.proto.Common.ErrorCode;
@@ -21,7 +21,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/order")
@@ -29,30 +29,30 @@ import java.util.Set;
 public class OrderController {
 
     private final OrderService orderService;
-    private final GoodService goodService;
+    private final ProductService productService;
     private final JsonFormat.Printer printer;
 
     @Autowired
-    public OrderController(OrderService orderService, GoodService goodService) {
+    public OrderController(OrderService orderService, ProductService productService) {
         this.orderService = orderService;
-        this.goodService = goodService;
+        this.productService = productService;
         this.printer = JsonFormat.printer().omittingInsignificantWhitespace();
     }
 
-    @PostMapping("/addGood")
-    public ResponseEntity<?> addGoodToOrder(@RequestBody Orders.AddGoodToOrderRequest addGoodToOrderRequest) throws InvalidProtocolBufferException {
+    @PostMapping("/addProduct")
+    public ResponseEntity<?> addProductToOrder(@RequestBody Orders.AddProductToOrderRequest addProductToOrderRequest) throws InvalidProtocolBufferException {
         try {
-            List<Common.Error> errors = validateAddGoodToOrderRequest(addGoodToOrderRequest);
+            List<Common.Error> errors = validateAddProductToOrderRequest(addProductToOrderRequest);
             if (!errors.isEmpty()) {
                 return ResponseEntity.badRequest().body(printer.print(buildErrorsResponse(errors)));
             }
-            int orderId = addGoodToOrderRequest.getOrderId();
-            int goodId = addGoodToOrderRequest.getGoodId();
-            float quantity = addGoodToOrderRequest.getQuantity();
-            int clientId = addGoodToOrderRequest.getClientId();
-            Order order = orderService.addGoodToOrder(orderId, goodId, quantity, clientId);
+            int orderId = addProductToOrderRequest.getOrderId();
+            int productId = addProductToOrderRequest.getProductId();
+            float quantity = addProductToOrderRequest.getQuantity();
+            int clientId = addProductToOrderRequest.getClientId();
+            Order order = orderService.addProductToOrder(orderId, productId, quantity, clientId);
             return ResponseEntity.ok(printer.print(buildProtoFromDomain(order)));
-        } catch (GoodNotFoundException e) {
+        } catch (ProductNotFoundException e) {
             log.warn(e.getMessage());
             return ResponseEntity.badRequest().body(printer.print(buildErrorResponse(e.getMessage(), ErrorCode.GOOD_NOT_FOUND)));
         } catch (ClientNotFoundException e) {
@@ -99,15 +99,15 @@ public class OrderController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/deleteGood")
-    public ResponseEntity<?> deleteGoodFromOrder(@RequestBody Orders.DeleteGoodFromOrderRequest deleteGoodFromOrderRequest) throws InvalidProtocolBufferException {
-        int orderGoodId = deleteGoodFromOrderRequest.getOrderGoodId();
-        int orderId = deleteGoodFromOrderRequest.getOrderId();
-        if (orderGoodId == 0) {
-            return ResponseEntity.badRequest().body(printer.print(buildErrorResponse("Invalid orderGoodId", ErrorCode.ORDER_NOT_FOUND)));
+    @PostMapping("/deleteProduct")
+    public ResponseEntity<?> deleteProductFromOrder(@RequestBody Orders.DeleteProductFromOrderRequest deleteProductFromOrderRequest) throws InvalidProtocolBufferException {
+        int orderProductId = deleteProductFromOrderRequest.getOrderProductId();
+        int orderId = deleteProductFromOrderRequest.getOrderId();
+        if (orderProductId == 0) {
+            return ResponseEntity.badRequest().body(printer.print(buildErrorResponse("Invalid orderProductId", ErrorCode.ORDER_NOT_FOUND)));
         }
         try {
-            orderService.deleteGoodFromOrder(orderId, orderGoodId);
+            orderService.deleteProductFromOrder(orderId, orderProductId);
         } catch (OrderNotFoundException e) {
             return ResponseEntity.badRequest().body(printer.print(buildErrorResponse(e.getMessage(), ErrorCode.ORDER_NOT_FOUND)));
         } catch (Exception e) {
@@ -149,13 +149,13 @@ public class OrderController {
             return ResponseEntity.badRequest().body(printer.print(buildErrorsResponse(errors)));
         }
         int orderId = updateOrderRequest.getOrderId();
-        int goodId = updateOrderRequest.getGoodId();
+        int productId = updateOrderRequest.getProductId();
         float newQuantity = updateOrderRequest.getNewQuantity();
         try {
-            orderService.updateOrder(orderId, goodId, newQuantity);
-        } catch (GoodNotFoundException e) {
+            orderService.updateProductQuantity(orderId, productId, newQuantity);
+        } catch (OrderNotFoundException e) {
             log.warn(e.getMessage());
-            return ResponseEntity.badRequest().body(printer.print(buildErrorResponse(e.getMessage(), ErrorCode.GOOD_NOT_FOUND)));
+            return ResponseEntity.badRequest().body(printer.print(buildErrorResponse(e.getMessage(), ErrorCode.ORDER_NOT_FOUND)));
         }
         return ResponseEntity.ok().build();
     }
@@ -185,18 +185,18 @@ public class OrderController {
         List<Orders.Order> protoOrders = new ArrayList<>();
         for (Order order : orders.toList()) {
             Orders.OrderState state = Orders.OrderState.NEW;
-            List<Orders.OrderGood> protoGoods = new ArrayList<>();
-            for (OrderGood good : order.getGoods()) {
-                protoGoods.add(mapOrderGoodToProto(good));
+            List<Orders.OrderProduct> protoGoods = new ArrayList<>();
+            for (OrderProduct good : order.getProducts()) {
+                protoGoods.add(mapOrderProductToProto(good));
             }
             protoOrders.add(Orders.Order.newBuilder()
                     .setId(order.getId())
-                    .setClient(Clients.Client.newBuilder().setId(order.getClientId()).build())
+                    .setClient(Clients.Client.newBuilder().setId(order.getClient().getId()).build())
                     .setTotalSum(order.getTotalSum())
                     .setState(state)
                     .setDate(order.getCreatedAt().toInstant().toEpochMilli())
-                    .setTotalWeight(order.getTotalWeightForGoods())
-                    .addAllGoods(protoGoods)
+                    .setTotalWeight(order.getTotalWeightForProducts())
+                    .addAllProducts(protoGoods)
                     .build());
         }
         Common.Pagination protoPagination = Common.Pagination.newBuilder()
@@ -210,41 +210,37 @@ public class OrderController {
                 .build();
     }
 
-    private Orders.AddGoodToOrderResponse buildProtoFromDomain(Order order) {
+    private Orders.AddProductToOrderResponse buildProtoFromDomain(Order order) {
         Orders.OrderState state = Orders.OrderState.NEW;
         if (StringUtils.hasText(order.getProcessingResult())) {
             state = Orders.OrderState.PROCESSED;
-            // TODO: 3/5/2021 Make logic
+            // TODO: 3/5/2021 Implement logic
         }
-        Clients.Client protoClient = Clients.Client.newBuilder().setId(order.getClientId()).build();
-        List<Orders.OrderGood> protoGoods = new ArrayList<>();
-        Set<OrderGood> goods = order.getGoods();
-        for (OrderGood good : goods) {
-            protoGoods.add(mapOrderGoodToProto(good));
-        }
+        Clients.Client protoClient = Clients.Client.newBuilder().setId(order.getClient().getId()).build();
+        List<Orders.OrderProduct> protoGoods = order.getProducts().stream().map(this::mapOrderProductToProto).collect(Collectors.toList());
         Orders.Order protoOrder = Orders.Order.newBuilder()
                 .setId(order.getId())
                 .setClient(protoClient)
-                .addAllGoods(protoGoods)
+                .addAllProducts(protoGoods)
                 .setState(state)
                 .setDate(order.getCreatedAt().toInstant().toEpochMilli())
-                .setTotalWeight(order.getTotalWeightForGoods())
+                .setTotalWeight(order.getTotalWeightForProducts())
                 .setTotalSum(order.getTotalSum())
                 .build();
 
-        return Orders.AddGoodToOrderResponse.newBuilder()
+        return Orders.AddProductToOrderResponse.newBuilder()
                 .setOrder(protoOrder)
                 .build();
     }
 
-    private Orders.OrderGood mapOrderGoodToProto(OrderGood good) {
-        String goodName = goodService.getGoodNameById(good.getGoodId());
-        return Orders.OrderGood.newBuilder()
-                .setGoodId(good.getId())
-                .setQuantity(good.getQuantity())
-                .setSum(good.getSum())
-                .setWeight(good.getWeight())
-                .setGoodName(goodName == null ? "" : goodName)
+    private Orders.OrderProduct mapOrderProductToProto(OrderProduct orderProduct) {
+        String goodName = productService.getProductNameById(orderProduct.getProduct().getId());
+        return Orders.OrderProduct.newBuilder()
+                .setProductId(orderProduct.getId())
+                .setQuantity(orderProduct.getQuantity())
+                .setSum(orderProduct.getSum())
+                .setWeight(orderProduct.getWeight())
+                .setProductName(goodName == null ? "" : goodName)
                 .build();
     }
 
@@ -263,16 +259,16 @@ public class OrderController {
                 .build();
     }
 
-    private List<Common.Error> validateAddGoodToOrderRequest(Orders.AddGoodToOrderRequest addGoodToOrderRequest) {
+    private List<Common.Error> validateAddProductToOrderRequest(Orders.AddProductToOrderRequest request) {
         List<Common.Error> errors = new ArrayList<>();
-        int goodId = addGoodToOrderRequest.getGoodId();
-        float quantity = addGoodToOrderRequest.getQuantity();
+        int productId = request.getProductId();
+        float quantity = request.getQuantity();
         if (quantity <= 0) {
             errors.add(Common.Error.newBuilder()
                     .setCode(ErrorCode.QUANTITY_IS_LESS_OR_EQUAL_TO_ZERO)
                     .build());
         }
-        if (goodId <= 0) {
+        if (productId <= 0) {
             errors.add(Common.Error.newBuilder()
                     .setCode(ErrorCode.GOOD_ID_IS_LESS_OR_EQUAL_TO_ZERO)
                     .build());

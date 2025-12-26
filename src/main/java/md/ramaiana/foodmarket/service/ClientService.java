@@ -23,4 +23,9 @@ public class ClientService {
                 .orElseThrow(() -> new ClientNotFoundException(String.format("Client with IDNO [%s] not found", idno)));
     }
 
+    public Client getClientById(Integer clientId) throws ClientNotFoundException {
+        return clientDao.findById(clientId)
+                .orElseThrow(() -> new ClientNotFoundException(String.format("Client with ID [%s] not found", clientId)));
+    }
+
 }
