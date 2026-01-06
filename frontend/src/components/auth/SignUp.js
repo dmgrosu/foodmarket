@@ -66,7 +66,7 @@ class SignUp extends Component {
     validateInput = () => {
         const {email, password, confirmPassword} = this.state;
         const errors = [];
-        const emailRegEx = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        const emailRegEx = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
         if (!email) {
             errors.push({
                 field: 'email',
@@ -179,7 +179,7 @@ class SignUp extends Component {
             <Container component="main"
                        maxWidth="xs"
             >
-                {token && <Redirect to="/goods"/>}
+                {token && <Redirect to="/products"/>}
                 <div className={classes.paper}>
                     <Avatar className={classes.avatar}>
                         <LockOutlinedIcon/>

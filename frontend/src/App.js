@@ -9,7 +9,7 @@ import {ToastContainer} from "material-react-toastify";
 import 'material-react-toastify/dist/ReactToastify.min.css';
 import {connect} from "react-redux";
 import Navbar from "./components/navigation/Navbar";
-import Goods from "./components/goods/Goods";
+import Products from "./components/products/Products";
 import Profile from "./components/auth/Profile";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import Orders from "./components/orders/Orders";
@@ -50,7 +50,7 @@ const App = (props) => {
 
     if (isAuthenticated) {
         routes.push(
-            <Route path='/goods' component={Goods} key={4}/>,
+            <Route path='/products' component={Products} key={4}/>,
             <Route path='/orders' component={Orders} key={5}/>,
             <Route path='/profile' component={Profile} key={6}/>,
             <Route path='/cart' component={Cart} key={7}/>,

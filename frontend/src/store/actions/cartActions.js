@@ -17,20 +17,20 @@ export const OPEN_PLACE_ORDER_DIALOG = "OPEN_PLACE_ORDER_DIALOG";
 export const CLOSE_PLACE_ORDER_DIALOG = "CLOSE_PLACE_ORDER_DIALOG";
 
 
-export const addGoodToCart = (goodId, orderId, quantity) => {
+export const addProductToCart = (productId, orderId, quantity) => {
     return (dispatch, getState) => {
         const {token} = getState().authReducer;
         dispatch({type: ADD_TO_CART_START});
-        axios.post("/order/addGood",
-            {orderId: orderId, goodId: goodId, quantity: quantity},
+        axios.post("/order/addProduct",
+            {orderId: orderId, productId: productId, quantity: quantity},
             {headers: {'Authorization': token}})
             .then(resp => {
                 const data = resp.data;
                 dispatch({
                     type: ADD_TO_CART_SUCCESS,
                     payload: {
-                        orderId: data.order.id,
-                        goods: data.order.goods,
+                        orderId: data.id,
+                        products: data.items,
                     }
                 });
             })
@@ -46,12 +46,11 @@ export const addGoodToCart = (goodId, orderId, quantity) => {
     };
 };
 
-export const deleteGoodFromCart = (orderId, orderGoodId) => {
+export const deleteProductFromCart = (orderId, itemId) => {
     return (dispatch, getState) => {
         const {token} = getState().authReducer;
         dispatch({type: DELETE_FROM_CART_START});
-        axios.post("/order/deleteGood",
-            {orderId: orderId, orderGoodId: orderGoodId},
+        axios.delete(`/order/deleteProduct/${orderId}/${itemId}`,
             {headers: {'Authorization': token}})
             .then(resp => {
                 dispatch({
@@ -68,8 +67,7 @@ export const placeOrder = (orderId) => {
     return (dispatch, getState) => {
         const {token} = getState().authReducer;
         dispatch({type: PLACE_ORDER_START});
-        axios.post("/order/placeOrder",
-            {orderId: orderId},
+        axios.put(`/order/placeOrder/${orderId}`,
             {headers: {'Authorization': token}})
             .then(resp => {
                 dispatch({
@@ -82,11 +80,11 @@ export const placeOrder = (orderId) => {
     };
 }
 
-export const selectGood = (goodId) => {
+export const selectProduct = (productId) => {
     return {
         type: SELECT_GOOD,
         payload: {
-            goodId: goodId
+            productId: productId
         }
     };
 }
@@ -100,16 +98,16 @@ export const changeQuantity = (quantity) => {
     };
 }
 
-export const selectGoodToDelete = (goodId) => {
+export const selectProductToDelete = (productId) => {
     return {
         type: SELECT_GOOD_TO_DELETE,
         payload: {
-            goodId: goodId
+            productId: productId
         }
     };
 }
 
-export const cancelDeleteGood = () => {
+export const cancelDeleteProduct = () => {
     return {
         type: DELETE_FROM_CART_CANCELLED
     }

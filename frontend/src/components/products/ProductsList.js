@@ -17,7 +17,7 @@ const styles = theme => ({
     }
 });
 
-const GoodsList = ({classes, goods, handleSelect, isFetching}) => {
+const ProductsList = ({classes, products, handleSelect, isFetching}) => {
 
     const columns = [
         {id: 1, label: 'Name', align: 'left', minWidth: '40%', dataId: 'name'},
@@ -55,17 +55,17 @@ const GoodsList = ({classes, goods, handleSelect, isFetching}) => {
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    {Array.isArray(goods) ? goods.map(good => (
-                        <TableRow key={good.id}
+                    {Array.isArray(products) ? products.map(product => (
+                        <TableRow key={product.id}
                                   hover
                         >
                             <TableCell>
-                                <IconButton onClick={() => handleSelect(good.id)}>
+                                <IconButton onClick={() => handleSelect(product.id)}>
                                     <AddShoppingCart fontSize="small" color="secondary"/>
                                 </IconButton>
                             </TableCell>
                             {columns.map(column => {
-                                const value = good[column.dataId];
+                                const value = product[column.dataId];
                                 return (
                                     <TableCell key={column.id}
                                                align={column.align}
@@ -82,4 +82,4 @@ const GoodsList = ({classes, goods, handleSelect, isFetching}) => {
     )
 }
 
-export default withStyles(styles)(GoodsList);
+export default withStyles(styles)(ProductsList);

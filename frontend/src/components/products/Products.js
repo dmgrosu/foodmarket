@@ -7,9 +7,9 @@ import Filter from "./Filter";
 import axios from "axios";
 import Groups from "./Groups";
 import Grid from "@material-ui/core/Grid";
-import GoodsList from "./GoodsList";
+import ProductsList from "./ProductsList";
 import {handleError} from "../../store/actions/authActions";
-import {addGoodToCart, changeQuantity, selectGood} from "../../store/actions/cartActions";
+import {addProductToCart, changeQuantity, selectProduct} from "../../store/actions/cartActions";
 
 const styles = theme => ({
     root: {
@@ -23,7 +23,7 @@ const styles = theme => ({
     },
 });
 
-class Goods extends Component {
+class Products extends Component {
 
     state = {
         filter: {
@@ -32,11 +32,11 @@ class Goods extends Component {
             changed: false
         },
         allBrands: [],
-        goods: [],
+        products: [],
         groups: [],
         selectedGroupId: null,
         isFetchingGroups: false,
-        isFetchingGoods: false,
+        isFetchingProducts: false,
     }
 
     changeFilter = (event, field) => {
@@ -49,9 +49,9 @@ class Goods extends Component {
         }))
     }
 
-    setFetchingStarted = (goods, groups) => {
+    setFetchingStarted = (products, groups) => {
         this.setState(state => ({
-            isFetchingGoods: goods,
+            isFetchingProducts: products,
             isFetchingGroups: groups,
             filter: {
                 ...state.filter,
@@ -68,15 +68,15 @@ class Goods extends Component {
             return;
         }
         this.setFetchingStarted(true, true);
-        axios.get("/good/search", {
+        axios.get("/product/search", {
             params: {brandId: brandId, name: filter.name},
             headers: {'Authorization': this.props.auth.token}
         }).then(resp => {
             const {data} = resp;
             this.setState({
                 groups: data.groups,
-                goods: [],
-                isFetchingGoods: false,
+                products: [],
+                isFetchingProducts: false,
                 isFetchingGroups: false
             })
         }).catch(err => {
@@ -87,7 +87,7 @@ class Goods extends Component {
     handleFetchingError(err) {
         this.setState({
             isFetchingGroups: false,
-            isFetchingGoods: false,
+            isFetchingProducts: false,
         });
         handleError(err);
     }
@@ -107,12 +107,12 @@ class Goods extends Component {
 
     fetchGroups = () => {
         this.setFetchingStarted(false, true);
-        axios.get("/good/listGroups", {headers: {'Authorization': this.props.auth.token}})
+        axios.get("/product/listGroups", {headers: {'Authorization': this.props.auth.token}})
             .then(resp => {
                 const {data} = resp;
                 this.setState({
                     groups: data.groups,
-                    goods: [],
+                    products: [],
                     isFetchingGroups: false,
                 })
             })
@@ -121,7 +121,7 @@ class Goods extends Component {
             })
     }
 
-    fetchGoods = (event, groupId) => {
+    fetchProducts = (event, groupId) => {
         const {filter} = this.state;
         let brandId = null;
         let nameLike = null;
@@ -130,7 +130,7 @@ class Goods extends Component {
             nameLike = filter.name !== '' ? filter.name : null;
         }
         this.setFetchingStarted(true, false);
-        axios.get("/good/listGoods", {
+        axios.get("/product/listProducts", {
             params: {
                 groupId: groupId,
                 brandId: brandId,
@@ -141,8 +141,8 @@ class Goods extends Component {
             .then(resp => {
                 const {data} = resp;
                 this.setState({
-                    goods: data.goods,
-                    isFetchingGoods: false,
+                    products: data.products,
+                    isFetchingProducts: false,
                 })
             })
             .catch(err => {
@@ -150,18 +150,18 @@ class Goods extends Component {
             })
     }
 
-    handleGoodSelect = (goodId) => {
-        this.props.selectGood(goodId);
+    handleProductSelect = (productId) => {
+        this.props.selectProduct(productId);
     }
 
     addToCart = () => {
-        const {selectedGood, orderId} = this.props.cart;
-        if (selectedGood) {
-            this.props.addGoodToCart(selectedGood.id, orderId, selectedGood.quantity);
+        const {selectedProduct, orderId} = this.props.cart;
+        if (selectedProduct) {
+            this.props.addProductToCart(selectedProduct.id, orderId, selectedProduct.quantity);
         }
     }
 
-    changeSelectedGood = (event) => {
+    changeSelectedProduct = (event) => {
         this.props.changeQuantity(event.target.value);
     }
 
@@ -174,7 +174,7 @@ class Goods extends Component {
 
         const {auth, classes, cart} = this.props;
         const isAuthorized = auth.token !== null;
-        const {filter, allBrands, goods, groups, isFetchingGroups, isFetchingGoods} = this.state;
+        const {filter, allBrands, products, groups, isFetchingGroups, isFetchingProducts} = this.state;
 
         return (
             <Grid container className={classes.root}>
@@ -192,22 +192,22 @@ class Goods extends Component {
                     <Grid item xs={12} sm={3}>
                         <Paper elevation={3}>
                             <Groups groups={groups}
-                                    handleSelect={this.fetchGoods}
+                                    handleSelect={this.fetchProducts}
                                     isFetching={isFetchingGroups}
                             />
                         </Paper>
                     </Grid>
                     <Grid item xs={12} sm={9}>
                         <Paper elevation={3}>
-                            <GoodsList goods={goods}
-                                       handleSelect={this.handleGoodSelect}
-                                       isFetching={isFetchingGoods}
+                            <ProductsList products={products}
+                                       handleSelect={this.handleProductSelect}
+                                       isFetching={isFetchingProducts}
                             />
                         </Paper>
                     </Grid>
                 </Grid>
-                <Dialog open={cart.selectedGood.id !== null}
-                        onClose={() => this.handleGoodSelect(null)}
+                <Dialog open={cart.selectedProduct.id !== null}
+                        onClose={() => this.handleProductSelect(null)}
                 >
                     <DialogTitle>
                         Add to cart
@@ -219,8 +219,8 @@ class Goods extends Component {
                         <TextField autoFocus
                                    fullWidth
                                    type="number"
-                                   value={cart.selectedGood.quantity}
-                                   onChange={this.changeSelectedGood}
+                                   value={cart.selectedProduct.quantity}
+                                   onChange={this.changeSelectedProduct}
                                    disabled={cart.isAdding}
                         />
                     </DialogContent>
@@ -231,7 +231,7 @@ class Goods extends Component {
                             OK
                         </Button>
                         {cart.isAdding && <CircularProgress size={28} className={classes.buttonProgress}/>}
-                        <Button onClick={() => this.handleGoodSelect(null)}
+                        <Button onClick={() => this.handleProductSelect(null)}
                                 disabled={cart.isAdding}
                         >
                             Cancel
@@ -249,7 +249,7 @@ const mapStateToProps = state => ({
 });
 
 export default connect(mapStateToProps, {
-    addGoodToCart,
-    selectGood,
+    addProductToCart,
+    selectProduct,
     changeQuantity
-})(withStyles(styles)(Goods));
+})(withStyles(styles)(Products));

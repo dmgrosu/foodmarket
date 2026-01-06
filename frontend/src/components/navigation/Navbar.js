@@ -25,9 +25,9 @@ const Navbar = (props) => {
     const {classes, auth, logout, cart} = props;
     const isAuthenticated = auth.token !== null;
 
-    const getGoodsCount = () => {
+    const getProductsCount = () => {
         if (cart) {
-            return cart.goods ? cart.goods.length : 0;
+            return cart.products ? cart.products.length : 0;
         }
     }
 
@@ -39,7 +39,7 @@ const Navbar = (props) => {
                     Ramaiana Food Market
                 </Typography>
                 {isAuthenticated && <IconButton component={Link} to="/cart">
-                    <Badge badgeContent={getGoodsCount()} color="error">
+                    <Badge badgeContent={getProductsCount()} color="error">
                         <ShoppingCartIcon/>
                     </Badge>
                 </IconButton>}

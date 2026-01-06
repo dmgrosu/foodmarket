@@ -17,17 +17,17 @@ import {
 
 const initialState = {
     orderId: null,
-    goods: [],
+    products: [],
     isAdding: false,
     isDeleting: false,
     isPlacing: false,
     placeOrderDialogOpen: false,
     error: null,
-    selectedGood: {
+    selectedProduct: {
         id: null,
         quantity: 0,
     },
-    deleteGoodId: null,
+    deleteProductId: null,
 };
 
 const cartReducer = (state = initialState, action) => {
@@ -40,10 +40,10 @@ const cartReducer = (state = initialState, action) => {
         case ADD_TO_CART_SUCCESS:
             return {
                 ...state,
-                goods: action.payload.goods,
+                products: action.payload.products,
                 orderId: action.payload.orderId,
                 isAdding: false,
-                selectedGood: {
+                selectedProduct: {
                     id: null,
                     quantity: 0
                 }
@@ -57,23 +57,23 @@ const cartReducer = (state = initialState, action) => {
         case SELECT_GOOD:
             return {
                 ...state,
-                selectedGood: {
-                    id: action.payload.goodId,
+                selectedProduct: {
+                    id: action.payload.productId,
                     quantity: 0
                 }
             }
         case CHANGE_QUANTITY:
             return {
                 ...state,
-                selectedGood: {
-                    ...state.selectedGood,
+                selectedProduct: {
+                    ...state.selectedProduct,
                     quantity: action.payload.quantity
                 }
             }
         case SELECT_GOOD_TO_DELETE:
             return {
                 ...state,
-                deleteGoodId: action.payload.goodId
+                deleteProductId: action.payload.productId
             }
         case DELETE_FROM_CART_START:
             return {
@@ -83,16 +83,16 @@ const cartReducer = (state = initialState, action) => {
         case DELETE_FROM_CART_CANCELLED:
             return {
                 ...state,
-                deleteGoodId: null,
+                deleteProductId: null,
                 isDeleting: true,
             }
         case DELETE_FROM_CART_END:
-            const newGoods = state.goods.filter(good => good.goodId !== state.deleteGoodId);
+            const newProducts = state.products.filter(product => product.productId !== state.deleteProductId);
             return {
                 ...state,
-                goods: newGoods,
-                orderId: newGoods.length === 0 ? null : state.orderId,
-                deleteGoodId: null,
+                products: newProducts,
+                orderId: newProducts.length === 0 ? null : state.orderId,
+                deleteProductId: null,
                 isDeleting: false
             }
         case PLACE_ORDER_START:
@@ -104,7 +104,7 @@ const cartReducer = (state = initialState, action) => {
             return {
                 ...state,
                 orderId: null,
-                goods: [],
+                products: [],
                 isPlacing: false,
                 placeOrderDialogOpen: false
             }

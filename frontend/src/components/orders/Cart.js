@@ -2,7 +2,7 @@ import React from 'react';
 import {Button, Grid, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, withStyles} from "@material-ui/core";
 import {connect} from "react-redux";
 import {Delete} from "@material-ui/icons";
-import {cancelDeleteGood, closePlaceOrderDialog, deleteGoodFromCart, openPlaceOrderDialog, placeOrder, selectGoodToDelete} from "../../store/actions/cartActions";
+import {cancelDeleteProduct, closePlaceOrderDialog, deleteProductFromCart, openPlaceOrderDialog, placeOrder, selectProductToDelete} from "../../store/actions/cartActions";
 import {Link} from "react-router-dom";
 import ConfirmDialog from "../ConfirmDialog";
 
@@ -31,17 +31,17 @@ const styles = theme => ({
     }
 });
 
-const Cart = ({classes, cart, selectGoodToDelete, cancelDeleteGood, deleteGoodFromCart,
+const Cart = ({classes, cart, selectProductToDelete, cancelDeleteProduct, deleteProductFromCart,
                   openPlaceOrderDialog, closePlaceOrderDialog, placeOrder}) => {
 
     const columns = [
-        {id: 1, label: 'Name', align: 'left', minWidth: '40%', dataId: 'goodName'},
+        {id: 1, label: 'Name', align: 'left', minWidth: '40%', dataId: 'productName'},
         {id: 2, label: 'Price', align: 'center', minWidth: '20%', dataId: 'price'},
         {id: 3, label: 'Quantity', align: 'center', minWidth: '20%', dataId: 'quantity'},
         {id: 4, label: 'Sum', align: 'right', minWidth: '20%', dataId: 'sum'},
     ];
 
-    const goods = cart.goods;
+    const products = cart.products;
 
     return (
         <Grid container className={classes.root}>
@@ -53,7 +53,7 @@ const Cart = ({classes, cart, selectGoodToDelete, cancelDeleteGood, deleteGoodFr
                 </Grid>
                 <Grid item sm={4} style={{textAlign: "right"}}>
                     <Button variant="contained"
-                            component={Link} to="/goods">
+                            component={Link} to="/products">
                         Back to catalogue
                     </Button>
                 </Grid>
@@ -78,19 +78,19 @@ const Cart = ({classes, cart, selectGoodToDelete, cancelDeleteGood, deleteGoodFr
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {Array.isArray(goods) ? goods.map(good => (
-                                <TableRow key={good.goodId}
+                            {Array.isArray(products) ? products.map(product => (
+                                <TableRow key={product.productId}
                                           hover
                                 >
                                     <TableCell>
-                                        <IconButton onClick={() => selectGoodToDelete(good.goodId)}>
+                                        <IconButton onClick={() => selectProductToDelete(product.productId)}>
                                             <Delete fontSize="small" color="secondary"/>
                                         </IconButton>
                                     </TableCell>
                                     {columns.map(column => {
-                                        let value = good[column.dataId];
+                                        let value = product[column.dataId];
                                         if (column.dataId === 'price') {
-                                            value = good.sum / good.quantity;
+                                            value = product.sum / product.quantity;
                                         }
                                         return (
                                             <TableCell key={column.id}
@@ -105,8 +105,8 @@ const Cart = ({classes, cart, selectGoodToDelete, cancelDeleteGood, deleteGoodFr
                             <TableRow>
                                 <TableCell colSpan={4} className={classes.total}>Total</TableCell>
                                 <TableCell align="right" className={classes.total}>
-                                    {Array.isArray(goods) ?
-                                        goods
+                                    {Array.isArray(products) ?
+                                        products
                                             .reduce((accumulator, currentValue) => accumulator + currentValue.sum, 0)
                                             .toFixed(2) :
                                         0}
@@ -124,10 +124,10 @@ const Cart = ({classes, cart, selectGoodToDelete, cancelDeleteGood, deleteGoodFr
                     Place order
                 </Button>
             </Grid>
-            <ConfirmDialog isOpen={cart.deleteGoodId !== null}
-                           onCancel={cancelDeleteGood}
-                           onOk={() => deleteGoodFromCart(cart.orderId, cart.deleteGoodId)}
-                           title="Remove selected good from cart?"
+            <ConfirmDialog isOpen={cart.deleteProductId !== null}
+                           onCancel={cancelDeleteProduct}
+                           onOk={() => deleteProductFromCart(cart.orderId, cart.deleteProductId)}
+                           title="Remove selected product from cart?"
             />
             <ConfirmDialog isOpen={cart.placeOrderDialogOpen}
                            onCancel={closePlaceOrderDialog}
@@ -143,9 +143,9 @@ const mapStateToProps = state => ({
 });
 
 export default connect(mapStateToProps, {
-    selectGoodToDelete,
-    deleteGoodFromCart,
-    cancelDeleteGood,
+    selectProductToDelete,
+    deleteProductFromCart: deleteProductFromCart,
+    cancelDeleteProduct,
     closePlaceOrderDialog,
     openPlaceOrderDialog,
     placeOrder
