@@ -64,9 +64,9 @@ public class OrderService {
         orderDao.save(order.updateQuantity(productId, newQuantity));
     }
 
-    public void deleteProductFromOrder(int orderId, int orderProductId) throws OrderNotFoundException {
+    public void deleteProductFromOrder(int orderId, int orderItemId) throws OrderNotFoundException {
         Order order = findOrder(orderId);
-        order.removeProduct(orderProductId);
+        order.removeProduct(orderItemId);
         orderDao.save(order);
     }
 

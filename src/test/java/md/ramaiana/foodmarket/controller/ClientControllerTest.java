@@ -6,6 +6,7 @@ import md.ramaiana.foodmarket.service.ClientService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -16,6 +17,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
+@AutoConfigureMockMvc
 class ClientControllerTest {
 
     @Autowired
@@ -52,7 +54,7 @@ class ClientControllerTest {
         mockMvc.perform(get("/client/findByIdno")
                 .param("idno", someIdno))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.errors[0].code").value("CLIENT_NOT_FOUND"))
-                .andExpect(jsonPath("$.errors[0].description").value("Client not found"));
+                .andExpect(jsonPath("$[0].code").value("CLIENT_NOT_FOUND"))
+                .andExpect(jsonPath("$[0].message").value("Client not found"));
     }
 }

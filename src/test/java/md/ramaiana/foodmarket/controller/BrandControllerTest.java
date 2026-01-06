@@ -6,6 +6,7 @@ import md.ramaiana.foodmarket.service.BrandService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -20,6 +21,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
+@AutoConfigureMockMvc
 class BrandControllerTest {
 
     @Autowired
@@ -29,8 +31,8 @@ class BrandControllerTest {
     private BrandService brandServiceMock;
 
 
-    @WithMockUser("spring")
     @Test
+    @WithMockUser("spring")
     void test_getAllBrands() throws Exception {
         //ARRANGE
         List<Brand> brands = new ArrayList<>();
@@ -45,7 +47,7 @@ class BrandControllerTest {
         //ACT
         mockMvc.perform(get("/brand/getAll"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.brands").isArray())
-                .andExpect(jsonPath("$.brands[0].name").value("someName"));
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$[0].name").value("someName"));
     }
 }

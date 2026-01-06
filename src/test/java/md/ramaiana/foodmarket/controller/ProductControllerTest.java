@@ -6,7 +6,7 @@ import md.ramaiana.foodmarket.service.ProductService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.lang.Nullable;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -22,78 +22,79 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
+@AutoConfigureMockMvc
 public class ProductControllerTest {
+
     @Autowired
     private MockMvc mockMvc;
 
     @MockitoBean
     private ProductService productServiceMock;
 
-    @WithMockUser("spring")
     @Test
+    @WithMockUser("spring")
     void test_getAllGroups_listReturned() throws Exception {
         //ARRANGE
         givenGroupsForParent(null);
         //ACT & ASSERT
-        mockMvc.perform(get("/good/listGroups")
-                .param("group_id", (String) null))
+        mockMvc.perform(get("/product/listGroups"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.groups[0].name").value("someGroupName"))
                 .andExpect(jsonPath("$.groups[1].name").value("someOtherGroupName"));
     }
 
-    @WithMockUser("spring")
     @Test
+    @WithMockUser("spring")
     void test_getAllGroupsForParent_listReturned() throws Exception {
         //ARRANGE
         Integer parentGroupId = 8;
         givenGroupsForParent(parentGroupId);
         //ACT & ASSERT
-        mockMvc.perform(get("/good/listGroups")
+        mockMvc.perform(get("/product/listGroups")
                 .param("parentGroupId", parentGroupId.toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.groups[0].name").value("someGroupName"))
                 .andExpect(jsonPath("$.groups[1].name").value("someOtherGroupName"));
     }
 
-    @WithMockUser("spring")
     @Test
-    void test_getGoodsForParent_listReturned() throws Exception {
+    @WithMockUser("spring")
+    void test_getProductsForParent_listReturned() throws Exception {
         //ARRANGE
         Integer someGroupId = 8;
-        givenGoodsFilteredBy(someGroupId, null, null);
+        givenProductsFilteredBy(someGroupId, null, null);
         //ACT & ASSERT
-        mockMvc.perform(get("/good/listGoods")
+        mockMvc.perform(get("/product/listProducts")
                 .param("groupId", someGroupId.toString()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.goods[0].id").value("1"))
-                .andExpect(jsonPath("$.goods[0].price").value("15.0"))
-                .andExpect(jsonPath("$.goods[0].groupId").value(someGroupId))
-                .andExpect(jsonPath("$.goods[0].brandId").value("1"))
-                .andExpect(jsonPath("$.goods[0].name").value("someName"))
-                .andExpect(jsonPath("$.goods[0].barCode").value("111222333444"))
-                .andExpect(jsonPath("$.goods[0].package").value("20.0"))
-                .andExpect(jsonPath("$.goods[0].weight").value("1000.0"))
-                .andExpect(jsonPath("$.goods[0].unit").value("кг"))
-                .andExpect(jsonPath("$.goods[1].groupId").value(someGroupId))
-                .andExpect(jsonPath("$.goods[1].name").value("someOtherName"));
+                .andExpect(jsonPath("$.products[0].id").value("1"))
+                .andExpect(jsonPath("$.products[0].price").value("15.0"))
+                .andExpect(jsonPath("$.products[0].groupId").value(someGroupId))
+                .andExpect(jsonPath("$.products[0].brandId").value("1"))
+                .andExpect(jsonPath("$.products[0].name").value("someName"))
+                .andExpect(jsonPath("$.products[0].barCode").value("111222333444"))
+                .andExpect(jsonPath("$.products[0].packSize").value("20.0"))
+                .andExpect(jsonPath("$.products[0].weight").value("1000.0"))
+                .andExpect(jsonPath("$.products[0].unit").value("кг"))
+                .andExpect(jsonPath("$.products[1].groupId").value(someGroupId))
+                .andExpect(jsonPath("$.products[1].name").value("someOtherName"));
     }
 
     @WithMockUser("spring")
     @Test
-    void test_searchGoods_listReturned() throws Exception {
+    void test_searchProducts_listReturned() throws Exception {
         //ARRANGE
-        givenGoodsFilteredBy(8, 5, "someName");
+        givenProductsFilteredBy(8, 5, "someName");
         givenGroupsForList();
         //ACT & ASSERT
-        mockMvc.perform(get("/good/search")
+        mockMvc.perform(get("/product/search")
                 .param("groupId", "8")
                 .param("brandId", "5")
                 .param("name", "someName"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.goods").isArray())
-                .andExpect(jsonPath("$.goods[0].name").value("someName"))
-                .andExpect(jsonPath("$.goods[1].name").value("someName"))
+                .andExpect(jsonPath("$.products").isArray())
+                .andExpect(jsonPath("$.products[0].name").value("someName"))
+                .andExpect(jsonPath("$.products[1].name").value("someName"))
                 .andExpect(jsonPath("$.groups[0].name").value("someGroupName"))
                 .andExpect(jsonPath("$.groups[1].name").value("someOtherGroupName"));
     }
@@ -125,7 +126,7 @@ public class ProductControllerTest {
         return groups;
     }
 
-    private void givenGoodsFilteredBy(Integer groupId, @Nullable Integer brandId, @Nullable String name) {
+    private void givenProductsFilteredBy(Integer groupId, Integer brandId, String name) {
         List<Product> products = new ArrayList<>();
         products.add(Product.builder()
                 .id(1)

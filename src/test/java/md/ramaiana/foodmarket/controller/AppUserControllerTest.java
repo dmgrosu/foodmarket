@@ -1,21 +1,24 @@
 package md.ramaiana.foodmarket.controller;
 
-import com.google.protobuf.util.JsonFormat;
+import md.ramaiana.foodmarket.controller.dto.authorization.LoginRequestDto;
+import md.ramaiana.foodmarket.controller.dto.authorization.SignUpRequestDto;
 import md.ramaiana.foodmarket.model.AppUser;
 import md.ramaiana.foodmarket.model.Role;
-import md.ramaiana.foodmarket.proto.Authorization.LoginRequest;
 import md.ramaiana.foodmarket.service.AppUserService;
 import md.ramaiana.foodmarket.service.TokenService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import tools.jackson.databind.ObjectMapper;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -26,6 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
+@AutoConfigureMockMvc
 class AppUserControllerTest {
 
     @Autowired
@@ -36,6 +40,7 @@ class AppUserControllerTest {
     private TokenService tokenServiceMock;
     @MockitoBean
     private AuthenticationManager authenticationManagerMock;
+    ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
     void test_login_tokenReturned() throws Exception {
@@ -67,8 +72,8 @@ class AppUserControllerTest {
         when(tokenServiceMock.getTOKEN_VALIDITY()).thenReturn(3600000);
         // ACT & ASSERT
         mockMvc.perform(post("/auth/register")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(givenUserDtoInJson("email", "passwd")))
+                .contentType(new MediaType("application", "json", StandardCharsets.UTF_8))
+                .content(givenUserRegisterDtoInJson("email", "passwd")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.user.email").value("email"))
                 .andExpect(jsonPath("$.user.id").isNotEmpty())
@@ -105,12 +110,14 @@ class AppUserControllerTest {
         when(tokenServiceMock.getTOKEN_VALIDITY()).thenReturn(3600000);
     }
 
-    private String givenUserDtoInJson(String email, String passwd) throws Exception {
-        LoginRequest loginRequest = LoginRequest.newBuilder()
-                .setEmail(email)
-                .setPassword(passwd)
-                .build();
-        return JsonFormat.printer().print(loginRequest);
+    private String givenUserDtoInJson(String email, String passwd) {
+        LoginRequestDto loginRequest = new LoginRequestDto(email, passwd);
+        return objectMapper.writeValueAsString(loginRequest);
+    }
+
+    private String givenUserRegisterDtoInJson(String email, String passwd) {
+        SignUpRequestDto request = new SignUpRequestDto(email, passwd, null);
+        return objectMapper.writeValueAsString(request);
     }
 
 }

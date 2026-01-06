@@ -7,6 +7,7 @@ import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @AllArgsConstructor
@@ -32,7 +33,8 @@ public class ProductGroup {
     private final OffsetDateTime updatedAt;
     @Transient
     @Setter
-    private List<ProductGroup> childGroups;
+    @Builder.Default
+    private List<ProductGroup> childGroups = new ArrayList<>();
 
     public ProductGroup updateFrom(ProductGroup other) {
         return ProductGroup.builder()
