@@ -1,7 +1,5 @@
 package md.ramaiana.foodmarket.domain.client.presentation.controller;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import md.ramaiana.foodmarket.domain.client.core.response.ClientResponse;
@@ -18,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/client")
 @RequiredArgsConstructor
-@Tag(name = "Client", description = "Client management endpoints")
 public class ClientController {
 
   // Access voters
@@ -31,11 +28,6 @@ public class ClientController {
    * Find by idno.
    */
   @GetMapping("/findByIdno")
-  @Operation(
-      operationId = "findClientByIdno",
-      summary = "Find client by ID number",
-      description = "Retrieve a client using their identification number"
-  )
   public ClientResponse findByIdno(@RequestParam("idno") @NonNull String idno) {
     accessVoter.assertCanFindByIdno();
     return clientFindByIdnoUseCase.execute(idno);

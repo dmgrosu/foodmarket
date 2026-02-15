@@ -1,7 +1,5 @@
 package md.ramaiana.foodmarket.domain.order.presentation.controller;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +33,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/order")
 @RequiredArgsConstructor
-@Tag(name = "Order", description = "Order management endpoints")
 public class OrderController {
 
   // Access voters
@@ -54,11 +51,6 @@ public class OrderController {
    * Add product to order.
    */
   @PostMapping("/addProduct")
-  @Operation(
-      operationId = "addProductToOrder",
-      summary = "Add product to order",
-      description = "Add a product to an existing order or create a new order"
-  )
   public OrderResponse addProduct(@Valid @RequestBody @NonNull AddProductToOrderRequest request) {
     accessVoter.assertCanAddProduct();
     return orderAddProductUseCase.execute(request);
@@ -68,11 +60,6 @@ public class OrderController {
    * Get order by id.
    */
   @GetMapping("/getById/{orderId}")
-  @Operation(
-      operationId = "getOrderById",
-      summary = "Get order by ID",
-      description = "Retrieve an order with all its items by order ID"
-  )
   public OrderResponse getById(@PathVariable int orderId) {
     accessVoter.assertCanGetById();
     return orderFindByIdUseCase.execute(orderId);
@@ -82,11 +69,6 @@ public class OrderController {
    * Delete order.
    */
   @DeleteMapping("/deleteById/{orderId}")
-  @Operation(
-      operationId = "deleteOrder",
-      summary = "Delete order",
-      description = "Soft delete an order by ID"
-  )
   public void deleteById(@PathVariable int orderId) {
     accessVoter.assertCanDelete();
     orderDeleteUseCase.execute(orderId);
@@ -96,11 +78,6 @@ public class OrderController {
    * Delete product from order.
    */
   @DeleteMapping("/deleteProduct/{orderId}/{itemId}")
-  @Operation(
-      operationId = "deleteProductFromOrder",
-      summary = "Delete product from order",
-      description = "Remove a specific product from an order"
-  )
   public void deleteProduct(@PathVariable int orderId, @PathVariable int itemId) {
     accessVoter.assertCanDeleteProduct();
     orderDeleteProductUseCase.execute(orderId, itemId);
@@ -110,11 +87,6 @@ public class OrderController {
    * Get orders by period.
    */
   @PostMapping("/getOrdersByPeriod")
-  @Operation(
-      operationId = "getOrdersByPeriod",
-      summary = "Get orders by period",
-      description = "Retrieve paginated orders filtered by date range and client"
-  )
   public OrderListResponse getOrdersByPeriod(@Valid @RequestBody @NonNull OrderListRequest request) {
     accessVoter.assertCanGetOrdersByPeriod();
     return orderSearchByPeriodUseCase.execute(request);
@@ -124,11 +96,6 @@ public class OrderController {
    * Update order.
    */
   @PutMapping("/update")
-  @Operation(
-      operationId = "updateOrder",
-      summary = "Update order",
-      description = "Update the quantity of a product in an order"
-  )
   public void update(@Valid @RequestBody @NonNull UpdateOrderRequest request) {
     accessVoter.assertCanUpdate();
     orderUpdateUseCase.execute(request);
@@ -138,11 +105,6 @@ public class OrderController {
    * Place order.
    */
   @PutMapping("/placeOrder/{orderId}")
-  @Operation(
-      operationId = "placeOrder",
-      summary = "Place order",
-      description = "Change order status from draft to placed"
-  )
   public void placeOrder(@PathVariable int orderId) {
     accessVoter.assertCanPlaceOrder();
     orderPlaceUseCase.execute(orderId);

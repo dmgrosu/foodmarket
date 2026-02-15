@@ -1,7 +1,5 @@
 package md.ramaiana.foodmarket.domain.product.presentation.controller;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Nullable;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/product")
 @RequiredArgsConstructor
-@Tag(name = "Product", description = "Product management endpoints")
 public class ProductController {
 
   // Access voters
@@ -34,11 +31,6 @@ public class ProductController {
    * List groups.
    */
   @GetMapping("/listGroups")
-  @Operation(
-      operationId = "listProductGroups",
-      summary = "List product groups",
-      description = "Retrieve product groups, optionally filtered by parent group ID"
-  )
   public ProductListResponse listGroups(
       @RequestParam(value = "parentGroupId", required = false) @Nullable Integer parentGroupId) {
     accessVoter.assertCanListGroups();
@@ -49,11 +41,6 @@ public class ProductController {
    * List products.
    */
   @GetMapping("/listProducts")
-  @Operation(
-      operationId = "listProducts",
-      summary = "List products",
-      description = "Retrieve products filtered by group ID, with optional brand and name filters"
-  )
   public ProductListResponse listProducts(
       @RequestParam("groupId") @NonNull Integer groupId,
       @RequestParam(value = "brandId", required = false) @Nullable Integer brandId,
@@ -66,11 +53,6 @@ public class ProductController {
    * Search products.
    */
   @GetMapping("/search")
-  @Operation(
-      operationId = "searchProducts",
-      summary = "Search products",
-      description = "Search for products with optional filters for group, brand, and name"
-  )
   public ProductListResponse search(
       @RequestParam(value = "groupId", required = false) @Nullable Integer groupId,
       @RequestParam(value = "brandId", required = false) @Nullable Integer brandId,

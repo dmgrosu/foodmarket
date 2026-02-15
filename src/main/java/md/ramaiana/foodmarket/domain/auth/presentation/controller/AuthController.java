@@ -1,7 +1,5 @@
 package md.ramaiana.foodmarket.domain.auth.presentation.controller;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
-@Tag(name = "Authentication", description = "Authentication management endpoints")
 public class AuthController {
 
   // Access voters
@@ -36,11 +33,6 @@ public class AuthController {
    * Login.
    */
   @PostMapping("/login")
-  @Operation(
-      operationId = "login",
-      summary = "User login",
-      description = "Authenticate a user with email and password"
-  )
   public AuthResponse login(@Valid @RequestBody @NonNull LoginRequest request) {
     accessVoter.assertCanLogin();
     return authLoginUseCase.execute(request);
@@ -50,11 +42,6 @@ public class AuthController {
    * Register.
    */
   @PostMapping("/register")
-  @Operation(
-      operationId = "register",
-      summary = "User registration",
-      description = "Register a new user account"
-  )
   public AuthResponse register(@Valid @RequestBody @NonNull RegisterRequest request) {
     accessVoter.assertCanRegister();
     return authRegisterUseCase.execute(request);
