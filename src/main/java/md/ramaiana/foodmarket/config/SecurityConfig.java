@@ -52,13 +52,6 @@ public class SecurityConfig {
                 "/auth/login",
                 "/client/findByIdno"
             ).permitAll()
-            // Swagger/OpenAPI endpoints
-            .requestMatchers(
-                "/swagger-ui.html",
-                "/swagger-ui/**",
-                "/v3/api-docs/**",
-                "/api-docs/**"
-            ).permitAll()
             // All other endpoints require authentication
             .anyRequest().authenticated()
         )
