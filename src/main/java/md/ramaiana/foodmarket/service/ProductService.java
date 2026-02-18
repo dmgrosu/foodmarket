@@ -14,6 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
+import static org.springframework.util.StringUtils.hasText;
+
 @Service
 @Slf4j
 public class ProductService {
@@ -84,6 +86,7 @@ public class ProductService {
         return foundGroups;
     }
 
+    @Transactional
     public void loadProducts(ProductReadResult readResult) {
         log.info("... data loading started");
         Map<String, String[]> erpCodes = readResult.getErpCodes();
@@ -97,44 +100,44 @@ public class ProductService {
         for (Product newProduct : newProducts.values()) {
             String productErp = newProduct.getErpCode();
             String parentErp = erpCodes.get(productErp)[0];
-            if (parentErp != null) {
+            if (hasText(parentErp)) {
                 ProductGroup parent = updatedGroups.get(parentErp);
                 if (parent != null) {
-                    newProduct.setGroupId(parent.getId());
+                    newProduct = newProduct.withGroupId(parent.getId());
                 }
             }
             String brandErp = erpCodes.get(productErp)[1];
-            if (brandErp != null) {
+            if (hasText(brandErp)) {
                 Brand brand = updatedBrands.get(brandErp);
-                newProduct.setBrandId(brand.getId());
+                newProduct = newProduct.withBrandId(brand.getId());
             }
             Product updatedProduct = upsertProduct(newProduct);
             updatedProductIds.add(updatedProduct.getId());
         }
         log.info("... updated {} goods", updatedProductIds.size());
-        int deletedCount = productDao.setDeletedIfIdNotIn(updatedProductIds);
-        log.info("... mark deleted {} goods", deletedCount);
+        //int deletedCount = productDao.setDeletedIfIdNotIn(updatedProductIds);
+        //log.info("... mark deleted {} goods", deletedCount);
         log.info("... data loading finished");
     }
 
-    protected Map<String, ProductGroup> updateGroups(ProductReadResult readResult) {
+    private Map<String, ProductGroup> updateGroups(ProductReadResult readResult) {
         Map<String, ProductGroup> newGroups = readResult.getGroups();
         Map<String, String[]> erpCodes = readResult.getErpCodes();
         Map<String, ProductGroup> updatedGroups = new HashMap<>();
         for (ProductGroup group : newGroups.values()) {
             String parentErp = erpCodes.get(group.getErpCode())[0];
             ProductGroup savedGroup;
-            if (parentErp == null) {
-                savedGroup = upsertGroupByErpCode(group);
-            } else {
+            if (hasText(parentErp)) {
                 savedGroup = upsertGroupWithParent(group, newGroups.get(parentErp));
+            } else {
+                savedGroup = upsertGroupByErpCode(group);
             }
             updatedGroups.put(savedGroup.getErpCode(), savedGroup);
         }
         return updatedGroups;
     }
 
-    protected Map<String, Brand> updateBrands(Map<String, Brand> newBrands) {
+    private Map<String, Brand> updateBrands(Map<String, Brand> newBrands) {
         Map<String, Brand> existingBrands = new HashMap<>();
         for (Brand existingBrand : brandDao.findAll()) {
             existingBrands.put(existingBrand.getErpCode(), existingBrand);
@@ -155,28 +158,18 @@ public class ProductService {
         return existingBrands;
     }
 
-    @Transactional
-    protected ProductGroup upsertGroupWithParent(ProductGroup newGroup, ProductGroup parentGroup) {
+    private ProductGroup upsertGroupWithParent(ProductGroup newGroup, ProductGroup parentGroup) {
         ProductGroup savedParent = upsertGroupByErpCode(parentGroup);
-        newGroup.setParentGroupId(savedParent.getId());
-        return upsertGroupByErpCode(newGroup);
+        return upsertGroupByErpCode(newGroup.withParentGroupId(savedParent.getId()));
     }
 
-    @Transactional
-    protected ProductGroup upsertGroupByErpCode(ProductGroup newGroup) {
-        Optional<ProductGroup> optionalGroup = productGroupDao.findByErpCode(newGroup.getErpCode());
-        if (optionalGroup.isPresent()) {
-            ProductGroup foundGroup = optionalGroup.get();
-            return productGroupDao.save(foundGroup
-                    .updateFrom(newGroup)
-                    .withId(foundGroup.getId()));
-        } else {
-            return productGroupDao.save(newGroup);
-        }
+    private ProductGroup upsertGroupByErpCode(ProductGroup newGroup) {
+        return productGroupDao.findByErpCode(newGroup.getErpCode())
+                .map(it -> productGroupDao.save(it.withName(newGroup.getName())))
+                .orElseGet(() -> productGroupDao.save(newGroup));
     }
 
-    @Transactional
-    protected Product upsertProduct(Product newProduct) {
+    private Product upsertProduct(Product newProduct) {
         Optional<Product> optionalProduct = productDao.findByErpCode(newProduct.getErpCode());
         if (optionalProduct.isPresent()) {
             Product foundProduct = optionalProduct.get();
@@ -200,8 +193,8 @@ public class ProductService {
         }
     }
 
-    public String getProductNameById(Integer goodId) {
-        return productDao.getNameById(goodId);
+    public String getProductNameById(Integer productId) {
+        return productDao.getNameById(productId);
     }
 
 }

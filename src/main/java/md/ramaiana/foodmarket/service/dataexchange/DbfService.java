@@ -35,6 +35,7 @@ public class DbfService implements DataExchangeService {
      * PRICE (Numeric(12,2)) - product's price
      * TYPE (Character(1)) - type: 0 - product, 1 - group
      * </p>
+     *
      * @return instance of ProductsReadResult, containing lists of Product, Groups and Brands that were read from file
      */
     @Override
@@ -86,21 +87,17 @@ public class DbfService implements DataExchangeService {
     }
 
     private ProductGroup mapDbfRowToGroup(DBFRow dbfRow) {
-        return ProductGroup.builder()
-                .erpCode(dbfRow.getString("ERP_ID"))
-                .name(dbfRow.getString("NAME"))
-                .build();
+        return new ProductGroup(dbfRow.getString("NAME"), dbfRow.getString("ERP_ID"));
     }
 
     private Product mapDbfRowToProduct(DBFRow dbfRow) {
-        return Product.builder()
-                .erpCode(dbfRow.getString("ERP_ID"))
-                .name(dbfRow.getString("NAME"))
-                .unit(dbfRow.getString("UNIT"))
-                .inPackage(dbfRow.getFloat("PACK"))
-                .weight(dbfRow.getFloat("WEIGHT"))
-                .barCode(dbfRow.getString("BARCODE"))
-                .price(dbfRow.getFloat("PRICE"))
-                .build();
+        return new Product(
+                dbfRow.getString("NAME"),
+                dbfRow.getString("UNIT"),
+                dbfRow.getFloat("PACK"),
+                dbfRow.getString("ERP_ID"),
+                dbfRow.getString("BARCODE"),
+                dbfRow.getFloat("WEIGHT")
+        );
     }
 }

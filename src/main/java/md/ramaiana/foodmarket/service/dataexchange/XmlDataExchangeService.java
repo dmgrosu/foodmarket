@@ -56,10 +56,7 @@ public class XmlDataExchangeService implements DataExchangeService {
     private Map<String, ProductGroup> toGroups(List<ErpGroupDto> dtoGroups) {
         return dtoGroups.stream()
                 .collect(Collectors.toMap(ErpGroupDto::getCode,
-                        dto -> ProductGroup.builder()
-                                .erpCode(dto.getCode())
-                                .name(dto.getName())
-                                .build(),
+                        dto -> new ProductGroup(dto.getName(), dto.getCode()),
                         (a, b) -> b));
     }
 
@@ -71,14 +68,14 @@ public class XmlDataExchangeService implements DataExchangeService {
     }
 
     private Product toProduct(ErpProductDto dto) {
-        return Product.builder()
-                .erpCode(dto.getCode())
-                .name(dto.getName())
-                .unit(dto.getUnit())
-                .inPackage(dto.getPackSize())
-                .weight(dto.getWeight())
-                .barCode(toBarCode(dto.getCodes()))
-                .build();
+        return new Product(
+                dto.getName(),
+                dto.getUnit(),
+                dto.getPackSize(),
+                dto.getCode(),
+                toBarCode(dto.getCodes()),
+                dto.getWeight()
+        );
     }
 
     private String toBarCode(List<ErpProductCodeDto> dtoCodes) {

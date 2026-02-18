@@ -12,7 +12,7 @@
     <artifactId>foodmarket</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>foodmarket</name>
-    <description>Demo project for Spring Boot</description>
+    <description>Web Application</description>
     <properties>
         <java.version>25</java.version>
     </properties>
