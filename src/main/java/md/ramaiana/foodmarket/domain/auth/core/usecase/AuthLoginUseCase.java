@@ -8,6 +8,7 @@ import md.ramaiana.foodmarket.domain.auth.data.AppUserEntity;
 import md.ramaiana.foodmarket.domain.client.core.response.ClientResponse;
 import md.ramaiana.foodmarket.domain.client.core.usecase.ClientFindByIdUseCase;
 import md.ramaiana.foodmarket.domain.client.data.ClientEntity;
+
 import md.ramaiana.foodmarket.shared.annotation.UseCase;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -48,7 +49,7 @@ public class AuthLoginUseCase {
 
     ClientResponse clientResponse = null;
     if (user.hasClient()) {
-      ClientEntity client = clientFindByIdUseCase.execute(user.getClient().getId());
+      ClientEntity client = clientFindByIdUseCase.execute(user.getClientId());
       clientResponse = new ClientResponse(client);
     }
 

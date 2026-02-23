@@ -1,31 +1,19 @@
 package md.ramaiana.foodmarket.domain.auth.data;
 
-import jakarta.persistence.CollectionTable;
-import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
-import md.ramaiana.foodmarket.domain.client.data.ClientEntity;
 import md.ramaiana.foodmarket.shared.enums.Role;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.MappedCollection;
+import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -35,38 +23,22 @@ import org.springframework.security.core.userdetails.UserDetails;
  */
 @Getter
 @Setter
-@Entity
-@Table(name = "app_user")
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
+@Table("app_user")
 public class AppUserEntity implements UserDetails {
 
-  @NonNull
-  @Setter(AccessLevel.NONE)
-  private final UUID uuid = UUID.randomUUID();
+  private UUID uuid = UUID.randomUUID();
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Setter(AccessLevel.NONE)
   private Integer id;
   @NonNull
-  @Column(unique = true)
   private String email;
-
   @NonNull
   private String passwd;
-
   @NonNull
-  @Setter(AccessLevel.NONE)
   private Instant createdAt = Instant.now();
-
-  @ElementCollection(fetch = FetchType.EAGER)
-  @CollectionTable(name = "app_user_roles", joinColumns = @JoinColumn(name = "user_id"))
-  @Column(name = "role")
-  @Enumerated(EnumType.STRING)
-  private Set<Role> roles = new HashSet<>();
-
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "client_id")
-  private ClientEntity client;
+  @MappedCollection(idColumn = "user_id")
+  private Set<UserRoleRef> userRoles = new HashSet<>();
+  private Integer clientId;
 
   /**
    * Constructor.
@@ -77,18 +49,22 @@ public class AppUserEntity implements UserDetails {
   }
 
   public void addRole(@NonNull Role role) {
-    this.roles.add(role);
+    this.userRoles.add(new UserRoleRef(role));
+  }
+
+  public Set<Role> getRoles() {
+    return userRoles.stream().map(UserRoleRef::getRole).collect(Collectors.toSet());
   }
 
   public boolean hasClient() {
-    return client != null;
+    return clientId != null;
   }
 
   @Override
   @NonNull
   public Collection<? extends GrantedAuthority> getAuthorities() {
-    return roles.stream()
-        .map(role -> new SimpleGrantedAuthority("ROLE_" + role.name()))
+    return userRoles.stream()
+        .map(ref -> new SimpleGrantedAuthority("ROLE_" + ref.getRole().name()))
         .collect(Collectors.toList());
   }
 

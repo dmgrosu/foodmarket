@@ -12,7 +12,6 @@ import md.ramaiana.foodmarket.domain.product.data.ProductRepository;
 import md.ramaiana.foodmarket.shared.annotation.UseCase;
 import md.ramaiana.foodmarket.shared.exception.http.BadRequestException;
 import md.ramaiana.foodmarket.shared.exception.http.NotFoundException;
-import md.ramaiana.foodmarket.shared.util.SpecificationBuilder;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -35,17 +34,13 @@ public class OrderFindByIdUseCase {
       throw new BadRequestException("Order ID cannot be zero");
     }
 
-    SpecificationBuilder<OrderEntity> specification = new SpecificationBuilder<>();
-    specification.and(OrderRepository.idEquals(orderId));
-    specification.and(OrderRepository.notDeleted());
-
-    OrderEntity order = orderRepository.findOne(specification.buildOrDefault())
+    OrderEntity order = orderRepository.findByIdAndDeletedAtIsNull(orderId)
         .orElseThrow(() -> new NotFoundException(String.format("Order with ID [%s] not found", orderId)));
 
     List<OrderItemResponse> items = order.getItems().stream()
         .map(item -> new OrderItemResponse(
             item,
-            productRepository.findNameById(item.getProduct().getId())
+            productRepository.findNameById(item.getProductId())
         ))
         .collect(Collectors.toList());
 

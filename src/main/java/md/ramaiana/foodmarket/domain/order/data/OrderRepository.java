@@ -1,51 +1,24 @@
 package md.ramaiana.foodmarket.domain.order.data;
 
 import java.time.Instant;
-import lombok.NonNull;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.stereotype.Repository;
+import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.PagingAndSortingRepository;
 
 /**
  * Order Repository.
  */
-@Repository
-public interface OrderRepository extends JpaRepository<@NonNull OrderEntity, @NonNull Integer>, JpaSpecificationExecutor<@NonNull OrderEntity> {
+public interface OrderRepository extends CrudRepository<OrderEntity, Integer>,
+    PagingAndSortingRepository<OrderEntity, Integer> {
 
-  /**
-   * Specification for orders that are not deleted.
-   */
-  @NonNull
-  static Specification<@NonNull OrderEntity> notDeleted() {
-    return (root, query, criteriaBuilder) ->
-        criteriaBuilder.isNull(root.get("deletedAt"));
-  }
+  Optional<OrderEntity> findByIdAndDeletedAtIsNull(Integer id);
 
-  /**
-   * Specification for orders with a specific ID.
-   */
-  @NonNull
-  static Specification<@NonNull OrderEntity> idEquals(@NonNull Integer id) {
-    return (root, query, criteriaBuilder) ->
-        criteriaBuilder.equal(root.get("id"), id);
-  }
-
-  /**
-   * Specification for orders created within a date range.
-   */
-  @NonNull
-  static Specification<@NonNull OrderEntity> createdAtBetween(@NonNull Instant startDate, @NonNull Instant endDate) {
-    return (root, query, criteriaBuilder) ->
-        criteriaBuilder.between(root.get("createdAt"), startDate, endDate);
-  }
-
-  /**
-   * Specification for orders belonging to a specific client.
-   */
-  @NonNull
-  static Specification<@NonNull OrderEntity> clientIdEquals(@NonNull Integer clientId) {
-    return (root, query, criteriaBuilder) ->
-        criteriaBuilder.equal(root.get("client").get("id"), clientId);
-  }
+  Page<OrderEntity> findByClientIdAndDeletedAtIsNullAndCreatedAtBetween(
+      Integer clientId,
+      Instant from,
+      Instant to,
+      Pageable pageable
+  );
 }

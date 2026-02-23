@@ -6,7 +6,6 @@ import md.ramaiana.foodmarket.domain.auth.data.AppUserEntity;
 import md.ramaiana.foodmarket.domain.auth.data.AppUserRepository;
 import md.ramaiana.foodmarket.shared.annotation.UseCase;
 import md.ramaiana.foodmarket.shared.exception.http.NotFoundException;
-import md.ramaiana.foodmarket.shared.util.SpecificationBuilder;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -24,10 +23,7 @@ public class AppUserFindByEmailUseCase {
   @NonNull
   @Transactional(readOnly = true)
   public AppUserEntity execute(@NonNull String email) {
-    SpecificationBuilder<AppUserEntity> specification = new SpecificationBuilder<>();
-    specification.and(AppUserRepository.emailEquals(email));
-
-    return appUserRepository.findOne(specification.buildOrDefault())
+    return appUserRepository.findByEmail(email)
         .orElseThrow(() -> new NotFoundException(String.format("User with email '%s' not found", email)));
   }
 }

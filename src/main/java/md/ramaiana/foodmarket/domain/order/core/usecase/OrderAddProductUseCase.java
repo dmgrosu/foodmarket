@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import md.ramaiana.foodmarket.domain.client.data.ClientEntity;
 import md.ramaiana.foodmarket.domain.client.data.ClientRepository;
 import md.ramaiana.foodmarket.domain.order.core.request.AddProductToOrderRequest;
 import md.ramaiana.foodmarket.domain.order.core.response.OrderItemResponse;
@@ -18,7 +17,6 @@ import md.ramaiana.foodmarket.shared.annotation.UseCase;
 import md.ramaiana.foodmarket.shared.enums.OrderState;
 import md.ramaiana.foodmarket.shared.exception.http.BadRequestException;
 import md.ramaiana.foodmarket.shared.exception.http.NotFoundException;
-import md.ramaiana.foodmarket.shared.util.SpecificationBuilder;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -39,22 +37,19 @@ public class OrderAddProductUseCase {
   @Transactional(rollbackFor = Exception.class)
   public OrderResponse execute(@NonNull AddProductToOrderRequest request) {
     // Validate client
-    ClientEntity client = clientRepository.findById(request.getClientId())
+    clientRepository.findById(request.getClientId())
         .orElseThrow(() -> new NotFoundException(String.format("Client with ID [%s] not found", request.getClientId())));
 
-    // Find product using specification
-    SpecificationBuilder<@NonNull ProductEntity> productSpec = new SpecificationBuilder<>();
-    productSpec.and(ProductRepository.idEquals(request.getProductId()));
-    productSpec.and(ProductRepository.notDeleted());
-
-    ProductEntity product = productRepository.findOne(productSpec.buildOrDefault())
+    // Find product
+    ProductEntity product = productRepository.findByIdAndDeletedAtIsNull(request.getProductId())
         .orElseThrow(() -> new NotFoundException(String.format("Product with ID [%s] not found", request.getProductId())));
 
     // Find or create order
-    OrderEntity order = findOrCreateOrder(request.getOrderId(), client);
+    OrderEntity order = findOrCreateOrder(request.getOrderId(), request.getClientId());
 
     // Add product to order
-    OrderItemEntity item = new OrderItemEntity(product, request.getQuantity());
+    float unitWeight = product.getWeight() != null ? product.getWeight() : 0f;
+    OrderItemEntity item = new OrderItemEntity(product.getId(), product.getPrice(), unitWeight, request.getQuantity());
     order.addItem(item);
     OrderEntity savedOrder = orderRepository.save(order);
 
@@ -62,7 +57,7 @@ public class OrderAddProductUseCase {
     List<OrderItemResponse> items = savedOrder.getItems().stream()
         .map(orderItem -> new OrderItemResponse(
             orderItem,
-            productRepository.findNameById(orderItem.getProduct().getId())
+            productRepository.findNameById(orderItem.getProductId())
         ))
         .collect(Collectors.toList());
 
@@ -70,10 +65,10 @@ public class OrderAddProductUseCase {
   }
 
   @NonNull
-  private OrderEntity findOrCreateOrder(int orderId, ClientEntity client) {
+  private OrderEntity findOrCreateOrder(int orderId, @NonNull Integer clientId) {
     OrderEntity order = orderId != 0 ?
         findOrder(orderId) :
-        new OrderEntity(client);
+        new OrderEntity(clientId);
 
     if (order.getState() == OrderState.PROCESSED) {
       throw new BadRequestException(String.format("Order with ID [%s] has been already processed", orderId));
@@ -85,11 +80,7 @@ public class OrderAddProductUseCase {
   }
 
   private OrderEntity findOrder(int orderId) {
-    SpecificationBuilder<OrderEntity> specification = new SpecificationBuilder<>();
-    specification.and(OrderRepository.idEquals(orderId));
-    specification.and(OrderRepository.notDeleted());
-
-    return orderRepository.findOne(specification.buildOrDefault())
+    return orderRepository.findByIdAndDeletedAtIsNull(orderId)
         .orElseThrow(() -> new NotFoundException(String.format("Order with ID [%s] not found", orderId)));
   }
 }

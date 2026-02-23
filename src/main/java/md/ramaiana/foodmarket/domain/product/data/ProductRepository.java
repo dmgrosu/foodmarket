@@ -1,69 +1,28 @@
 package md.ramaiana.foodmarket.domain.product.data;
 
-import lombok.NonNull;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.jpa.repository.Query;
+import java.util.List;
+import java.util.Optional;
+import org.springframework.data.jdbc.repository.query.Query;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
 
 /**
  * Product Repository.
  */
-@Repository
-public interface ProductRepository extends
-    JpaRepository<@NonNull ProductEntity, @NonNull Integer>,
-    JpaSpecificationExecutor<@NonNull ProductEntity> {
+public interface ProductRepository extends CrudRepository<ProductEntity, Integer> {
 
-  /**
-   * Specification for products that are not deleted.
-   */
-  @NonNull
-  static Specification<@NonNull ProductEntity> notDeleted() {
-    return (root, query, criteriaBuilder) ->
-        criteriaBuilder.isNull(root.get("deletedAt"));
-  }
+  Optional<ProductEntity> findByIdAndDeletedAtIsNull(Integer id);
 
-  /**
-   * Specification for products with a specific group ID.
-   */
-  @NonNull
-  static Specification<@NonNull ProductEntity> groupIdEquals(@NonNull Integer groupId) {
-    return (root, query, criteriaBuilder) ->
-        criteriaBuilder.equal(root.get("group").get("id"), groupId);
-  }
+  @Query("SELECT * FROM product WHERE deleted_at IS NULL"
+      + " AND (:groupId IS NULL OR group_id = :groupId)"
+      + " AND (:brandId IS NULL OR brand_id = :brandId)"
+      + " AND (:nameLike IS NULL OR LOWER(name) LIKE :nameLike)")
+  List<ProductEntity> findAllByFilters(
+      @Param("groupId") Integer groupId,
+      @Param("brandId") Integer brandId,
+      @Param("nameLike") String nameLike
+  );
 
-  /**
-   * Specification for products with a specific brand ID.
-   */
-  @NonNull
-  static Specification<@NonNull ProductEntity> brandIdEquals(@NonNull Integer brandId) {
-    return (root, query, criteriaBuilder) ->
-        criteriaBuilder.equal(root.get("brand").get("id"), brandId);
-  }
-
-  /**
-   * Specification for products with name containing the given string (case-insensitive).
-   */
-  @NonNull
-  static Specification<@NonNull ProductEntity> nameContainsIgnoreCase(@NonNull String name) {
-    return (root, query, criteriaBuilder) ->
-        criteriaBuilder.like(
-            criteriaBuilder.lower(root.get("name")),
-            "%" + name.toLowerCase() + "%"
-        );
-  }
-
-  /**
-   * Specification for products with a specific ID.
-   */
-  @NonNull
-  static Specification<@NonNull ProductEntity> idEquals(@NonNull Integer id) {
-    return (root, query, criteriaBuilder) ->
-        criteriaBuilder.equal(root.get("id"), id);
-  }
-
-  @Query("SELECT p.name FROM ProductEntity p WHERE p.id = :id")
-  String findNameById(@NonNull @Param("id") Integer id);
+  @Query("SELECT name FROM product WHERE id = :id")
+  String findNameById(@Param("id") Integer id);
 }

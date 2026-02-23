@@ -35,7 +35,7 @@ public class OrderResponse {
   public OrderResponse(@NonNull OrderEntity order, @NonNull List<OrderItemResponse> items) {
     this.id = order.getId();
     this.totalSum = order.getTotalSum();
-    this.clientId = order.getClient() != null ? order.getClient().getId() : null;
+    this.clientId = order.getClientId();
     this.state = order.getState();
     this.createdAt = order.getCreatedAt().toEpochMilli();
     this.totalWeight = order.getTotalWeightForProducts();

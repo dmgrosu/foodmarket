@@ -17,7 +17,6 @@ import md.ramaiana.foodmarket.domain.product.data.ProductGroupEntity;
 import md.ramaiana.foodmarket.domain.product.data.ProductGroupRepository;
 import md.ramaiana.foodmarket.domain.product.data.ProductRepository;
 import md.ramaiana.foodmarket.shared.annotation.UseCase;
-import md.ramaiana.foodmarket.shared.util.SpecificationBuilder;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -36,7 +35,7 @@ public class ProductSearchUseCase {
   @NonNull
   @Transactional(readOnly = true)
   public ProductListResponse execute(@Nullable Integer groupId, @Nullable Integer brandId, @Nullable String nameLike) {
-    List<ProductEntity> products = findProductsFiltered(groupId, brandId, nameLike);
+    List<ProductEntity> products = productRepository.findAllByFilters(groupId, brandId, nameLike);
     List<ProductGroupEntity> groups = findProductsForProductsList(products);
 
     List<ProductResponse> productResponses = products.stream()
@@ -51,39 +50,14 @@ public class ProductSearchUseCase {
   }
 
   @NonNull
-  private List<ProductEntity> findProductsFiltered(@Nullable Integer groupId, @Nullable Integer brandId, @Nullable String name) {
-    SpecificationBuilder<@NonNull ProductEntity> specification = new SpecificationBuilder<>();
-
-    // Always filter out deleted products
-    specification.and(ProductRepository.notDeleted());
-
-    // Add groupId filter if present
-    if (groupId != null) {
-      specification.and(ProductRepository.groupIdEquals(groupId));
-    }
-
-    // Add brandId filter if present
-    if (brandId != null) {
-      specification.and(ProductRepository.brandIdEquals(brandId));
-    }
-
-    // Add name filter if present
-    if (name != null) {
-      specification.and(ProductRepository.nameContainsIgnoreCase(name));
-    }
-
-    return productRepository.findAll(specification.buildOrDefault());
-  }
-
-  @NonNull
   private List<ProductGroupEntity> findProductsForProductsList(@NonNull List<ProductEntity> products) {
     Map<Integer, ProductGroupEntity> groupsMap = new HashMap<>();
     List<ProductGroupEntity> topGroups = new ArrayList<>();
 
     for (ProductEntity product : products) {
-      Integer parentGroupId = product.getGroup() != null ? product.getGroup().getId() : null;
-      if (parentGroupId != null) {
-        addAllParentsToMap(parentGroupId, groupsMap);
+      Integer productGroupId = product.getGroupId();
+      if (productGroupId != null) {
+        addAllParentsToMap(productGroupId, groupsMap);
       }
     }
 
@@ -91,7 +65,7 @@ public class ProductSearchUseCase {
       if (!group.hasParent()) {
         topGroups.add(group);
       } else {
-        ProductGroupEntity parent = groupsMap.get(group.getParentGroup().getId());
+        ProductGroupEntity parent = groupsMap.get(group.getParentGroupId());
         if (parent != null) {
           parent.addChildIfAbsent(group);
         }
@@ -107,7 +81,7 @@ public class ProductSearchUseCase {
       ProductGroupEntity group = optionalGroup.get();
       parents.putIfAbsent(group.getId(), group);
       if (group.hasParent()) {
-        addAllParentsToMap(group.getParentGroup().getId(), parents);
+        addAllParentsToMap(group.getParentGroupId(), parents);
       }
     }
   }

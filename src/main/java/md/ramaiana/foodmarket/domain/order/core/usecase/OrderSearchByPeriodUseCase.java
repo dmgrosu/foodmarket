@@ -16,7 +16,6 @@ import md.ramaiana.foodmarket.domain.product.data.ProductRepository;
 import md.ramaiana.foodmarket.shared.annotation.UseCase;
 import md.ramaiana.foodmarket.shared.exception.http.BadRequestException;
 import md.ramaiana.foodmarket.shared.exception.http.NotFoundException;
-import md.ramaiana.foodmarket.shared.util.SpecificationBuilder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -53,16 +52,10 @@ public class OrderSearchByPeriodUseCase {
     PageRequest pageable = PageRequest.of(request.getPageNo(), request.getPageSize(),
         Sort.Direction.valueOf(request.getSortDirection().toString()), request.getSortColumn());
 
-    // Build specification
-    SpecificationBuilder<OrderEntity> specification = new SpecificationBuilder<>();
-    specification.and(OrderRepository.notDeleted());
-    specification.and(OrderRepository.createdAtBetween(dateFrom, dateTo));
-    if (request.getClientId() != null) {
-      specification.and(OrderRepository.clientIdEquals(request.getClientId()));
-    }
-
-    Page<@NonNull OrderEntity> ordersPage = orderRepository.findAll(
-        specification.buildOrDefault(),
+    Page<OrderEntity> ordersPage = orderRepository.findByClientIdAndDeletedAtIsNullAndCreatedAtBetween(
+        request.getClientId(),
+        dateFrom,
+        dateTo,
         pageable
     );
 
@@ -71,7 +64,7 @@ public class OrderSearchByPeriodUseCase {
           List<OrderItemResponse> items = order.getItems().stream()
               .map(item -> new OrderItemResponse(
                   item,
-                  productRepository.findNameById(item.getProduct().getId())
+                  productRepository.findNameById(item.getProductId())
               ))
               .collect(Collectors.toList());
           return new OrderResponse(order, items);

@@ -1,6 +1,5 @@
 package md.ramaiana.foodmarket.domain.auth.core.usecase;
 
-import java.util.Optional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import md.ramaiana.foodmarket.domain.auth.core.request.RegisterRequest;
@@ -13,7 +12,6 @@ import md.ramaiana.foodmarket.domain.client.data.ClientEntity;
 import md.ramaiana.foodmarket.shared.annotation.UseCase;
 import md.ramaiana.foodmarket.shared.enums.Role;
 import md.ramaiana.foodmarket.shared.exception.http.BadRequestException;
-import md.ramaiana.foodmarket.shared.util.SpecificationBuilder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,13 +33,8 @@ public class AuthRegisterUseCase {
   @NonNull
   @Transactional(rollbackFor = Exception.class)
   public AuthResponse execute(@NonNull RegisterRequest request) {
-    SpecificationBuilder<@NonNull AppUserEntity> specification = new SpecificationBuilder<>();
-    specification.and(AppUserRepository.emailEquals(request.getEmail()));
-
-    Optional<@NonNull AppUserEntity> foundUser = appUserRepository.findOne(specification.buildOrDefault());
-
     // Check if user already exists
-    if (foundUser.isPresent()) {
+    if (appUserRepository.findByEmail(request.getEmail()).isPresent()) {
       throw new BadRequestException(String.format("User with email '%s' already exists", request.getEmail()));
     }
 
@@ -62,7 +55,7 @@ public class AuthRegisterUseCase {
     // Get client if exists
     ClientResponse clientResponse = null;
     if (savedUser.hasClient()) {
-      ClientEntity client = clientFindByIdUseCase.execute(savedUser.getClient().getId());
+      ClientEntity client = clientFindByIdUseCase.execute(savedUser.getClientId());
       clientResponse = new ClientResponse(client);
     }
 

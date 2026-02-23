@@ -11,7 +11,6 @@ import md.ramaiana.foodmarket.domain.product.core.response.ProductListResponse;
 import md.ramaiana.foodmarket.domain.product.data.ProductGroupEntity;
 import md.ramaiana.foodmarket.domain.product.data.ProductGroupRepository;
 import md.ramaiana.foodmarket.shared.annotation.UseCase;
-import md.ramaiana.foodmarket.shared.util.SpecificationBuilder;
 import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,23 +39,10 @@ public class ProductGroupSearchUseCase {
 
   @NonNull
   private List<ProductGroupEntity> getGroupsHierarchy(@Nullable Integer parentGroupId) {
-    SpecificationBuilder<ProductGroupEntity> specification = new SpecificationBuilder<>();
-
-    // Always filter out deleted product groups
-    specification.and(ProductGroupRepository.notDeleted());
-
-    // Add parent group filter
-    if (parentGroupId == null) {
-      specification.and(ProductGroupRepository.parentGroupIsNull());
-    } else {
-      specification.and(ProductGroupRepository.parentGroupIdEquals(parentGroupId));
-    }
-
-    // Find groups with sorting by name
-    List<ProductGroupEntity> foundGroups = productGroupRepository.findAll(
-        specification.buildOrDefault(),
-        Sort.by(Sort.Direction.ASC, "name")
-    );
+    Sort sort = Sort.by(Sort.Direction.ASC, "name");
+    List<ProductGroupEntity> foundGroups = parentGroupId == null
+        ? productGroupRepository.findByParentGroupIdIsNullAndDeletedAtIsNull(sort)
+        : productGroupRepository.findByParentGroupIdAndDeletedAtIsNull(parentGroupId, sort);
 
     // Recursively load child groups
     for (ProductGroupEntity foundGroup : foundGroups) {

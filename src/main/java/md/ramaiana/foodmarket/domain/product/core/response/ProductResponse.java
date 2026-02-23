@@ -45,8 +45,8 @@ public class ProductResponse {
     this.id = product.getId();
     this.name = product.getName();
     this.price = product.getPrice();
-    this.groupId = product.getGroup() != null ? product.getGroup().getId() : null;
-    this.brandId = product.getBrand() != null ? product.getBrand().getId() : null;
+    this.groupId = product.getGroupId();
+    this.brandId = product.getBrandId();
     this.inPackage = product.getInPackage();
     this.barCode = product.getBarCode();
     this.unit = product.getUnit();

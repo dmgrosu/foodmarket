@@ -7,7 +7,6 @@ import md.ramaiana.foodmarket.domain.client.data.ClientEntity;
 import md.ramaiana.foodmarket.domain.client.data.ClientRepository;
 import md.ramaiana.foodmarket.shared.annotation.UseCase;
 import md.ramaiana.foodmarket.shared.exception.http.NotFoundException;
-import md.ramaiana.foodmarket.shared.util.SpecificationBuilder;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -25,12 +24,7 @@ public class ClientFindByIdnoUseCase {
   @NonNull
   @Transactional(readOnly = true)
   public ClientResponse execute(@NonNull String idno) {
-    SpecificationBuilder<@NonNull ClientEntity> specification = new SpecificationBuilder<>();
-
-    specification.and(ClientRepository.idnoEquals(idno));
-    specification.and(ClientRepository.notDeleted());
-
-    ClientEntity client = clientRepository.findOne(specification.buildOrDefault())
+    ClientEntity client = clientRepository.findByIdnoAndDeletedAtIsNull(idno)
         .orElseThrow(() -> new NotFoundException(String.format("Client with idno '%s' not found", idno)));
 
     return new ClientResponse(client);

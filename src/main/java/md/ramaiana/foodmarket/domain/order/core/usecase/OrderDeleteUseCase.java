@@ -5,7 +5,6 @@ import md.ramaiana.foodmarket.domain.order.data.OrderEntity;
 import md.ramaiana.foodmarket.domain.order.data.OrderRepository;
 import md.ramaiana.foodmarket.shared.annotation.UseCase;
 import md.ramaiana.foodmarket.shared.exception.http.NotFoundException;
-import md.ramaiana.foodmarket.shared.util.SpecificationBuilder;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -22,11 +21,7 @@ public class OrderDeleteUseCase {
    */
   @Transactional(rollbackFor = Exception.class)
   public void execute(int orderId) {
-    SpecificationBuilder<OrderEntity> specification = new SpecificationBuilder<>();
-    specification.and(OrderRepository.idEquals(orderId));
-    specification.and(OrderRepository.notDeleted());
-
-    OrderEntity order = orderRepository.findOne(specification.buildOrDefault())
+    OrderEntity order = orderRepository.findByIdAndDeletedAtIsNull(orderId)
         .orElseThrow(() -> new NotFoundException(String.format("Order with ID [%s] not found", orderId)));
 
     order.markDeleted();
