@@ -2,6 +2,7 @@ package md.ramaiana.foodmarket.domain.order.core.usecase;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import md.ramaiana.foodmarket.domain.client.data.ClientRepository;
@@ -26,61 +27,61 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class OrderAddProductUseCase {
 
-  private final OrderRepository orderRepository;
-  private final ProductRepository productRepository;
-  private final ClientRepository clientRepository;
+    private final OrderRepository orderRepository;
+    private final ProductRepository productRepository;
+    private final ClientRepository clientRepository;
 
-  /**
-   * Execute the use case.
-   */
-  @NonNull
-  @Transactional(rollbackFor = Exception.class)
-  public OrderResponse execute(@NonNull AddProductToOrderRequest request) {
-    // Validate client
-    clientRepository.findById(request.getClientId())
-        .orElseThrow(() -> new NotFoundException(String.format("Client with ID [%s] not found", request.getClientId())));
+    /**
+     * Execute the use case.
+     */
+    @NonNull
+    @Transactional(rollbackFor = Exception.class)
+    public OrderResponse execute(@NonNull AddProductToOrderRequest request) {
+        // Validate client
+        clientRepository.findById(request.getClientId())
+                .orElseThrow(() -> new NotFoundException(String.format("Client with ID [%s] not found", request.getClientId())));
 
-    // Find product
-    ProductEntity product = productRepository.findByIdAndDeletedAtIsNull(request.getProductId())
-        .orElseThrow(() -> new NotFoundException(String.format("Product with ID [%s] not found", request.getProductId())));
+        // Find product
+        ProductEntity product = productRepository.findByIdAndDeletedAtIsNull(request.getProductId())
+                .orElseThrow(() -> new NotFoundException(String.format("Product with ID [%s] not found", request.getProductId())));
 
-    // Find or create order
-    OrderEntity order = findOrCreateOrder(request.getOrderId(), request.getClientId());
+        // Find or create order
+        OrderEntity order = findOrCreateOrder(request.getOrderId(), request.getClientId());
 
-    // Add product to order
-    float unitWeight = product.getWeight() != null ? product.getWeight() : 0f;
-    OrderItemEntity item = new OrderItemEntity(product.getId(), product.getPrice(), unitWeight, request.getQuantity());
-    order.addItem(item);
-    OrderEntity savedOrder = orderRepository.save(order);
+        // Add product to order
+        float unitWeight = product.getWeight() != null ? product.getWeight() : 0f;
+        OrderItemEntity item = new OrderItemEntity(product.getId(), product.getPrice(request.getPriceType()), unitWeight, request.getQuantity());
+        order.addItem(item);
+        OrderEntity savedOrder = orderRepository.save(order);
 
-    // Build response
-    List<OrderItemResponse> items = savedOrder.getItems().stream()
-        .map(orderItem -> new OrderItemResponse(
-            orderItem,
-            productRepository.findNameById(orderItem.getProductId())
-        ))
-        .collect(Collectors.toList());
+        // Build response
+        List<OrderItemResponse> items = savedOrder.getItems().stream()
+                .map(orderItem -> new OrderItemResponse(
+                        orderItem,
+                        productRepository.findNameById(orderItem.getProductId())
+                ))
+                .collect(Collectors.toList());
 
-    return new OrderResponse(savedOrder, items);
-  }
-
-  @NonNull
-  private OrderEntity findOrCreateOrder(int orderId, @NonNull Integer clientId) {
-    OrderEntity order = orderId != 0 ?
-        findOrder(orderId) :
-        new OrderEntity(clientId);
-
-    if (order.getState() == OrderState.PROCESSED) {
-      throw new BadRequestException(String.format("Order with ID [%s] has been already processed", orderId));
+        return new OrderResponse(savedOrder, items);
     }
-    if (order.getState() == OrderState.PLACED) {
-      throw new BadRequestException(String.format("Order with ID [%s] has been already placed", orderId));
-    }
-    return order;
-  }
 
-  private OrderEntity findOrder(int orderId) {
-    return orderRepository.findByIdAndDeletedAtIsNull(orderId)
-        .orElseThrow(() -> new NotFoundException(String.format("Order with ID [%s] not found", orderId)));
-  }
+    @NonNull
+    private OrderEntity findOrCreateOrder(int orderId, @NonNull Integer clientId) {
+        OrderEntity order = orderId != 0 ?
+                findOrder(orderId) :
+                new OrderEntity(clientId);
+
+        if (order.getState() == OrderState.PROCESSED) {
+            throw new BadRequestException(String.format("Order with ID [%s] has been already processed", orderId));
+        }
+        if (order.getState() == OrderState.PLACED) {
+            throw new BadRequestException(String.format("Order with ID [%s] has been already placed", orderId));
+        }
+        return order;
+    }
+
+    private OrderEntity findOrder(int orderId) {
+        return orderRepository.findByIdAndDeletedAtIsNull(orderId)
+                .orElseThrow(() -> new NotFoundException(String.format("Order with ID [%s] not found", orderId)));
+    }
 }
