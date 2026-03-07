@@ -14,7 +14,6 @@ import org.springframework.oxm.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 
 @Slf4j
 @UseCase
@@ -31,11 +30,15 @@ public class ImportPricesAndBalancesUseCase {
     private final Unmarshaller unmarshaller;
 
 
-    public void execute() throws IOException {
+    public void execute() {
         String filePath = exchangeFolderPath + BALANCES_DATA_FILE;
-        BalanceDataDto balanceDataDto = (BalanceDataDto) unmarshaller.unmarshal(getSource(filePath));
-        pricesUpdate.execute(balanceDataDto.getPrices());
-        balancesUpdate.execute(balanceDataDto.getBalances());
+        try {
+            BalanceDataDto balanceDataDto = (BalanceDataDto) unmarshaller.unmarshal(getSource(filePath));
+            pricesUpdate.execute(balanceDataDto.getPrices());
+            balancesUpdate.execute(balanceDataDto.getBalances());
+        } catch (Exception ex) {
+            log.error("Error while importing prices and balances: {}", ex.getMessage(), ex);
+        }
     }
 
     @NonNull

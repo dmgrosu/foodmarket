@@ -12,11 +12,11 @@ import md.ramaiana.foodmarket.shared.enums.PriceType;
 @Setter
 @XmlRootElement(name = "price")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class ErpPriceDto {
+public final class ErpPriceDto {
     @XmlAttribute
-    private String storageErpCode;
+    private String storageCode;
     @XmlAttribute
-    private String productErpCode;
+    private String productCode;
     @XmlAttribute
     private PriceType type;
     @XmlAttribute

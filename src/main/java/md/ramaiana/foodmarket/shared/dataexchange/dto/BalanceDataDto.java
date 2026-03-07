@@ -10,7 +10,7 @@ import java.util.List;
 @Setter
 @XmlRootElement(name = "balance-data")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class BalanceDataDto {
+public final class BalanceDataDto {
     @XmlElement(name = "price")
     @XmlElementWrapper(name = "prices")
     private List<ErpPriceDto> prices;

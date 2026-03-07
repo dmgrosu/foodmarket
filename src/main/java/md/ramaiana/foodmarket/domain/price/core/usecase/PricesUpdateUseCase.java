@@ -24,8 +24,8 @@ public class PricesUpdateUseCase {
 
     public void execute(List<ErpPriceDto> erpPrices) {
         for (ErpPriceDto erpPrice : erpPrices) {
-            AggregateReference<StorageEntity, Integer> storage = storageRepository.getByErpCode(erpPrice.getStorageErpCode());
-            AggregateReference<ProductEntity, Integer> product = productRepository.getByErpCode(erpPrice.getProductErpCode());
+            AggregateReference<StorageEntity, Integer> storage = storageRepository.getByErpCode(erpPrice.getStorageCode());
+            AggregateReference<ProductEntity, Integer> product = productRepository.getByErpCode(erpPrice.getProductCode());
             PriceEntity price = priceRepository.findByStorageAndProductAndType(storage, product, erpPrice.getType())
                     .map(it -> it.withPrice(erpPrice.getPrice()))
                     .orElse(new PriceEntity(null, erpPrice.getType(), storage, product, erpPrice.getPrice()));

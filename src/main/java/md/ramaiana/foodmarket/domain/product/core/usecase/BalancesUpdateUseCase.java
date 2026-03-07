@@ -27,8 +27,8 @@ public class BalancesUpdateUseCase {
     }
 
     private BalanceEntity mapToEntity(ErpBalanceDto dto) {
-        AggregateReference<StorageEntity, Integer> storage = storageRepository.getByErpCode(dto.getStorageErpCode());
-        AggregateReference<ProductEntity, Integer> product = productRepository.getByErpCode(dto.getProductErpCode());
+        AggregateReference<StorageEntity, Integer> storage = storageRepository.getByErpCode(dto.getStorageCode());
+        AggregateReference<ProductEntity, Integer> product = productRepository.getByErpCode(dto.getProductCode());
         return new BalanceEntity(storage, product, dto.getQuantity());
     }
 

@@ -1,0 +1,18 @@
+spring:
+  datasource:
+    url: ${DATASOURCE_URL}
+    username: ${DATASOURCE_USERNAME}
+    password: ${DATASOURCE_PASSWD}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      connection-init-sql: SET search_path TO rama_fm
+
+jwt:
+  token:
+    secret: kldfnb9b0934nv^*(NJk$$l,dde
+    validity: 3600000
+
+# data loading folder path
+dataFolderPath: ${DATA_FOLDER_PATH}
+# data loading delay in millis, default 10000 (10 sec)
+dataLoadingDelay: 10000

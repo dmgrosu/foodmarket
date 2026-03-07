@@ -26,7 +26,7 @@ public class DataExchangeConfig {
         Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
         Map<String, Object> props = new HashMap<>();
         props.put("jaxb.formatted.output", true);
-        marshaller.setPackagesToScan("md.ramaiana.foodmarket.service.dataexchange.dto");
+        marshaller.setPackagesToScan("md.ramaiana.foodmarket.shared.dataexchange.dto");
         marshaller.setMarshallerProperties(props);
         return marshaller;
     }

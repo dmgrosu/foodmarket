@@ -11,11 +11,11 @@ import lombok.Setter;
 @Setter
 @XmlRootElement(name = "balance")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class ErpBalanceDto {
+public final class ErpBalanceDto {
     @XmlAttribute
-    private String storageErpCode;
+    private String storageCode;
     @XmlAttribute
-    private String productErpCode;
+    private String productCode;
     @XmlAttribute
     private float quantity;
 }
