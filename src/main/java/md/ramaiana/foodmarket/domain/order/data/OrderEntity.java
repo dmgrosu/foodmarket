@@ -15,9 +15,10 @@ import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.MappedCollection;
 import org.springframework.data.relational.core.mapping.Table;
 
-/**
- * Order Entity.
- */
+// TODO: make all props final
+// TODO: add PersistenceCreator constructor
+// TODO: add storage entity ref
+
 @Getter
 @Setter
 @NoArgsConstructor

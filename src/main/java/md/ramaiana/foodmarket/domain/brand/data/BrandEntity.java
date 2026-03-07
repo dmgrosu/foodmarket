@@ -1,27 +1,34 @@
 package md.ramaiana.foodmarket.domain.brand.data;
 
-import java.util.UUID;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.NonNull;
-import lombok.Setter;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.PersistenceCreator;
 import org.springframework.data.relational.core.mapping.Table;
 
-/**
- * Brand Entity.
- */
+import java.util.UUID;
+
 @Getter
-@Setter
-@NoArgsConstructor
 @Table("brand")
 public class BrandEntity {
 
-  private UUID uuid = UUID.randomUUID();
-  @Id
-  private Integer id;
-  @NonNull
-  private String name;
-  @NonNull
-  private String erpCode;
+    private final UUID uuid = UUID.randomUUID();
+    @Id
+    private final Integer id;
+    @NonNull
+    private final String name;
+    @NonNull
+    private final String erpCode;
+
+    @PersistenceCreator
+    public BrandEntity(Integer id, @NonNull String name,
+                       @NonNull String erpCode) {
+        this.id = id;
+        this.name = name;
+        this.erpCode = erpCode;
+    }
+
+    public BrandEntity(@NonNull String name, @NonNull String erpCode) {
+        this(null, name, erpCode);
+    }
 }

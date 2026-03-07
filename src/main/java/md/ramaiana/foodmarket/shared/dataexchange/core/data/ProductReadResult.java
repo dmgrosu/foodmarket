@@ -1,0 +1,47 @@
+package md.ramaiana.foodmarket.shared.dataexchange.core.data;
+
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Value;
+import md.ramaiana.foodmarket.domain.brand.data.BrandEntity;
+import md.ramaiana.foodmarket.domain.product.data.ProductEntity;
+import md.ramaiana.foodmarket.domain.product.data.ProductGroupEntity;
+
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * @author Dmitri Grosu (dmitri.grosu@gmail.com), 3/7/21
+ */
+@Getter
+@Value
+@Builder
+public class ProductReadResult {
+    /**
+     * Map, containing groups, read from file
+     * key - group ERP code, value - group itself
+     */
+    @Builder.Default
+    Map<String, ProductGroupEntity> groups = new HashMap<>();
+    /**
+     * Map containing products, read from file
+     * key - product ERP code, value - good itself
+     */
+    @Builder.Default
+    Map<String, ProductEntity> products = new HashMap<>();
+    /**
+     * Map containing brands, read from file
+     * key - brand ERP code, value - brand itself
+     */
+    @Builder.Default
+    Map<String, BrandEntity> brands = new HashMap<>();
+    /**
+     * Map containing ERP child-parent-brand relations:
+     * key - product/group ERP code
+     * value - array, containing:
+     * [0] parent ERP code
+     * [1] brand ERP code
+     */
+    @Builder.Default
+    Map<String, String[]> erpCodes = new HashMap<>();
+}
