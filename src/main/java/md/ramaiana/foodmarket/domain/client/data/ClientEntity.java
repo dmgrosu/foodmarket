@@ -1,31 +1,37 @@
 package md.ramaiana.foodmarket.domain.client.data;
 
-import jakarta.annotation.Nullable;
-import java.time.Instant;
-import java.util.UUID;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.NonNull;
-import lombok.Setter;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.PersistenceCreator;
 import org.springframework.data.relational.core.mapping.Table;
+
+import java.time.Instant;
 
 /**
  * Client Entity.
  */
 @Getter
-@Setter
-@NoArgsConstructor
 @Table("client")
 public class ClientEntity {
 
-  private UUID uuid = UUID.randomUUID();
   @Id
-  private Integer id;
+  private final Integer id;
   @NonNull
-  private String name;
+  private final String name;
   @NonNull
-  private String idno;
-  @Nullable
-  private Instant deletedAt;
+  private final String idno;
+  @NonNull
+  private final Instant createdAt;
+  private final Instant deletedAt;
+
+  @PersistenceCreator
+  public ClientEntity(Integer id, @NonNull String name, @NonNull String idno,
+                      @NonNull Instant createdAt, Instant deletedAt) {
+    this.id = id;
+    this.name = name;
+    this.idno = idno;
+    this.createdAt = createdAt;
+    this.deletedAt = deletedAt;
+  }
 }

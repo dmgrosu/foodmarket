@@ -33,30 +33,35 @@ public class AuthLoginUseCase {
   @Transactional(readOnly = true)
   public AuthResponse execute(@NonNull LoginRequest request) {
     Authentication authentication = authenticationManager.authenticate(
-        new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
+        new UsernamePasswordAuthenticationToken(request.email(), request.password())
     );
-
-    if (!authentication.isAuthenticated()) {
-      throw new SecurityException("Authentication failed");
-    }
-
-    AppUserEntity user = (AppUserEntity) authentication.getPrincipal();
-    if (user == null) {
-      throw new SecurityException("Could not find principal for user");
-    }
+    AppUserEntity user = validateAuthentication(authentication);
     String token = jwtCreateTokenUseCase.execute(user);
     int tokenTtl = jwtCreateTokenUseCase.getTokenValidityInSeconds();
 
     ClientResponse clientResponse = null;
     if (user.hasClient()) {
-      ClientEntity client = clientFindByIdUseCase.execute(user.getClientId());
+      ClientEntity client = clientFindByIdUseCase.execute(user.getClient());
       clientResponse = new ClientResponse(client);
     }
-
     return new AuthResponse(
         new AuthResponse.UserResponse(user, clientResponse),
         token,
         tokenTtl
     );
+  }
+
+  private @NonNull AppUserEntity validateAuthentication(Authentication authentication) {
+    if (!authentication.isAuthenticated()) {
+      throw new SecurityException("Authentication failed");
+    }
+    AppUserEntity user = (AppUserEntity) authentication.getPrincipal();
+    if (user == null) {
+      throw new SecurityException("Could not find principal for user");
+    }
+    if (!user.isActive()) {
+      throw new SecurityException("Found user is not active");
+    }
+    return user;
   }
 }

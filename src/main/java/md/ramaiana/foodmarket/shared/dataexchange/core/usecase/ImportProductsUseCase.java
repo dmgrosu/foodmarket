@@ -42,6 +42,8 @@ public class ImportProductsUseCase {
             String filePath = exchangeFolderPath + PRODUCTS_DATA_FILE;
             CatalogDto catalogDto = (CatalogDto) unmarshaller.unmarshal(getSource(filePath));
             productLoadUseCase.execute(mapToReadResult(catalogDto));
+        } catch (FileNotFoundException ex) {
+            log.warn("Skip products import - no {} file found", PRODUCTS_DATA_FILE);
         } catch (Exception ex) {
             log.error("Error while importing products: {}", ex.getMessage(), ex);
         }

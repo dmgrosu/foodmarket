@@ -36,6 +36,8 @@ public class ImportPricesAndBalancesUseCase {
             BalanceDataDto balanceDataDto = (BalanceDataDto) unmarshaller.unmarshal(getSource(filePath));
             pricesUpdate.execute(balanceDataDto.getPrices());
             balancesUpdate.execute(balanceDataDto.getBalances());
+        } catch (FileNotFoundException ex) {
+            log.warn("Skip import balances - no {} file found", BALANCES_DATA_FILE);
         } catch (Exception ex) {
             log.error("Error while importing prices and balances: {}", ex.getMessage(), ex);
         }

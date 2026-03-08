@@ -128,4 +128,3 @@ CREATE TABLE IF NOT EXISTS balances
 
 create unique index if not exists balances_product_id_storage_id_uindex
     on balances (product_id, storage_id);
-

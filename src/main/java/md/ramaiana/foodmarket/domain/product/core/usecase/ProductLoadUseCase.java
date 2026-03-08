@@ -88,7 +88,9 @@ public class ProductLoadUseCase {
                 newBrand = new BrandEntity(
                         existingBrands.get(erpCode).getId(),
                         brand.getName(),
-                        brand.getErpCode()
+                        brand.getErpCode(),
+                        brand.getCreatedAt(),
+                        brand.getDeletedAt()
                 );
             } else {
                 newBrand = brand;

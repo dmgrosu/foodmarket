@@ -6,6 +6,7 @@ import md.ramaiana.foodmarket.domain.client.data.ClientEntity;
 import md.ramaiana.foodmarket.domain.client.data.ClientRepository;
 import md.ramaiana.foodmarket.shared.annotation.UseCase;
 import md.ramaiana.foodmarket.shared.exception.http.NotFoundException;
+import org.springframework.data.jdbc.core.mapping.AggregateReference;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -22,8 +23,8 @@ public class ClientFindByIdUseCase {
    */
   @NonNull
   @Transactional(readOnly = true)
-  public ClientEntity execute(@NonNull Integer id) {
-    return clientRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException(String.format("Client with id '%s' not found", id)));
+  public ClientEntity execute(@NonNull AggregateReference<ClientEntity, Integer> client) {
+    return clientRepository.findById(client.getId())
+        .orElseThrow(() -> new NotFoundException(String.format("Client with id '%s' not found", client.getId())));
   }
 }

@@ -4,48 +4,57 @@ import java.time.Instant;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.NonNull;
-import lombok.Setter;
+import md.ramaiana.foodmarket.domain.client.data.ClientEntity;
 import md.ramaiana.foodmarket.shared.enums.Role;
+import md.ramaiana.foodmarket.shared.enums.UserState;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.PersistenceCreator;
+import org.springframework.data.jdbc.core.mapping.AggregateReference;
+import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.MappedCollection;
 import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-/**
- * AppUser Entity.
- */
+
 @Getter
-@Setter
-@NoArgsConstructor
 @Table("app_user")
 public class AppUserEntity implements UserDetails {
 
-  private UUID uuid = UUID.randomUUID();
   @Id
-  private Integer id;
+  private final Integer id;
   @NonNull
-  private String email;
+  private final String email;
   @NonNull
-  private String passwd;
+  private final String passwd;
   @NonNull
-  private Instant createdAt = Instant.now();
+  private final Instant createdAt;
+  @NonNull
+  private final UserState state;
   @MappedCollection(idColumn = "user_id")
-  private Set<UserRoleRef> userRoles = new HashSet<>();
-  private Integer clientId;
+  private final Set<UserRoleRef> userRoles;
+  @Column("client_id")
+  private final AggregateReference<ClientEntity, Integer> client;
 
-  /**
-   * Constructor.
-   */
-  public AppUserEntity(@NonNull String email, @NonNull String passwd) {
+  @PersistenceCreator
+  public AppUserEntity(Integer id, @NonNull String email, @NonNull String passwd, @NonNull Instant createdAt,
+                       @NonNull UserState state, @NonNull Set<UserRoleRef> userRoles,
+                       AggregateReference<ClientEntity, Integer> client) {
+    this.id = id;
     this.email = email;
     this.passwd = passwd;
+    this.createdAt = createdAt;
+    this.state = state;
+    this.userRoles = userRoles;
+    this.client = client;
+  }
+
+  public AppUserEntity(@NonNull String email, @NonNull String passwd) {
+    this(null, email, passwd, Instant.now(), UserState.INACTIVE, new HashSet<>(), null);
   }
 
   public void addRole(@NonNull Role role) {
@@ -57,7 +66,7 @@ public class AppUserEntity implements UserDetails {
   }
 
   public boolean hasClient() {
-    return clientId != null;
+    return client != null;
   }
 
   @Override
@@ -96,6 +105,11 @@ public class AppUserEntity implements UserDetails {
 
   @Override
   public boolean isEnabled() {
-    return true;
+    return !UserState.SUSPENDED.equals(state);
   }
+
+  public boolean isActive() {
+    return state.equals(UserState.ACTIVE);
+  }
+
 }
