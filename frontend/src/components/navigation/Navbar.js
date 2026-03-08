@@ -36,7 +36,7 @@ const Navbar = (props) => {
             <Toolbar>
                 <MainMenu isAuthenticated={isAuthenticated}/>
                 <Typography variant="h6" className={classes.title}>
-                    Ramaiana Food Market
+                    Ramaiana SRL
                 </Typography>
                 {isAuthenticated && <IconButton component={Link} to="/cart">
                     <Badge badgeContent={getProductsCount()} color="error">
