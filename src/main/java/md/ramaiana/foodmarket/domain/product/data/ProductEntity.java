@@ -15,7 +15,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 
 /**
  * Product Entity.
@@ -24,7 +23,6 @@ import java.util.UUID;
 @Table("product")
 public class ProductEntity {
 
-    private final UUID uuid = UUID.randomUUID();
     @Id
     private final Integer id;
     @NonNull

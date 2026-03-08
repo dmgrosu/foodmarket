@@ -13,13 +13,11 @@ import org.springframework.data.relational.core.mapping.Table;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @Getter
 @Table("product_group")
 public class ProductGroupEntity {
 
-    private final UUID uuid = UUID.randomUUID();
     @Id
     private final Integer id;
     @NonNull

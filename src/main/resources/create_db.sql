@@ -75,14 +75,14 @@ create unique index if not exists client_idno_uindex
 
 create table if not exists rama_fm."order"
 (
-    id                bigserial                   not null
+    id                bigserial         not null
         constraint order_pk
             primary key,
     client_id         integer
         constraint order_client_id_fk
             references rama_fm.client (id),
-    total_sum         numeric default 0           not null,
-    created_at        timestamp                   not null default now(),
+    total_sum         numeric default 0 not null,
+    created_at        timestamp         not null default now(),
     deleted_at        timestamp,
     processed_at      timestamp,
     processing_result text,
@@ -113,6 +113,7 @@ create table if not exists rama_fm."app_user"
             primary key,
     email      text                     not null,
     passwd     text                     not null,
+    state      text                     not null,
     client_id  integer
         constraint app_user_client_id_fk
             references rama_fm.client (id),
@@ -151,7 +152,7 @@ create table if not exists rama_fm."prices"
     product_id bigserial
         constraint prices_product_id_fk
             references rama_fm.product
-            on delete cascade,
+                on delete cascade,
     storage_id serial
         constraint prices_storages_id_fk
             references rama_fm.storages
@@ -168,11 +169,11 @@ create table if not exists rama_fm.balances
     storage_id serial
         constraint balances_storages_id_fk
             references rama_fm.storages
-            on delete cascade,
+                on delete cascade,
     product_id bigserial
         constraint balances_product_id_fk
             references rama_fm.product
-            on delete cascade,
+                on delete cascade,
     quantity   numeric not null
 );
 
