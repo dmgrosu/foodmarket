@@ -8,7 +8,7 @@ import Box from '@material-ui/core/Box';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import SearchIcon from '@material-ui/icons/Search';
 import Typography from '@material-ui/core/Typography';
-import Copyright from "../Copyright";
+import Copyright from "../home/Copyright";
 import {connect} from "react-redux";
 import {withStyles} from "@material-ui/styles";
 import {signUpStart} from "../../store/actions/authActions";
@@ -71,13 +71,13 @@ class SignUp extends Component {
             errors.push({
                 field: 'email',
                 code: 'EMAIL_EMPTY',
-                description: 'Email required!'
+                description: 'Email обязателен!'
             })
         } else if (!emailRegEx.test(email)) {
             errors.push({
                 field: 'email',
                 code: 'EMAIL_INVALID',
-                description: 'Email is invalid!'
+                description: 'Email неправильный!'
             })
         }
         const passRegexp = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/;
@@ -85,19 +85,19 @@ class SignUp extends Component {
             errors.push({
                 field: 'password',
                 code: 'PASSWORD_EMPTY',
-                description: 'Password required!'
+                description: 'Пароль обязателен!'
             })
         } else if (password !== confirmPassword) {
             errors.push({
                 field: 'confirmPassword',
                 code: 'PASSWORD_NOT_MATCH',
-                description: 'Password does not match!'
+                description: 'Пароли не совпадают!'
             })
         } else if (!passRegexp.test(password)) {
             errors.push({
                 field: 'password',
                 code: 'PASSWORD_NOT_STRONG',
-                description: 'Password is not strong!'
+                description: 'Пароль не достаточно надежный!'
             })
         }
         if (errors.length > 0) {
@@ -185,7 +185,7 @@ class SignUp extends Component {
                         <LockOutlinedIcon/>
                     </Avatar>
                     <Typography component="h1" variant="h5" gutterBottom>
-                        Sign up
+                        {"Регистрация"}
                     </Typography>
                     <Grid container spacing={2}>
                         <Grid item xs={10}>
@@ -220,7 +220,7 @@ class SignUp extends Component {
                                 variant="outlined"
                                 fullWidth
                                 id="firstName"
-                                label="First Name"
+                                label="Имя"
                                 autoFocus
                                 value={firstName}
                                 disabled={isLoading}
@@ -232,7 +232,7 @@ class SignUp extends Component {
                                 variant="outlined"
                                 fullWidth
                                 id="lastName"
-                                label="Last Name"
+                                label="Фамилия"
                                 name="lastName"
                                 value={lastName}
                                 disabled={isLoading}
@@ -245,7 +245,7 @@ class SignUp extends Component {
                                 required
                                 fullWidth
                                 id="email"
-                                label="Email Address"
+                                label="Email адрес"
                                 name="email"
                                 error={this.getErrorForField("email") !== false}
                                 helperText={this.getErrorForField("email")}
@@ -260,7 +260,7 @@ class SignUp extends Component {
                                 required
                                 fullWidth
                                 name="password"
-                                label="Password"
+                                label="Пароль"
                                 type="password"
                                 id="password"
                                 error={this.getErrorForField("password") !== false}
@@ -295,13 +295,13 @@ class SignUp extends Component {
                         className={classes.submit}
                         disabled={isLoading}
                     >
-                        Sign Up
+                        {"Зарегистрироваться"}
                     </Button>
                     {isLoading && <CircularProgress size={24} className={classes.buttonProgress}/>}
                     <Grid container justify="flex-end">
                         <Grid item>
                             <Link to="/signIn" variant="body2">
-                                Already have an account? Sign in
+                                {"Уже есть аккаунт? Войти"}
                             </Link>
                         </Grid>
                     </Grid>

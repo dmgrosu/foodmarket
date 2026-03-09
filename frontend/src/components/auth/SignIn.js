@@ -7,7 +7,7 @@ import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
-import Copyright from "../Copyright";
+import Copyright from "../home/Copyright";
 import {withStyles} from "@material-ui/styles";
 import {connect} from "react-redux";
 import {loginStart} from "../../store/actions/authActions";
@@ -116,7 +116,7 @@ class SignIn extends Component {
                         <LockOutlinedIcon/>
                     </Avatar>
                     <Typography component="h1" variant="h5">
-                        Sign in
+                        Войти
                     </Typography>
                     <TextField
                         variant="outlined"
@@ -124,7 +124,7 @@ class SignIn extends Component {
                         required
                         fullWidth
                         id="email"
-                        label="Email Address"
+                        label="Email адрес"
                         name="email"
                         autoComplete="email"
                         autoFocus
@@ -139,7 +139,7 @@ class SignIn extends Component {
                         required
                         fullWidth
                         name="password"
-                        label="Password"
+                        label="Пароль"
                         type="password"
                         id="password"
                         disabled={isLoading}
@@ -156,7 +156,7 @@ class SignIn extends Component {
                         className={classes.submit}
                         onClick={this.requestLogin}
                     >
-                        Sign In
+                        {"Вход"}
                     </Button>
                     {isLoading && <CircularProgress size={24} className={classes.buttonProgress}/>}
                     <Grid container>
@@ -167,7 +167,7 @@ class SignIn extends Component {
                         </Grid>
                         <Grid item xs={6}>
                             <Link to="/signUp">
-                                {"Don't have an account? Sign Up"}
+                                {"Нет аккаунта? Зарегистрироваться"}
                             </Link>
                         </Grid>
                     </Grid>

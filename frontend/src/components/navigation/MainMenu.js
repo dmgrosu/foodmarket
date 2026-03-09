@@ -55,11 +55,11 @@ class MainMenu extends Component {
                         <ListItemIcon>
                             <HomeIcon/>
                         </ListItemIcon>
-                        <ListItemText primary="Home"/>
+                        <ListItemText primary="Домой"/>
                     </MenuItem>
                     {isAuthenticated && <Divider/>}
-                    {isAuthenticated && <MainMenuItem text="Catalog" linkTo="/products" icon={<ShopTwo/>}/>}
-                    {isAuthenticated && <MainMenuItem text="Orders" linkTo="/orders" icon={<Assignment/>}/>}
+                    {isAuthenticated && <MainMenuItem text="Каталог" linkTo="/products" icon={<ShopTwo/>}/>}
+                    {isAuthenticated && <MainMenuItem text="Заказы" linkTo="/orders" icon={<Assignment/>}/>}
                 </Menu>
             </div>
         )

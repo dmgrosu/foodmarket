@@ -50,10 +50,10 @@ class RightMenu extends Component {
                       }}
                       getContentAnchorEl={null}
                 >
-                    {isAuthenticated && <MenuItem component={Link} to="/profile">Profile</MenuItem>}
-                    {isAuthenticated && <MenuItem onClick={this.toggleDialog}>Logout</MenuItem>}
-                    {!isAuthenticated && <MenuItem component={Link} to="/signIn">Login</MenuItem>}
-                    {!isAuthenticated && <MenuItem component={Link} to="/signUp">Sign Up</MenuItem>}
+                    {isAuthenticated && <MenuItem component={Link} to="/profile">Профиль</MenuItem>}
+                    {isAuthenticated && <MenuItem onClick={this.toggleDialog}>Выйти из системы</MenuItem>}
+                    {!isAuthenticated && <MenuItem component={Link} to="/signIn">Войти</MenuItem>}
+                    {!isAuthenticated && <MenuItem component={Link} to="/signUp">Зарегистрироваться</MenuItem>}
                 </Menu>
                 <Dialog
                     open={dialogOpen}

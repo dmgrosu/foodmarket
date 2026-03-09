@@ -10,7 +10,6 @@ const Copyright = () => {
                 Ramaiana
             </Link>{' '}
             {new Date().getFullYear()}
-            {'.'}
         </Typography>
     );
 }

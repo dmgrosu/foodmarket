@@ -4,7 +4,7 @@ import {createMuiTheme} from "@material-ui/core";
 import {Route, Switch, withRouter} from "react-router-dom";
 import SignIn from "./components/auth/SignIn";
 import SignUp from "./components/auth/SignUp";
-import Home from "./components/Home";
+import Home from "./components/home/Home";
 import {ToastContainer} from "material-react-toastify";
 import 'material-react-toastify/dist/ReactToastify.min.css';
 import {connect} from "react-redux";
@@ -19,7 +19,7 @@ import Cart from "./components/orders/Cart";
 const theme = createMuiTheme({
     palette: {
         primary: {
-            main: '#556cd6',
+            main: '#32425a',
         },
         secondary: {
             main: '#19857b',
