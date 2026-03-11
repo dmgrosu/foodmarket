@@ -50,7 +50,10 @@ public class SecurityConfig {
             .requestMatchers(
                 "/auth/register",
                 "/auth/login",
-                "/client/findByIdno"
+                "/client/findByIdno",
+                "/v3/api-docs/**",
+                "/swagger-ui/**",
+                "/swagger-ui.html"
             ).permitAll()
             // All other endpoints require authentication
             .anyRequest().authenticated()
