@@ -1,12 +1,12 @@
 package md.ramaiana.foodmarket.domain.client.data;
 
-import java.util.Optional;
 import org.springframework.data.repository.CrudRepository;
 
-/**
- * Client Repository.
- */
+import java.util.Optional;
+
+
 public interface ClientRepository extends CrudRepository<ClientEntity, Integer> {
 
-  Optional<ClientEntity> findByIdnoAndDeletedAtIsNull(String idno);
+    Optional<ClientEntity> findByIdnoAndDeletedAtIsNull(String idno);
+
 }

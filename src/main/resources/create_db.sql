@@ -179,3 +179,30 @@ create table if not exists rama_fm.balances
 
 create unique index if not exists balances_product_id_storage_id_uindex
     on rama_fm.balances (product_id, storage_id);
+
+create table if not exists rama_fm.client_phones
+(
+    "number"  text    not null,
+    name      text,
+    client_id integer not null
+        constraint client_phones_client_id_fk
+            references rama_fm.client
+                on delete cascade
+);
+
+create index if not exists client_phones_client_id_index
+    on rama_fm.client_phones (client_id);
+
+create table if not exists rama_fm.client_addresses
+(
+    type         text not null,
+    full_address text,
+    description  text,
+    client_id    integer
+        constraint client_addresses_client_id_fk
+            references rama_fm.client
+                on delete cascade
+);
+
+create index if not exists client_addresses_client_id_index
+    on rama_fm.client_addresses (client_id);
