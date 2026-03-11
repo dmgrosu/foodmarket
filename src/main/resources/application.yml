@@ -16,3 +16,10 @@ jwt:
 dataFolderPath: ${DATA_FOLDER_PATH}
 # data loading delay in millis, default 10000 (10 sec)
 dataLoadingDelay: 10000
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+  api-docs:
+    path: /v3/api-docs
