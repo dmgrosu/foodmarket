@@ -6,6 +6,7 @@ import md.ramaiana.foodmarket.domain.product.core.usecase.BalancesUpdateUseCase;
 import md.ramaiana.foodmarket.shared.dataexchange.dto.ErpBalanceDto;
 import md.ramaiana.foodmarket.shared.dataexchange.dto.ErpPriceDto;
 import md.ramaiana.foodmarket.shared.enums.PriceType;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -18,6 +19,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -63,6 +67,33 @@ class ImportPricesAndBalancesUseCaseTest {
     ArgumentCaptor<List<ErpBalanceDto>> balancesCaptor;
     @Captor
     ArgumentCaptor<List<ErpPriceDto>> pricesCaptor;
+    Path path = Paths.get("src/test/resources/dataExchange/balances-data.xml");
+
+    @BeforeEach
+    void setUp() throws Exception {
+        if (!Files.exists(path)) {
+            Files.createDirectories(path.getParent());
+            String xml = """
+                    <?xml version="1.0" encoding="Windows-1251"?>
+                    <balance-data>
+                       <prices>
+                           <price storageCode="1" productCode="1c555" type="LOCAL" price="85.13"/>
+                           <price storageCode="1" productCode="1c555" type="RETAIL_ZONE1" price="88.53"/>
+                           <price storageCode="1" productCode="1c666" type="LOCAL" price="57.54"/>
+                           <price storageCode="2" productCode="1c555" type="LOCAL" price="84.49"/>
+                           <price storageCode="4" productCode="1c555" type="LOCAL" price="84.57"/>
+                       </prices>
+                       <balances>
+                           <balance storageCode="1" productCode="1c555" quantity="412"/>
+                           <balance storageCode="1" productCode="1c666" quantity="46"/>
+                           <balance storageCode="2" productCode="1c555" quantity="38"/>
+                           <balance storageCode="3" productCode="1c555" quantity="76"/>
+                           <balance storageCode="4" productCode="1c555" quantity="188"/>
+                       </balances>
+                    </balance-data>""";
+            Files.writeString(path, xml);
+        }
+    }
 
     @Test
     void should_import_prices_and_balances() {
@@ -70,7 +101,7 @@ class ImportPricesAndBalancesUseCaseTest {
 
         verify(pricesUpdate).execute(pricesCaptor.capture());
         verify(balancesUpdate).execute(balancesCaptor.capture());
-        List<ErpPriceDto> actualPrices =  pricesCaptor.getValue();
+        List<ErpPriceDto> actualPrices = pricesCaptor.getValue();
         assertThat(actualPrices)
                 .isNotNull()
                 .extracting("storageCode", "productCode", "type", "price")

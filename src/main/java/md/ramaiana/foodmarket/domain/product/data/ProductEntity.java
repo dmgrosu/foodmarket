@@ -12,9 +12,7 @@ import org.springframework.data.relational.core.mapping.MappedCollection;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * Product Entity.
@@ -48,15 +46,15 @@ public class ProductEntity {
     private final Instant deletedAt;
     @Nullable
     private final Instant updatedAt;
-    @MappedCollection(keyColumn = "id", idColumn = "product_id")
-    private final List<PriceEntity> prices;
+    @MappedCollection(idColumn = "product_id")
+    private final Set<PriceEntity> prices;
 
     @PersistenceCreator
     public ProductEntity(Integer id, String name, String unit,
                          Float inPackage, String erpCode, String barCode,
                          Float weight, Integer brandId, Integer groupId,
                          Instant createdAt, Instant updatedAt, Instant deletedAt,
-                         List<PriceEntity> prices) {
+                         Set<PriceEntity> prices) {
         this.id = id;
         this.name = name;
         this.unit = unit;
@@ -75,13 +73,13 @@ public class ProductEntity {
     public ProductEntity(String name, String unit, Float inPackage, String erpCode,
                    String barCode, Float weight) {
         this(null, name, unit, inPackage, erpCode, barCode,
-                weight, null, null, Instant.now(), null, null, new ArrayList<>());
+                weight, null, null, Instant.now(), null, null, new HashSet<>());
     }
 
     public ProductEntity(String name, String unit, Float inPackage, String erpCode,
                    String barCode, Float weight, Integer brandId, Integer groupId) {
         this(null, name, unit, inPackage, erpCode, barCode,
-                weight, brandId, groupId, Instant.now(), null, null, new ArrayList<>());
+                weight, brandId, groupId, Instant.now(), null, null, new HashSet<>());
     }
 
     public ProductEntity updateFrom(ProductEntity other) {

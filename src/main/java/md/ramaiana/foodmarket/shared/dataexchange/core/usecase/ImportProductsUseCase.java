@@ -17,6 +17,10 @@ import org.springframework.oxm.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +46,7 @@ public class ImportProductsUseCase {
             String filePath = exchangeFolderPath + PRODUCTS_DATA_FILE;
             CatalogDto catalogDto = (CatalogDto) unmarshaller.unmarshal(getSource(filePath));
             productLoadUseCase.execute(mapToReadResult(catalogDto));
+            deleteFile(filePath);
         } catch (FileNotFoundException ex) {
             log.warn("Skip products import - no {} file found", PRODUCTS_DATA_FILE);
         } catch (Exception ex) {
@@ -52,6 +57,15 @@ public class ImportProductsUseCase {
     @NonNull
     private StreamSource getSource(String file) throws FileNotFoundException {
         return new StreamSource(new FileInputStream(file));
+    }
+
+    private void deleteFile(String filePath) {
+        try {
+            Path path = Paths.get(filePath);
+            Files.deleteIfExists(path);
+        } catch (IOException e) {
+            log.error("Error while deleting file {}: {}", filePath, e.getMessage());
+        }
     }
 
     private ProductReadResult mapToReadResult(CatalogDto catalogDto) {

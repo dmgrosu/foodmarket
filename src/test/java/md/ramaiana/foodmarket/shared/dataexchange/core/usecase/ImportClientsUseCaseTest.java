@@ -1,9 +1,12 @@
 package md.ramaiana.foodmarket.shared.dataexchange.core.usecase;
 
 import md.ramaiana.foodmarket.config.DataExchangeConfig;
+import md.ramaiana.foodmarket.domain.client.data.ClientAddressEntity;
 import md.ramaiana.foodmarket.domain.client.data.ClientEntity;
 import md.ramaiana.foodmarket.domain.client.data.ClientRepository;
+import md.ramaiana.foodmarket.shared.enums.AddressType;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -16,8 +19,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.List;
+import java.util.Set;
 
 import java.util.Optional;
 
@@ -28,7 +35,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(SpringExtension.class)
 @ExtendWith(MockitoExtension.class)
 @TestPropertySource(locations = "classpath:application.yml")
-class ImportClientUseCaseTest {
+class ImportClientsUseCaseTest {
 
     @TestConfiguration
     static class TextConfig {
@@ -36,9 +43,9 @@ class ImportClientUseCaseTest {
         private String folderPath;
 
         @Bean
-        public ImportClientUseCase useCase() {
+        public ImportClientsUseCase useCase() {
             DataExchangeConfig config = new DataExchangeConfig();
-            ImportClientUseCase useCase = new ImportClientUseCase(config.unmarshaller(), clientRepository());
+            ImportClientsUseCase useCase = new ImportClientsUseCase(config.unmarshaller(), clientRepository());
             useCase.setExchangeFolderPath(folderPath);
             return useCase;
         }
@@ -50,11 +57,34 @@ class ImportClientUseCaseTest {
     }
 
     @Autowired
-    ImportClientUseCase useCase;
+    ImportClientsUseCase useCase;
     @Autowired
     ClientRepository clientRepository;
     @Captor
     ArgumentCaptor<List<ClientEntity>> clientsCaptor;
+    Path path = Paths.get("src/test/resources/dataExchange/clients-data.xml");
+
+    @BeforeEach
+    void setUp() throws Exception {
+        if (!Files.exists(path)) {
+            Files.createDirectories(path.getParent());
+            String xml = """
+                    <?xml version="1.0" encoding="Windows-1251"?>
+                    <clients-data>
+                        <clients>
+                            <client name="S.R.L Kaufland" idno="111111111111">
+                                <address type="LEGAL" address="Chisinau, Mircea cel Batran 1" descr=""/>
+                                <phone number="022111222" name="Office"/>
+                                <email>test@dot.md</email>
+                            </client>
+                            <client name="IMENSITATE SRL" idno="22222222222">
+                                <email>email1@test.md;email2@test.md</email>
+                            </client>
+                        </clients>
+                    </clients-data>""";
+            Files.writeString(path, xml);
+        }
+    }
 
     @AfterEach
     void tearDown() {
@@ -77,6 +107,15 @@ class ImportClientUseCaseTest {
                         tuple(null, "S.R.L Kaufland", "111111111111", "test@dot.md"),
                         tuple(null, "IMENSITATE SRL", "22222222222", "email1@test.md;email2@test.md")
                 );
+        assertThat(actualClients.getFirst().getAddresses())
+                .extracting(
+                        ClientAddressEntity::getType,
+                        ClientAddressEntity::getFullAddress,
+                        ClientAddressEntity::getDescription)
+                .containsExactly(
+                        tuple(AddressType.LEGAL, "Chisinau, Mircea cel Batran 1", null)
+                );
+        assertThat(Files.exists(path)).isFalse();
     }
 
     @Test
@@ -88,8 +127,8 @@ class ImportClientUseCaseTest {
                 "old@email.md",
                 Instant.now().minusSeconds(3600),
                 null,
-                List.of(),
-                List.of()
+                Set.of(),
+                Set.of()
         );
         ClientEntity existingClient2 = new ClientEntity(
                 2,
@@ -98,8 +137,8 @@ class ImportClientUseCaseTest {
                 "old2@email.md",
                 Instant.now().minusSeconds(7200),
                 null,
-                List.of(),
-                List.of()
+                Set.of(),
+                Set.of()
         );
         when(clientRepository.findByIdnoAndDeletedAtIsNull("111111111111"))
                 .thenReturn(Optional.of(existingClient1));

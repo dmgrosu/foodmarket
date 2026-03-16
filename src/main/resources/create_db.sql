@@ -66,6 +66,7 @@ create table if not exists rama_fm.client
             primary key,
     name       text                     not null,
     idno       char(13)                 not null,
+    email      text,
     created_at timestamp with time zone not null default now(),
     deleted_at timestamp with time zone
 );
@@ -187,7 +188,8 @@ create table if not exists rama_fm.client_phones
     client_id integer not null
         constraint client_phones_client_id_fk
             references rama_fm.client
-                on delete cascade
+                on delete cascade,
+    client_key integer
 );
 
 create index if not exists client_phones_client_id_index
@@ -201,7 +203,8 @@ create table if not exists rama_fm.client_addresses
     client_id    integer
         constraint client_addresses_client_id_fk
             references rama_fm.client
-                on delete cascade
+                on delete cascade,
+    client_key integer
 );
 
 create index if not exists client_addresses_client_id_index
