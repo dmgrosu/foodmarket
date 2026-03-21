@@ -2,7 +2,10 @@ package md.ramaiana.foodmarket.shared.dataexchange.core.usecase;
 
 import md.ramaiana.foodmarket.config.DataExchangeConfig;
 import md.ramaiana.foodmarket.domain.product.core.usecase.ProductLoadUseCase;
+import md.ramaiana.foodmarket.domain.storage.core.usecase.StorageSearchUseCase;
+import md.ramaiana.foodmarket.domain.storage.data.StorageEntity;
 import md.ramaiana.foodmarket.shared.dataexchange.core.data.ProductReadResult;
+import md.ramaiana.foodmarket.shared.enums.PriceType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.data.jdbc.core.mapping.AggregateReference;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -19,8 +23,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.assertj.core.groups.Tuple.tuple;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
 @TestPropertySource(locations = "classpath:application.yml")
@@ -34,7 +38,11 @@ class ImportProductsUseCaseTest {
         @Bean
         public ImportProductsUseCase useCase() {
             DataExchangeConfig config = new DataExchangeConfig();
-            ImportProductsUseCase useCase = new ImportProductsUseCase(productLoadUseCase(), config.unmarshaller());
+            ImportProductsUseCase useCase = new ImportProductsUseCase(
+                    productLoadUseCase(),
+                    storageSearch(),
+                    config.unmarshaller()
+            );
             useCase.setExchangeFolderPath(folderPath);
             return useCase;
         }
@@ -43,12 +51,19 @@ class ImportProductsUseCaseTest {
         public ProductLoadUseCase productLoadUseCase() {
             return mock(ProductLoadUseCase.class);
         }
+
+        @Bean
+        public StorageSearchUseCase storageSearch() {
+            return mock(StorageSearchUseCase.class);
+        }
     }
 
     @Autowired
     ImportProductsUseCase useCase;
     @Autowired
     ProductLoadUseCase productLoad;
+    @Autowired
+    StorageSearchUseCase storageSearch;
     Path path = Paths.get("src/test/resources/dataExchange/products-data.xml");
 
     @BeforeEach
@@ -75,11 +90,21 @@ class ImportProductsUseCaseTest {
                                     <code name="kauflandCode" value="123456789"/>
                                     <!-- any other code may come here -->
                                 </codes>
+                                <prices>
+                                   <price storageCode="1" productCode="1c555" type="LOCAL" price="85.13"/>
+                                   <price storageCode="1" productCode="1c555" type="RETAIL_ZONE1" price="88.53"/>
+                                   <price storageCode="2" productCode="1c555" type="LOCAL" price="84.49"/>
+                                   <price storageCode="4" productCode="1c555" type="LOCAL" price="84.57"/>
+                               </prices>
                             </product>
                             <product code="1c666" name="Pasarea Maiastra 300gr" brandCode="1c10" groupCode="1c444" weight="0.3" unit="buc" packSize="12">
                                 <codes>
                                     <code name="barCode" value="4785468724687"/>
                                 </codes>
+                                <prices>
+                                    <price storageCode="1" productCode="1c666" type="LOCAL" price="57.54"/>
+                                    <price storageCode="2" productCode="1c666" type="LOCAL" price="53.16"/>
+                                </prices>
                             </product>
                         </products>
                     </catalog>""";
@@ -89,6 +114,10 @@ class ImportProductsUseCaseTest {
 
     @Test
     void should_import_products() {
+        when(storageSearch.findByErpCode("1")).thenReturn(new StorageEntity(1, "storage 1", "1"));
+        when(storageSearch.findByErpCode("2")).thenReturn(new StorageEntity(2, "storage 2", "2"));
+        when(storageSearch.findByErpCode("4")).thenReturn(new StorageEntity(4, "storage 4", "4"));
+
         useCase.execute();
 
         ArgumentCaptor<ProductReadResult> captor = ArgumentCaptor.forClass(ProductReadResult.class);
@@ -99,6 +128,14 @@ class ImportProductsUseCaseTest {
         assertThat(readResult.getProducts().get("1с555"))
                 .extracting("name", "unit", "inPackage", "barCode", "weight")
                 .containsExactly("Метеорит 450гр", "шт", 10f, "4215355134213", 0.45f);
+        assertThat(readResult.getProducts().get("1с555").getPrices())
+                .extracting("storage", "type", "price")
+                .containsExactlyInAnyOrder(
+                        tuple(AggregateReference.to(1), PriceType.LOCAL, 85.13f),
+                        tuple(AggregateReference.to(1), PriceType.RETAIL_ZONE1, 88.53f),
+                        tuple(AggregateReference.to(2), PriceType.LOCAL, 84.49f),
+                        tuple(AggregateReference.to(4), PriceType.LOCAL, 84.57f)
+                );
         assertThat(readResult.getGroups())
                 .containsOnlyKeys("1c111", "1c222", "1c333", "1c444");
         assertThat(readResult.getBrands())

@@ -3,7 +3,6 @@ package md.ramaiana.foodmarket.domain.product.data;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.data.jdbc.core.mapping.AggregateReference;
 import org.springframework.data.jdbc.repository.query.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -12,8 +11,6 @@ import org.springframework.data.repository.query.Param;
  * Product Repository.
  */
 public interface ProductRepository extends CrudRepository<ProductEntity, Integer> {
-
-  AggregateReference<ProductEntity, Integer> getByErpCode(String erpCode);
 
   Optional<ProductEntity> findByIdAndDeletedAtIsNull(Integer id);
 

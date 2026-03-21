@@ -12,7 +12,9 @@ import org.springframework.data.relational.core.mapping.MappedCollection;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.Instant;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * Product Entity.
@@ -71,9 +73,9 @@ public class ProductEntity {
     }
 
     public ProductEntity(String name, String unit, Float inPackage, String erpCode,
-                   String barCode, Float weight) {
+                   String barCode, Float weight, Set<PriceEntity> prices) {
         this(null, name, unit, inPackage, erpCode, barCode,
-                weight, null, null, Instant.now(), null, null, new HashSet<>());
+                weight, null, null, Instant.now(), null, null, prices);
     }
 
     public ProductEntity(String name, String unit, Float inPackage, String erpCode,

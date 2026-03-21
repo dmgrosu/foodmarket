@@ -5,13 +5,17 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import md.ramaiana.foodmarket.domain.brand.data.BrandEntity;
+import md.ramaiana.foodmarket.domain.price.data.PriceEntity;
 import md.ramaiana.foodmarket.domain.product.core.usecase.ProductLoadUseCase;
 import md.ramaiana.foodmarket.domain.product.data.ProductEntity;
 import md.ramaiana.foodmarket.domain.product.data.ProductGroupEntity;
-import md.ramaiana.foodmarket.shared.dataexchange.core.data.ProductReadResult;
+import md.ramaiana.foodmarket.domain.storage.core.usecase.StorageSearchUseCase;
+import md.ramaiana.foodmarket.domain.storage.data.StorageEntity;
 import md.ramaiana.foodmarket.shared.annotation.UseCase;
+import md.ramaiana.foodmarket.shared.dataexchange.core.data.ProductReadResult;
 import md.ramaiana.foodmarket.shared.dataexchange.dto.*;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.jdbc.core.mapping.AggregateReference;
 import org.springframework.oxm.Unmarshaller;
 
 import javax.xml.transform.stream.StreamSource;
@@ -38,6 +42,7 @@ public class ImportProductsUseCase {
     @Value("${dataFolderPath}")
     private String exchangeFolderPath;
     private final ProductLoadUseCase productLoadUseCase;
+    private final StorageSearchUseCase storageSearch;
     private final Unmarshaller unmarshaller;
 
 
@@ -98,8 +103,18 @@ public class ImportProductsUseCase {
                 dto.getPackSize(),
                 dto.getCode(),
                 toBarCode(dto.getCodes()),
-                dto.getWeight()
+                dto.getWeight(),
+                dto.getPrices().stream()
+                        .map(this::toPrice)
+                        .collect(Collectors.toSet())
         );
+    }
+
+    private PriceEntity toPrice(ErpPriceDto dto) {
+        AggregateReference<StorageEntity, Integer> storage = AggregateReference.to(
+                storageSearch.findByErpCode(dto.getStorageCode()).getId()
+        );
+        return new PriceEntity(dto.getType(), storage, dto.getPrice());
     }
 
     private String toBarCode(List<ErpProductCodeDto> dtoCodes) {

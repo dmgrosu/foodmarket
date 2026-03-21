@@ -4,7 +4,6 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import md.ramaiana.foodmarket.domain.price.core.usecase.PricesUpdateUseCase;
 import md.ramaiana.foodmarket.domain.product.core.usecase.BalancesUpdateUseCase;
 import md.ramaiana.foodmarket.shared.annotation.UseCase;
 import md.ramaiana.foodmarket.shared.dataexchange.dto.BalanceDataDto;
@@ -22,14 +21,13 @@ import java.nio.file.Paths;
 @Slf4j
 @UseCase
 @RequiredArgsConstructor
-public class ImportPricesAndBalancesUseCase {
+public class ImportBalancesUseCase {
 
     private static final String BALANCES_DATA_FILE = "balances-data.xml";
 
     @Setter
     @Value("${dataFolderPath}")
     private String exchangeFolderPath;
-    private final PricesUpdateUseCase pricesUpdate;
     private final BalancesUpdateUseCase balancesUpdate;
     private final Unmarshaller unmarshaller;
 
@@ -38,7 +36,6 @@ public class ImportPricesAndBalancesUseCase {
         String filePath = exchangeFolderPath + BALANCES_DATA_FILE;
         try {
             BalanceDataDto balanceDataDto = (BalanceDataDto) unmarshaller.unmarshal(getSource(filePath));
-            pricesUpdate.execute(balanceDataDto.getPrices());
             balancesUpdate.execute(balanceDataDto.getBalances());
             deleteFile(filePath);
         } catch (FileNotFoundException ex) {

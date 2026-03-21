@@ -53,7 +53,7 @@ public class ProductLoadUseCase {
             ProductEntity updatedProduct = upsertProduct(newProduct);
             updatedProductIds.add(updatedProduct.getId());
         }
-        log.info("... updated {} goods", updatedProductIds.size());
+        log.info("... updated {} products", updatedProductIds.size());
         //int deletedCount = productDao.setDeletedIfIdNotIn(updatedProductIds);
         //log.info("... mark deleted {} goods", deletedCount);
         log.info("... data loading finished");
@@ -123,20 +123,5 @@ public class ProductLoadUseCase {
             return productRepository.save(newProduct);
         }
     }
-
-    private void addAllParentsToMap(Integer childGroupId, Map<Integer, ProductGroupEntity> parents) {
-        if (parents == null) {
-            parents = new HashMap<>();
-        }
-        Optional<ProductGroupEntity> optionalGroup = productGroupRepository.findById(childGroupId);
-        if (optionalGroup.isPresent()) {
-            ProductGroupEntity group = optionalGroup.get();
-            parents.putIfAbsent(group.getId(), group);
-            if (group.hasParent()) {
-                addAllParentsToMap(group.getParentGroupId(), parents);
-            }
-        }
-    }
-
 
 }

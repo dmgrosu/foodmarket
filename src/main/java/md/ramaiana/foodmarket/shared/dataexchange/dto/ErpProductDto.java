@@ -28,4 +28,7 @@ public final class ErpProductDto {
     @XmlElement(name = "code")
     @XmlElementWrapper(name = "codes")
     private List<ErpProductCodeDto> codes;
+    @XmlElement(name = "price")
+    @XmlElementWrapper(name = "prices")
+    private List<ErpPriceDto> prices;
 }

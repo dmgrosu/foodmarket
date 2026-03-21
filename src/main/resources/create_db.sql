@@ -144,22 +144,20 @@ create table if not exists rama_fm."storages"
     erp_code text not null
 );
 
-create table if not exists rama_fm."prices"
+create table if not exists rama_fm.prices
 (
-    id         bigserial
-        constraint prices_pk
-            primary key,
-    type       text not null,
+    type       text    not null,
     product_id bigserial
         constraint prices_product_id_fk
             references rama_fm.product
-                on delete cascade,
+            on delete cascade,
     storage_id serial
         constraint prices_storages_id_fk
-            references rama_fm.storages
+            references rama_fm.storages,
+    price      numeric not null
 );
 
-create index if not exists prices_type_storage_id_product_id_index
+create unique index if not exists prices_type_storage_id_product_id_uindex
     on rama_fm.prices (type, storage_id, product_id);
 
 create table if not exists rama_fm.balances
