@@ -10,7 +10,7 @@
     "@testing-library/jest-dom": "^5.11.9",
     "@testing-library/react": "^11.2.5",
     "@testing-library/user-event": "^12.7.1",
-    "axios": "^1.6.5",
+    "axios": "^1.13.6",
     "material-react-toastify": "^1.0.1",
     "moment": "^2.29.1",
     "react": "^17.0.1",
