@@ -35,6 +35,7 @@ const Navbar = (props) => {
         <AppBar position="sticky">
             <Toolbar>
                 <MainMenu isAuthenticated={isAuthenticated}/>
+                <img src="/logos/rama-dark.png" alt="Ramaiana" style={{height: 40, marginRight: 12}}/>
                 <Typography variant="h6" className={classes.title}>
                     Ramaiana SRL
                 </Typography>

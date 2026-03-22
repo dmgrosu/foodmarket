@@ -8,7 +8,6 @@ import md.ramaiana.foodmarket.domain.product.data.ProductEntity;
 
 import java.util.List;
 
-
 public record ProductResponse(
         @NonNull
         Integer id,

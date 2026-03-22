@@ -6,10 +6,12 @@ import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import md.ramaiana.foodmarket.shared.enums.AddressType;
 
 @Getter
 @Setter
+@ToString
 @XmlRootElement(name = "address")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class ErpAddressDto {

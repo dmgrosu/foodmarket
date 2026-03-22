@@ -36,7 +36,7 @@ export default function HomePage() {
             </Container>
 
             <Box bgcolor="#f7f9fc" py={8}>
-                <Container maxWidth="md">
+                <Container maxWidth="lg">
                     <About />
                 </Container>
             </Box>

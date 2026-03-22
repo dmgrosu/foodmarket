@@ -2,6 +2,28 @@
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+## Configuration
+
+The frontend uses environment variables for configuration. You can create a `.env` file in the `frontend` directory and set the variables. See `.env.example` for available options.
+
+- `REACT_APP_API_URL`: The base URL of the API. Default is empty (uses current host).
+
+### Build Time Configuration
+
+Since this is a React application, environment variables are embedded into the build at build time. To set them for production, ensure they are present in the environment when you run `npm run build`.
+
+**Option 1: CLI**
+```bash
+REACT_APP_API_URL=https://api.yourdomain.com npm run build
+```
+
+**Option 2: `.env.production` file**
+Create a file named `.env.production` in the `frontend` directory:
+```
+REACT_APP_API_URL=https://api.yourdomain.com
+```
+Then run `npm run build`.
+
 ## Available Scripts
 
 In the project directory, you can run:

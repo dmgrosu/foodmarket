@@ -76,7 +76,7 @@ class ImportBalancesUseCaseTest {
     }
 
     @Test
-    void should_import_prices_and_balances() {
+    void should_import_balances() {
         useCase.execute();
 
         verify(balancesUpdate).execute(balancesCaptor.capture());

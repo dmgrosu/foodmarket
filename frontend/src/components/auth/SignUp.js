@@ -13,7 +13,7 @@ import {connect} from "react-redux";
 import {withStyles} from "@material-ui/styles";
 import {signUpStart} from "../../store/actions/authActions";
 import {CircularProgress, Container, IconButton} from "@material-ui/core";
-import axios from "axios";
+import axios from "../../axios-instance";
 import {toast} from "material-react-toastify";
 
 

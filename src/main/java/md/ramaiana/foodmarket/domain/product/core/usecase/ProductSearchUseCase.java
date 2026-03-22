@@ -1,6 +1,5 @@
 package md.ramaiana.foodmarket.domain.product.core.usecase;
 
-import jakarta.annotation.Nullable;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import md.ramaiana.foodmarket.domain.product.core.response.ProductGroupResponse;
@@ -30,9 +29,12 @@ public class ProductSearchUseCase {
      */
     @NonNull
     @Transactional(readOnly = true)
-    public ProductListResponse execute(@Nullable Integer groupId, @Nullable Integer brandId, @Nullable String nameLike) {
-        List<ProductEntity> products = productRepository.findAllByFilters(groupId, brandId, nameLike);
-        List<ProductGroupEntity> groups = findProductsForProductsList(products);
+    public ProductListResponse execute(ProductSearchCriteria criteria) {
+        String nameLike = criteria.nameLike() != null ? "%" + criteria.nameLike().toLowerCase() + "%" : null;
+        Set<ProductEntity> products = productRepository.findAllByFiltersHavingPositiveBalance(
+                criteria.storageId(), criteria.groupId(), criteria.brandId(), nameLike
+        );
+        List<ProductGroupEntity> groups = findGroupsForProductsList(products);
 
         List<ProductResponse> productResponses = products.stream()
                 .map(ProductResponse::new)
@@ -46,17 +48,15 @@ public class ProductSearchUseCase {
     }
 
     @NonNull
-    private List<ProductGroupEntity> findProductsForProductsList(@NonNull List<ProductEntity> products) {
+    private List<ProductGroupEntity> findGroupsForProductsList(@NonNull Set<ProductEntity> products) {
         Map<Integer, ProductGroupEntity> groupsMap = new HashMap<>();
         List<ProductGroupEntity> topGroups = new ArrayList<>();
-
         for (ProductEntity product : products) {
             Integer productGroupId = product.getGroupId();
             if (productGroupId != null) {
                 addAllParentsToMap(productGroupId, groupsMap);
             }
         }
-
         for (ProductGroupEntity group : groupsMap.values()) {
             if (!group.hasParent()) {
                 topGroups.add(group);
@@ -67,11 +67,11 @@ public class ProductSearchUseCase {
                 }
             }
         }
-
         return topGroups;
     }
 
-    private void addAllParentsToMap(@NonNull Integer childGroupId, @NonNull Map<Integer, ProductGroupEntity> parents) {
+    private void addAllParentsToMap(@NonNull Integer childGroupId,
+                                    @NonNull Map<Integer, ProductGroupEntity> parents) {
         Optional<ProductGroupEntity> optionalGroup = productGroupRepository.findById(childGroupId);
         if (optionalGroup.isPresent()) {
             ProductGroupEntity group = optionalGroup.get();

@@ -26,7 +26,7 @@ const Groups = ({classes, expanded, selected, handleToggle, handleSelect, groups
 
     const renderTree = (group) => (
         <TreeItem key={group.id} nodeId={group.id.toString()} label={group.name}>
-            {Array.isArray(group.groups) ? group.groups.map(group => renderTree(group)) : null}
+            {Array.isArray(group.children) ? group.children.map(group => renderTree(group)) : null}
         </TreeItem>
     );
 

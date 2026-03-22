@@ -1,8 +1,10 @@
 package md.ramaiana.foodmarket.domain.product.core.usecase;
 
 import jakarta.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -28,8 +30,8 @@ public class ProductGroupSearchUseCase {
    */
   @NonNull
   @Transactional(readOnly = true)
-  public ProductListResponse execute(@Nullable Integer parentGroupId) {
-    List<ProductGroupEntity> groups = getGroupsHierarchy(parentGroupId);
+  public ProductListResponse execute(@Nullable Integer storageId, @Nullable Integer parentGroupId) {
+    List<ProductGroupEntity> groups = getGroupsHierarchy(storageId, parentGroupId);
     List<ProductGroupResponse> groupResponses = groups.stream()
         .map(ProductGroupResponse::new)
         .collect(Collectors.toList());
@@ -38,20 +40,24 @@ public class ProductGroupSearchUseCase {
   }
 
   @NonNull
-  private List<ProductGroupEntity> getGroupsHierarchy(@Nullable Integer parentGroupId) {
+  private List<ProductGroupEntity> getGroupsHierarchy(@Nullable Integer storageId, @Nullable Integer parentGroupId) {
     Sort sort = Sort.by(Sort.Direction.ASC, "name");
     List<ProductGroupEntity> foundGroups = parentGroupId == null
         ? productGroupRepository.findByParentGroupIdIsNullAndDeletedAtIsNull(sort)
         : productGroupRepository.findByParentGroupIdAndDeletedAtIsNull(parentGroupId, sort);
 
-    // Recursively load child groups
+    Set<ProductGroupEntity> nonEmptyGroups = productGroupRepository.findAllNonEmpty(storageId);
+
+    // Recursively load child groups and filter empty ones
+    List<ProductGroupEntity> result = new ArrayList<>();
     for (ProductGroupEntity foundGroup : foundGroups) {
-      if (productGroupRepository.existsByParentGroupId(foundGroup.getId())) {
-        List<ProductGroupEntity> children = getGroupsHierarchy(foundGroup.getId());
-        foundGroup.setChildGroups(children);
+      List<ProductGroupEntity> children = getGroupsHierarchy(storageId, foundGroup.getId());
+      foundGroup.setChildGroups(children);
+      if (!children.isEmpty() || nonEmptyGroups.contains(foundGroup)) {
+        result.add(foundGroup);
       }
     }
 
-    return foundGroups;
+    return result;
   }
 }

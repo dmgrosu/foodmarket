@@ -6,9 +6,11 @@ import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
+@ToString
 @XmlRootElement(name = "code")
 @XmlAccessorType(XmlAccessType.FIELD)
 public final class ErpProductCodeDto {

@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios from "../../axios-instance";
 import {handleError} from "./authActions";
 
 export const ADD_TO_CART_START = "ADD_TO_CART_START";
@@ -19,11 +19,9 @@ export const CLOSE_PLACE_ORDER_DIALOG = "CLOSE_PLACE_ORDER_DIALOG";
 
 export const addProductToCart = (productId, orderId, quantity) => {
     return (dispatch, getState) => {
-        const {token} = getState().authReducer;
         dispatch({type: ADD_TO_CART_START});
         axios.post("/order/addProduct",
-            {orderId: orderId, productId: productId, quantity: quantity},
-            {headers: {'Authorization': token}})
+            {orderId: orderId, productId: productId, quantity: quantity})
             .then(resp => {
                 const data = resp.data;
                 dispatch({
@@ -48,10 +46,8 @@ export const addProductToCart = (productId, orderId, quantity) => {
 
 export const deleteProductFromCart = (orderId, itemId) => {
     return (dispatch, getState) => {
-        const {token} = getState().authReducer;
         dispatch({type: DELETE_FROM_CART_START});
-        axios.delete(`/order/deleteProduct/${orderId}/${itemId}`,
-            {headers: {'Authorization': token}})
+        axios.delete(`/order/deleteProduct/${orderId}/${itemId}`)
             .then(resp => {
                 dispatch({
                     type: DELETE_FROM_CART_END,
@@ -65,10 +61,8 @@ export const deleteProductFromCart = (orderId, itemId) => {
 
 export const placeOrder = (orderId) => {
     return (dispatch, getState) => {
-        const {token} = getState().authReducer;
         dispatch({type: PLACE_ORDER_START});
-        axios.put(`/order/placeOrder/${orderId}`,
-            {headers: {'Authorization': token}})
+        axios.put(`/order/placeOrder/${orderId}`)
             .then(resp => {
                 dispatch({
                     type: PLACE_ORDER_SUCCESS,

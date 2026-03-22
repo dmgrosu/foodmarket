@@ -22,7 +22,7 @@ public class BalanceRepository {
                 balances,
                 batchSize,
                 (PreparedStatement ps, BalanceEntity balance) -> {
-                    ps.setInt(1, balance.getProduct().getId());
+                    ps.setInt(1, balance.getStorage().getId());
                     ps.setInt(2, balance.getProduct().getId());
                     ps.setDouble(3, balance.getQuantity());
                 });

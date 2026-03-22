@@ -11,7 +11,6 @@ import org.springframework.data.relational.core.mapping.Table;
 public class StorageEntity {
     @Id
     private final Integer id;
-    @Column("name")
     private final String name;
     @Column("erp_code")
     private final String erpCode;

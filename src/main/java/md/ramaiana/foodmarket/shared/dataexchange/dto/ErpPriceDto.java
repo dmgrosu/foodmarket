@@ -6,10 +6,12 @@ import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import md.ramaiana.foodmarket.shared.enums.PriceType;
 
 @Getter
 @Setter
+@ToString
 @XmlRootElement(name = "price")
 @XmlAccessorType(XmlAccessType.FIELD)
 public final class ErpPriceDto {

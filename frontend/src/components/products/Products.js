@@ -1,10 +1,20 @@
 import React, {Component} from 'react';
-import {Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Paper, TextField} from "@material-ui/core";
+import {
+    Button,
+    CircularProgress,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
+    Paper,
+    TextField
+} from "@material-ui/core";
 import {connect} from "react-redux";
 import {withStyles} from "@material-ui/styles";
 import {Redirect} from "react-router-dom";
 import Filter from "./Filter";
-import axios from "axios";
+import axios from "../../axios-instance";
 import Groups from "./Groups";
 import Grid from "@material-ui/core/Grid";
 import ProductsList from "./ProductsList";
@@ -27,10 +37,12 @@ class Products extends Component {
 
     state = {
         filter: {
+            storageId: 0,
             brandId: 0,
             name: "",
             changed: false
         },
+        allStorages: [],
         allBrands: [],
         products: [],
         groups: [],
@@ -69,8 +81,7 @@ class Products extends Component {
         }
         this.setFetchingStarted(true, true);
         axios.get("/product/search", {
-            params: {brandId: brandId, name: filter.name},
-            headers: {'Authorization': this.props.auth.token}
+            params: {brandId: brandId, name: filter.name}
         }).then(resp => {
             const {data} = resp;
             this.setState({
@@ -93,9 +104,9 @@ class Products extends Component {
     }
 
     fetchBrands = () => {
-        axios.get("/brand/getAll", {headers: {'Authorization': this.props.auth.token}})
+        axios.get("/brand/getAll")
             .then(resp => {
-                const {brands} = resp.data || [];
+                const brands = resp.data || [];
                 this.setState({
                     allBrands: brands.filter(brand => brand.id && brand.name),
                 })
@@ -105,9 +116,22 @@ class Products extends Component {
             });
     }
 
+    fetchStorages = () => {
+        axios.get("/storage")
+            .then(resp => {
+                const storages = resp.data || [];
+                this.setState({
+                    allStorages: storages.filter(storage => storage.id && storage.name),
+                })
+            })
+            .catch(err => {
+                handleError(err);
+            });
+    }
+
     fetchGroups = () => {
         this.setFetchingStarted(false, true);
-        axios.get("/product/listGroups", {headers: {'Authorization': this.props.auth.token}})
+        axios.get("/product/listGroups")
             .then(resp => {
                 const {data} = resp;
                 this.setState({
@@ -123,20 +147,22 @@ class Products extends Component {
 
     fetchProducts = (event, groupId) => {
         const {filter} = this.state;
+        let storageId = null;
         let brandId = null;
         let nameLike = null;
         if (filter) {
+            storageId = filter.storageId !== 0 ? filter.storageId : null;
             brandId = filter.brandId !== 0 ? filter.brandId : null;
             nameLike = filter.name !== '' ? filter.name : null;
         }
         this.setFetchingStarted(true, false);
         axios.get("/product/listProducts", {
             params: {
+                storageId: storageId,
                 groupId: groupId,
                 brandId: brandId,
                 name: nameLike
-            },
-            headers: {'Authorization': this.props.auth.token}
+            }
         })
             .then(resp => {
                 const {data} = resp;
@@ -166,6 +192,7 @@ class Products extends Component {
     }
 
     componentDidMount() {
+        this.fetchStorages();
         this.fetchBrands();
         this.fetchGroups();
     }
@@ -174,13 +201,15 @@ class Products extends Component {
 
         const {auth, classes, cart} = this.props;
         const isAuthorized = auth.token !== null;
-        const {filter, allBrands, products, groups, isFetchingGroups, isFetchingProducts} = this.state;
+        const {filter, allStorages, allBrands, products, groups, isFetchingGroups, isFetchingProducts} = this.state;
 
         return (
             <Grid container className={classes.root}>
                 {!isAuthorized && <Redirect to="/signIn"/>}
                 <Grid item sm={12}>
-                    <Filter brands={allBrands}
+                    <Filter storages={allStorages}
+                            storageId={filter.storageId}
+                            brands={allBrands}
                             brandId={filter.brandId}
                             name={filter.name}
                             changeFilter={this.changeFilter}
@@ -200,8 +229,8 @@ class Products extends Component {
                     <Grid item xs={12} sm={9}>
                         <Paper elevation={3}>
                             <ProductsList products={products}
-                                       handleSelect={this.handleProductSelect}
-                                       isFetching={isFetchingProducts}
+                                          handleSelect={this.handleProductSelect}
+                                          isFetching={isFetchingProducts}
                             />
                         </Paper>
                     </Grid>

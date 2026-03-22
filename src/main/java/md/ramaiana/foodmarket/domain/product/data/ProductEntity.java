@@ -1,6 +1,7 @@
 package md.ramaiana.foodmarket.domain.product.data;
 
 import jakarta.annotation.Nullable;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
 import md.ramaiana.foodmarket.domain.price.data.PriceEntity;
@@ -24,8 +25,10 @@ import java.util.Set;
 public class ProductEntity {
 
     @Id
+    @EqualsAndHashCode.Include
     private final Integer id;
     @NonNull
+    @EqualsAndHashCode.Include
     private final String name;
     @Nullable
     private final String unit;

@@ -14,13 +14,25 @@ const styles = theme => ({
     }
 });
 
-const Filter = ({brands, brandId, name, changeFilter, classes, search, changed}) => {
+const Filter = ({storages, storageId, brands, brandId, name, changeFilter, classes, search, changed}) => {
 
-    const menuItems = brands.length > 0 && brands
+    const brandsItems = brands.length > 0 && brands
         .map(brand => <MenuItem key={brand.id} value={brand.id}>{brand.name}</MenuItem>);
+    const storageItems = storages.length > 0 && storages
+        .map(storage => <MenuItem key={storage.id} value={storage.id}>{storage.name}</MenuItem>);
 
     return (
         <FormGroup row>
+            <FormControl className={classes.formControl}>
+                <InputLabel id="storage-id-label">Storage</InputLabel>
+                <Select labelId="storage-id-label"
+                        value={storageId}
+                        onChange={(e) => changeFilter(e, 'storageId')}
+                >
+                    <MenuItem key={0} value={0}><em>All</em></MenuItem>
+                    {storageItems}
+                </Select>
+            </FormControl>
             <FormControl className={classes.formControl}>
                 <InputLabel id="brand-id-label">Brand</InputLabel>
                 <Select labelId="brand-id-label"
@@ -28,7 +40,7 @@ const Filter = ({brands, brandId, name, changeFilter, classes, search, changed})
                         onChange={(e) => changeFilter(e, 'brandId')}
                 >
                     <MenuItem key={0} value={0}><em>All</em></MenuItem>
-                    {menuItems}
+                    {brandsItems}
                 </Select>
             </FormControl>
             <FormControl className={classes.formControl}>

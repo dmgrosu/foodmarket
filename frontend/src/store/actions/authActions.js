@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios from "../../axios-instance";
 import {toast} from "material-react-toastify";
 import moment from "moment";
 
@@ -90,6 +90,7 @@ export const logout = () => {
 }
 
 export const handleError = (err) => {
+    console.log(err);
     const errorMessage = err.response ? err.response.status + ": " + err.response.data.message || err.response.statusText : "Unknown error";
     toast.error(errorMessage);
 }
