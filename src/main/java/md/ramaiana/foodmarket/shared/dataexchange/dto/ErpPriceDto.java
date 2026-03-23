@@ -18,8 +18,6 @@ public final class ErpPriceDto {
     @XmlAttribute
     private String storageCode;
     @XmlAttribute
-    private String productCode;
-    @XmlAttribute
     private PriceType type;
     @XmlAttribute
     private float price;

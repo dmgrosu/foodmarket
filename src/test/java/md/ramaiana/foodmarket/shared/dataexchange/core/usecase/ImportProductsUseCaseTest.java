@@ -91,10 +91,10 @@ class ImportProductsUseCaseTest {
                                     <!-- any other code may come here -->
                                 </codes>
                                 <prices>
-                                   <price storageCode="1" productCode="1c555" type="LOCAL" price="85.13"/>
-                                   <price storageCode="1" productCode="1c555" type="RETAIL_ZONE1" price="88.53"/>
-                                   <price storageCode="2" productCode="1c555" type="LOCAL" price="84.49"/>
-                                   <price storageCode="4" productCode="1c555" type="LOCAL" price="84.57"/>
+                                   <price storageCode="1" type="LOCAL" price="85.13"/>
+                                   <price storageCode="1" type="RETAIL_ZONE1" price="88.53"/>
+                                   <price storageCode="2" type="LOCAL" price="84.49"/>
+                                   <price storageCode="4" type="LOCAL" price="84.57"/>
                                </prices>
                             </product>
                             <product code="1c666" name="Pasarea Maiastra 300gr" brandCode="1c10" groupCode="1c444" weight="0.3" unit="buc" packSize="12">
@@ -102,8 +102,8 @@ class ImportProductsUseCaseTest {
                                     <code name="barCode" value="4785468724687"/>
                                 </codes>
                                 <prices>
-                                    <price storageCode="1" productCode="1c666" type="LOCAL" price="57.54"/>
-                                    <price storageCode="2" productCode="1c666" type="LOCAL" price="53.16"/>
+                                    <price storageCode="1" type="LOCAL" price="57.54"/>
+                                    <price storageCode="2" type="LOCAL" price="53.16"/>
                                 </prices>
                             </product>
                         </products>
