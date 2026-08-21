@@ -1,5 +1,6 @@
 package md.ramaiana.foodmarket.domain.product.core.usecase;
 
+import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import md.ramaiana.foodmarket.domain.brand.data.BrandEntity;
@@ -37,21 +38,27 @@ public class ProductLoadUseCase {
         Map<String, ProductEntity> newProducts = readResult.getProducts();
         List<Integer> updatedProductIds = new ArrayList<>();
         for (ProductEntity newProduct : newProducts.values()) {
-            String productErp = newProduct.getErpCode();
-            String parentErp = erpCodes.get(productErp)[0];
-            if (hasText(parentErp)) {
-                ProductGroupEntity parent = updatedGroups.get(parentErp);
-                if (parent != null) {
-                    newProduct = newProduct.withGroupId(parent.getId());
+            try {
+                String productErp = newProduct.getErpCode();
+                String parentErp = erpCodes.get(productErp)[0];
+                if (hasText(parentErp)) {
+                    ProductGroupEntity parent = updatedGroups.get(parentErp);
+                    if (parent != null) {
+                        newProduct = newProduct.withGroupId(parent.getId());
+                    }
                 }
+                String brandErp = erpCodes.get(productErp)[1];
+                if (hasText(brandErp)) {
+                    BrandEntity brand = updatedBrands.get(brandErp);
+                    if (brand != null) {
+                        newProduct = newProduct.withBrandId(brand.getId());
+                    }
+                }
+                ProductEntity updatedProduct = upsertProduct(newProduct);
+                updatedProductIds.add(updatedProduct.getId());
+            } catch (Exception e) {
+                log.error("Error saving product {}: {}", newProduct.getErpCode(), e.getMessage());
             }
-            String brandErp = erpCodes.get(productErp)[1];
-            if (hasText(brandErp)) {
-                BrandEntity brand = updatedBrands.get(brandErp);
-                newProduct = newProduct.withBrandId(brand.getId());
-            }
-            ProductEntity updatedProduct = upsertProduct(newProduct);
-            updatedProductIds.add(updatedProduct.getId());
         }
         log.info("... updated {} products", updatedProductIds.size());
         //int deletedCount = productDao.setDeletedIfIdNotIn(updatedProductIds);
@@ -71,7 +78,9 @@ public class ProductLoadUseCase {
             } else {
                 savedGroup = upsertGroupByErpCode(group);
             }
-            updatedGroups.put(savedGroup.getErpCode(), savedGroup);
+            if (savedGroup != null) {
+                updatedGroups.put(savedGroup.getErpCode(), savedGroup);
+            }
         }
         return updatedGroups;
     }
@@ -103,7 +112,9 @@ public class ProductLoadUseCase {
         return existingBrands;
     }
 
+    @Nullable
     private ProductGroupEntity upsertGroupWithParent(ProductGroupEntity newGroup, ProductGroupEntity parentGroup) {
+        if (parentGroup == null) return null;
         ProductGroupEntity savedParent = upsertGroupByErpCode(parentGroup);
         return upsertGroupByErpCode(newGroup.withParentGroupId(savedParent.getId()));
     }

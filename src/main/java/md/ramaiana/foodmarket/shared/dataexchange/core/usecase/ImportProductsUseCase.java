@@ -1,5 +1,6 @@
 package md.ramaiana.foodmarket.shared.dataexchange.core.usecase;
 
+import jakarta.annotation.Nullable;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -110,11 +111,17 @@ public class ImportProductsUseCase {
         );
     }
 
+    @Nullable
     private PriceEntity toPrice(ErpPriceDto dto) {
-        AggregateReference<StorageEntity, Integer> storage = AggregateReference.to(
-                storageSearch.findByErpCode(dto.getStorageCode()).getId()
-        );
-        return new PriceEntity(dto.getType(), storage, dto.getPrice());
+        try {
+            AggregateReference<StorageEntity, Integer> storage = AggregateReference.to(
+                    storageSearch.findByErpCode(dto.getStorageCode()).getId()
+            );
+            return new PriceEntity(dto.getType(), storage, dto.getPrice());
+        } catch (Exception ex) {
+            log.error("Error while mapping price {}-{}: {}", dto.getType(), dto.getPrice(), ex.getMessage());
+            return null;
+        }
     }
 
     private String toBarCode(List<ErpProductCodeDto> dtoCodes) {
