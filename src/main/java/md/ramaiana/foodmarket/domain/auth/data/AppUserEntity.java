@@ -53,8 +53,8 @@ public class AppUserEntity implements UserDetails {
     this.client = client;
   }
 
-  public AppUserEntity(@NonNull String email, @NonNull String passwd) {
-    this(null, email, passwd, Instant.now(), UserState.INACTIVE, new HashSet<>(), null);
+  public AppUserEntity(@NonNull String email, @NonNull String passwd, @NonNull UserState state) {
+    this(null, email, passwd, Instant.now(), state, new HashSet<>(), null);
   }
 
   public void addRole(@NonNull Role role) {

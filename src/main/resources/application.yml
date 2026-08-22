@@ -23,3 +23,6 @@ springdoc:
     operations-sorter: method
   api-docs:
     path: /v3/api-docs
+
+server:
+  port: 9291
