@@ -7,6 +7,7 @@ import md.ramaiana.foodmarket.domain.storage.data.StorageEntity;
 import md.ramaiana.foodmarket.shared.dataexchange.core.data.ProductReadResult;
 import md.ramaiana.foodmarket.shared.enums.PriceType;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -26,6 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.groups.Tuple.tuple;
 import static org.mockito.Mockito.*;
 
+@Tag("integration")
 @ExtendWith(SpringExtension.class)
 @TestPropertySource(locations = "classpath:application.yml")
 class ImportProductsUseCaseTest {
