@@ -1,4 +1,4 @@
 DATASOURCE_URL: jdbc:postgresql://localhost:5432/rama_fm
-DATASOURCE_USERNAME: postgres
+DATASOURCE_USERNAME: dgrosu
 DATASOURCE_PASSWD: 123456
-DATA_FOLDER_PATH: /Users/grosukirill/Documents/ramaiana/
+DATA_FOLDER_PATH: /home/dgrosu/Downloads/
