@@ -4,7 +4,7 @@ import AdminSearchTable from "./AdminSearchTable";
 import useDebouncedValue from "./useDebouncedValue";
 import {searchClients} from "../../api/admin";
 
-// Must stay within AdminClientSearchUseCase.SORTABLE_PROPERTIES.
+// Must stay within ClientSearchUseCase.SORTABLE_PROPERTIES.
 const COLUMNS = [
     {id: "id", label: "ID"},
     {id: "name", label: "Название"},

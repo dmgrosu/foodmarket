@@ -62,7 +62,7 @@ class MainMenu extends Component {
                     {isAuthenticated && <MainMenuItem text="Заказы" linkTo="/orders" icon={<Assignment/>}/>}
                     {isAuthenticated && isAdmin && <Divider/>}
                     {isAuthenticated && isAdmin &&
-                    <MainMenuItem text="Администрирование" linkTo="/admin" icon={<SupervisorAccount/>}/>}
+                    <MainMenuItem text="Клиенты" linkTo="/admin" icon={<SupervisorAccount/>}/>}
                 </Menu>
             </div>
         )
