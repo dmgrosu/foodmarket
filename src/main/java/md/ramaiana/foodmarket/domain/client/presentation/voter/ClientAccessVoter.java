@@ -15,4 +15,11 @@ public class ClientAccessVoter extends AccessVoter {
   public void assertCanFindByIdno() {
     assertUserIsAuthenticated();
   }
+
+  /**
+   * Assert that the current user can search clients. Administrators only.
+   */
+  public void assertCanSearch() {
+    assertUserIsAdmin();
+  }
 }

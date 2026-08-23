@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
     CircularProgress,
     Paper,
@@ -35,7 +35,7 @@ const useStyles = makeStyles(theme => ({
 const ROWS_PER_PAGE_OPTIONS = [10, 25, 50];
 
 /**
- * Paged, sortable table over one of the /admin/** search endpoints.
+ * Paged, sortable table over an admin search endpoint.
  *
  * `columns` entries are {id, label, render?, sortable?}. `id` must be a property the backend
  * accepts for sorting, otherwise it responds 400 — so only mark a column sortable when the
@@ -62,19 +62,38 @@ const AdminSearchTable = (props) => {
     // on object identity — otherwise this refetches in a loop.
     const filtersKey = JSON.stringify(filters || {});
 
+    // Two filters debouncing a moment apart put two requests in flight at once. Responses can
+    // land out of order, so without this the older, broader result can overwrite the newer one.
+    // Each request takes a sequence number and only the newest is allowed to touch state.
+    const latestRequestRef = useRef(0);
+
     const loadPage = useCallback(() => {
+        const requestId = latestRequestRef.current + 1;
+        latestRequestRef.current = requestId;
+        const isStale = () => requestId !== latestRequestRef.current;
+
         setIsLoading(true);
         fetchPage({...JSON.parse(filtersKey), pageNo, pageSize, sortColumn, sortDirection})
             .then(page => {
+                if (isStale()) {
+                    return;
+                }
                 setRows(page.items);
                 setTotalElements(page.totalElements);
             })
             .catch(err => {
+                if (isStale()) {
+                    return;
+                }
                 handleError(err);
                 setRows([]);
                 setTotalElements(0);
             })
-            .finally(() => setIsLoading(false));
+            .finally(() => {
+                if (!isStale()) {
+                    setIsLoading(false);
+                }
+            });
     }, [fetchPage, filtersKey, pageNo, pageSize, sortColumn, sortDirection]);
 
     useEffect(() => {

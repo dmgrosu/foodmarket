@@ -10,7 +10,7 @@ import java.util.Set;
 /**
  * Product Repository.
  */
-public interface ProductRepository extends CrudRepository<ProductEntity, Integer>, ProductRepositoryCustom {
+public interface ProductRepository extends CrudRepository<ProductEntity, Integer> {
 
     Optional<ProductEntity> findByIdAndDeletedAtIsNull(Integer id);
 

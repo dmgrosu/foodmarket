@@ -10,12 +10,11 @@ Admin calls go through `frontend/src/api/admin.js`, written against the backend'
 
 ## Call sites
 
-Schema: `| caller | http | backend path | params | dispatches |`. 13 rows = every `axios.<verb>` in `frontend/src`. `searchRequest` is one call site shared by `searchBrands`/`searchClients`/`searchProducts`.
+Schema: `| caller | http | backend path | params | dispatches |`. 12 rows = every `axios.<verb>` in `frontend/src`.
 
 | caller | http | backend path | params | dispatches |
 |---|---|---|---|---|
-| admin.js#searchRequest | GET | /admin/{brand,client,product}/search | name,idno,brandId,groupId,pageNo,pageSize,sortColumn,sortDirection |  |
-| admin.js#fetchAllBrands | GET | /brand/getAll |  |  |
+| admin.js#searchClients | GET | /client/search | name,idno,pageNo,pageSize,sortColumn,sortDirection |  |
 | authActions.js#loginStart | POST | /auth/login | email,password | LOGIN_START,LOGIN_SUCCESS,LOGIN_FAIL |
 | authActions.js#signUpStart | POST | /auth/register | email,password,clientId | LOGIN_START,LOGIN_SUCCESS,LOGIN_FAIL |
 | Products.js#fetchBrands | GET | /brand/getAll |  |  |
@@ -63,10 +62,12 @@ No catch-all/404 route. When logged out the authed paths are simply absent from 
 
 ## Admin dashboard
 
-`/admin` renders `components/admin/AdminDashboard` (tabs over Товары / Бренды / Клиенты). All three tabs reuse
-`AdminSearchTable`, which owns paging, sorting and the loading/empty states and calls one of the `api/admin.js`
-search functions. A column is only marked sortable when the matching use case whitelists that property — the
-backend answers 400 otherwise.
+`/admin` renders `components/admin/AdminDashboard`, a single clients table — brands and products are
+customer-facing only and have no admin screen. `AdminSearchTable` owns paging, sorting, debounced search
+and the loading/empty states, and calls `api/admin.js#searchClients`. It tags each request with a sequence
+number and drops stale responses, because two filters debouncing a moment apart put two requests in flight
+and they can resolve out of order. A column is only marked sortable when `ClientSearchUseCase` whitelists
+that property — the backend answers 400 otherwise.
 
 Role gating is display-only: `store/selectors/authSelectors#isAdmin` hides the menu entry and the route.
-Enforcement is server-side in `SecurityConfig` and each `Admin*AccessVoter`.
+Enforcement is server-side in `ClientAccessVoter#assertCanSearch`.

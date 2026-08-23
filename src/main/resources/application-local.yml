@@ -1,3 +1,6 @@
+# Local dev profile. The frontend dev proxy (frontend/package.json) and the prod build
+# both target 9291, but no server.port is configured, so the app would otherwise start
+# on Spring's default 8080 and the UI could not reach it.
 server:
   port: 9291
 

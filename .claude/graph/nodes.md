@@ -12,20 +12,6 @@ Schema: `| id | kind | dir | api | note |` — `dir` omits the prefix `src/main/
 | AccessVoterTest | abstract | src/test/java/md/ramaiana/foodmarket/shared/util/abstraction/voter | 5 tests: assertUserIsAdmin (admin-pass, non-admin-reject, anonymous-reject, no-auth-reject), assertUserIsAuthenticated (pass) | test |
 | AddProductToOrderRequest | request | domain/order/core/request | orderId:int;storageId:Integer;productId:Integer;priceType:PriceType;quantity:float;clientId:Integer |  |
 | AddressType | enum | shared/enums | LEGAL;POINT;OFFICE |  |
-| AdminBrandAccessVoter | voter | domain/brand/presentation/voter | assertCanSearch() |  |
-| AdminBrandController | controller | domain/brand/presentation/controller | search(String,int,int,String,Sort.Direction)->PagedResponse<BrandResponse> |  |
-| AdminBrandSearchUseCase | usecase | domain/brand/core/usecase | execute(BrandSearchCriteria)->PagedResponse<BrandResponse> |  |
-| AdminBrandSearchUseCaseTest | usecase | src/test/java/md/ramaiana/foodmarket/domain/brand/core/usecase | 1 test: builds Pageable from criteria, maps Page to PagedResponse | test |
-| AdminClientAccessVoter | voter | domain/client/presentation/voter | assertCanSearch() |  |
-| AdminClientController | controller | domain/client/presentation/controller | search(String,String,int,int,String,Sort.Direction)->PagedResponse<ClientResponse> |  |
-| AdminClientSearchUseCase | usecase | domain/client/core/usecase | execute(ClientSearchCriteria)->PagedResponse<ClientResponse> |  |
-| AdminClientSearchUseCaseTest | usecase | src/test/java/md/ramaiana/foodmarket/domain/client/core/usecase | 1 test: filters pass through, Page maps to PagedResponse | test |
-| AdminEndpointSecurityTest | config | src/test/java/md/ramaiana/foodmarket/config | 3 tests: anonymous rejected, non-admin 403 at filter chain, admin passes filter and reaches voter | test |
-| AdminProductAccessVoter | voter | domain/product/presentation/voter | assertCanSearch() |  |
-| AdminProductController | controller | domain/product/presentation/controller | search(String,Integer,Integer,int,int,String,Sort.Direction)->PagedResponse<ProductResponse> |  |
-| AdminProductSearchCriteria | request | domain/product/core/usecase | nameLike:String;brandId:Integer;groupId:Integer;pageNo:int;pageSize:int;sortColumn:String;sortDirection:Sort.Direction | sibling of ProductSearchCriteria: no storage filter, not restricted to positive stock |
-| AdminProductSearchUseCase | usecase | domain/product/core/usecase | execute(AdminProductSearchCriteria)->PagedResponse<ProductResponse> | unlike ProductSearchUseCase: flat page, includes zero-stock products, no group-tree assembly |
-| AdminProductSearchUseCaseTest | usecase | src/test/java/md/ramaiana/foodmarket/domain/product/core/usecase | 1 test: filters pass through, Page maps to PagedResponse | test |
 | Advantages | fe-component | frontend/src/components/home | renders advantage cards grid |  |
 | App | fe-component | frontend/src | App |  |
 | App.test | fe-component | frontend/src |  | DEVIATION: stale CRA smoke test asserting "learn react" |
@@ -49,11 +35,7 @@ Schema: `| id | kind | dir | api | note |` — `dir` omits the prefix `src/main/
 | BrandController | controller | domain/brand/presentation/controller | getAll()->List<BrandResponse> |  |
 | BrandEntity | entity | domain/brand/data | id:Integer;name:String;erpCode:String;createdAt:Instant;deletedAt:Instant |  |
 | BrandRepository | repo | domain/brand/data |  | no custom finders; findAll/saveAll only |
-| BrandRepositoryCustom | repo | domain/brand/data | search(String,Pageable)->Page<BrandEntity> |  |
-| BrandRepositoryImpl | repo | domain/brand/data | search(String,Pageable)->Page<BrandEntity> | JdbcAggregateOperations.findAll(Query,Class,Pageable) criteria query; @Query Page queries are unsupported in Spring Data JDBC 4.0 and derived finders cannot express optional filters |
-| BrandRepositoryTest | repo | src/test/java/md/ramaiana/foodmarket/domain/brand/data | 3 tests: page+sort both directions, filter by name, unknown sort property rejected | test |
 | BrandResponse | response | domain/brand/core/response | id:Integer;name:String |  |
-| BrandSearchCriteria | request | domain/brand/core/usecase | nameLike:String;pageNo:int;pageSize:int;sortColumn:String;sortDirection:Sort.Direction |  |
 | BrandSearchUseCase | usecase | domain/brand/core/usecase | execute()->List<BrandResponse> |  |
 | Cart | fe-component | frontend/src/components/orders | Cart |  |
 | CatalogDto | dto | shared/dataexchange/dto | groups:List<ErpGroupDto>;brands:List<ErpBrandDto>;products:List<ErpProductDto> |  |
@@ -62,7 +44,6 @@ Schema: `| id | kind | dir | api | note |` — `dir` omits the prefix `src/main/
 | ClientController | controller | domain/client/presentation/controller | findByIdno(String)->ClientResponse |  |
 | ClientEntity | entity | domain/client/data | id:Integer;name:String;idno:String;email:String;createdAt:Instant;deletedAt:Instant;addresses:Set;phones:Set |  |
 | ClientFindByIdUseCase | usecase | domain/client/core/usecase | execute(AggregateReference)->ClientEntity | returns entity not DTO, unlike its sibling |
-| ClientFindByIdnoUseCase | usecase | domain/client/core/usecase | execute(String)->ClientResponse |  |
 | ClientPhoneEntity | entity | domain/client/data | number:String;name:String | DEVIATION: no @Id; embedded child of ClientEntity |
 | ClientRepository | repo | domain/client/data | findByIdnoAndDeletedAtIsNull |  |
 | ClientRepositoryCustom | repo | domain/client/data | search(String,String,Pageable)->Page<ClientEntity> |  |
@@ -70,6 +51,9 @@ Schema: `| id | kind | dir | api | note |` — `dir` omits the prefix `src/main/
 | ClientRepositoryTest | repo | src/test/java/md/ramaiana/foodmarket/domain/client/data | 3 tests: page+sort, filter by name and idno, child collections loaded | test |
 | ClientResponse | response | domain/client/core/response | id:Integer;name:String;idno:String |  |
 | ClientSearchCriteria | request | domain/client/core/usecase | nameLike:String;idno:String;pageNo:int;pageSize:int;sortColumn:String;sortDirection:Sort.Direction |  |
+| ClientSearchSecurityTest | config | src/test/java/md/ramaiana/foodmarket/config | 3 tests: anonymous rejected, non-admin rejected, admin reaches the voter | test |
+| ClientSearchUseCase | usecase | domain/client/core/usecase | execute(ClientSearchCriteria)->PagedResponse<ClientResponse>;executeByIdno(String)->ClientResponse | DEVIATION: two public methods; executeByIdno wraps execute so the not-found rule stays out of the controller |
+| ClientSearchUseCaseTest | usecase | src/test/java/md/ramaiana/foodmarket/domain/client/core/usecase | 4 tests: filters+paging, sort whitelist, executeByIdno found and not-found | test |
 | ClientsDataDto | dto | shared/dataexchange/dto | clients:List<ErpClientDto> |  |
 | ConfirmDialog | fe-component | frontend/src/components | ConfirmDialog |  |
 | Contacts | fe-component | frontend/src/components/home | renders contact details and CTA button |  |
@@ -144,9 +128,6 @@ Schema: `| id | kind | dir | api | note |` — `dir` omits the prefix `src/main/
 | ProductLoadUseCase | usecase | domain/product/core/usecase | execute(ProductReadResult)->void | DEVIATION: bare @Transactional |
 | ProductReadResult | dto | shared/dataexchange/core/data | groups:Map;products:Map;brands:Map;erpCodes:Map | erpCodes value is String[]{parentCode,brandCode} |
 | ProductRepository | repo | domain/product/data | findByIdAndDeletedAtIsNull;findAllByFiltersHavingPositiveBalance;findNameById;findByErpCode | 2 @Query methods join balances |
-| ProductRepositoryCustom | repo | domain/product/data | search(String,Integer,Integer,Pageable)->Page<ProductEntity> |  |
-| ProductRepositoryImpl | repo | domain/product/data | search(String,Integer,Integer,Pageable)->Page<ProductEntity> | same criteria-query pattern; aggregate path also loads prices; no balances join so zero-stock products appear |
-| ProductRepositoryTest | repo | src/test/java/md/ramaiana/foodmarket/domain/product/data | 3 tests: page+sort, filter by name/brand/group, includes zero-stock products | test |
 | ProductResponse | response | domain/product/core/response | id:Integer;name:String;groupId:Integer;brandId:Integer;inPackage:Float;barCode:String;unit:String;weight:Float;prices:List<PriceResponse> |  |
 | ProductSearchCriteria | request | domain/product/core/usecase | storageId:Integer;groupId:Integer;brandId:Integer;nameLike:String | DEVIATION: request record living in core/usecase, not core/request |
 | ProductSearchUseCase | usecase | domain/product/core/usecase | execute(ProductSearchCriteria)->ProductListResponse | recurses one findById per ancestor per product |
