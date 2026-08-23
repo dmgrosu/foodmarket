@@ -7,6 +7,7 @@ import AdminBrands from "./AdminBrands";
 import AdminClients from "./AdminClients";
 import AdminProducts from "./AdminProducts";
 import {isAdmin} from "../../store/selectors/authSelectors";
+import {useTranslation} from "react-i18next";
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -21,16 +22,17 @@ const useStyles = makeStyles(theme => ({
     },
 }));
 
-const TABS = [
-    {path: "/admin/products", label: "Товары"},
-    {path: "/admin/brands", label: "Бренды"},
-    {path: "/admin/clients", label: "Клиенты"},
-];
-
 const AdminDashboard = (props) => {
 
     const classes = useStyles();
     const location = useLocation();
+    const {t} = useTranslation();
+
+    const TABS = [
+        {path: "/admin/products", label: t('admin.tabs.products')},
+        {path: "/admin/brands", label: t('admin.tabs.brands')},
+        {path: "/admin/clients", label: t('admin.tabs.clients')},
+    ];
 
     const activeTab = TABS.find(tab => location.pathname.startsWith(tab.path));
     const activeTabPath = activeTab ? activeTab.path : TABS[0].path;
@@ -43,7 +45,7 @@ const AdminDashboard = (props) => {
 
     return (
         <Container maxWidth="lg" className={classes.root}>
-            <Typography variant="h5" className={classes.title}>Панель администратора</Typography>
+            <Typography variant="h5" className={classes.title}>{t('admin.title')}</Typography>
             <Paper className={classes.tabs}>
                 <Tabs value={activeTabPath}
                       indicatorColor="primary"

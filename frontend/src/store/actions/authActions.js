@@ -1,6 +1,7 @@
 import axios from "../../axios-instance";
 import {toast} from "material-react-toastify";
 import moment from "moment";
+import i18n from "../../i18n";
 
 export const LOGIN_START = "LOGIN_START";
 export const LOGIN_SUCCESS = "LOGIN_SUCCESS";
@@ -92,7 +93,7 @@ export const logout = () => {
 
 export const handleError = (err) => {
     console.log(err);
-    const errorMessage = err.response ? err.response.status + ": " + err.response.data.message || err.response.statusText : "Unknown error";
+    const errorMessage = err.response ? err.response.status + ": " + err.response.data.message || err.response.statusText : i18n.t('common.unknownError');
     toast.error(errorMessage);
 }
 

@@ -5,26 +5,29 @@ import {
     Card,
     CardContent
 } from "@material-ui/core"
-import {howItWorks} from "../../data/homepageContent";
+import {useTranslation} from "react-i18next";
+
+const STEP_KEYS = ["registration", "catalogAccess", "orderPlacement"];
 
 export default function HowItWorks() {
+    const {t} = useTranslation();
     return (
         <>
             <Typography variant="h4" gutterBottom>
-                {howItWorks.title}
+                {t('home.howItWorks.title')}
             </Typography>
 
             <Grid container spacing={3}>
-                {howItWorks.steps.map((step, i) => (
-                    <Grid item xs={12} md={4} key={i}>
+                {STEP_KEYS.map((key, i) => (
+                    <Grid item xs={12} md={4} key={key}>
                         <Card>
                             <CardContent>
                                 <Typography variant="h6">
-                                    {i + 1}. {step.title}
+                                    {i + 1}. {t(`home.howItWorks.steps.${key}.title`)}
                                 </Typography>
 
                                 <Typography color="textSecondary">
-                                    {step.text}
+                                    {t(`home.howItWorks.steps.${key}.text`)}
                                 </Typography>
                             </CardContent>
                         </Card>

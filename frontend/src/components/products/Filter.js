@@ -2,6 +2,7 @@ import React from 'react';
 import {FormControl, FormGroup, IconButton, InputLabel, MenuItem, Select, TextField} from "@material-ui/core";
 import {withStyles} from "@material-ui/styles";
 import SearchIcon from "@material-ui/icons/Search";
+import {useTranslation} from "react-i18next";
 
 const styles = theme => ({
     formControl: {
@@ -16,6 +17,8 @@ const styles = theme => ({
 
 const Filter = ({storages, storageId, brands, brandId, name, changeFilter, classes, search, changed}) => {
 
+    const {t} = useTranslation();
+
     const brandsItems = brands.length > 0 && brands
         .map(brand => <MenuItem key={brand.id} value={brand.id}>{brand.name}</MenuItem>);
     const storageItems = storages.length > 0 && storages
@@ -24,28 +27,28 @@ const Filter = ({storages, storageId, brands, brandId, name, changeFilter, class
     return (
         <FormGroup row>
             <FormControl className={classes.formControl}>
-                <InputLabel id="storage-id-label">Storage</InputLabel>
+                <InputLabel id="storage-id-label">{t('products.filter.storage')}</InputLabel>
                 <Select labelId="storage-id-label"
                         value={storageId}
                         onChange={(e) => changeFilter(e, 'storageId')}
                 >
-                    <MenuItem key={0} value={0}><em>All</em></MenuItem>
+                    <MenuItem key={0} value={0}><em>{t('common.all')}</em></MenuItem>
                     {storageItems}
                 </Select>
             </FormControl>
             <FormControl className={classes.formControl}>
-                <InputLabel id="brand-id-label">Brand</InputLabel>
+                <InputLabel id="brand-id-label">{t('products.filter.brand')}</InputLabel>
                 <Select labelId="brand-id-label"
                         value={brandId}
                         onChange={(e) => changeFilter(e, 'brandId')}
                 >
-                    <MenuItem key={0} value={0}><em>All</em></MenuItem>
+                    <MenuItem key={0} value={0}><em>{t('common.all')}</em></MenuItem>
                     {brandsItems}
                 </Select>
             </FormControl>
             <FormControl className={classes.formControl}>
                 <TextField value={name}
-                           label="name"
+                           label={t('products.filter.name')}
                            onChange={(e) => changeFilter(e, 'name')}
                 />
             </FormControl>

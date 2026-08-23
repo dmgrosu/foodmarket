@@ -1,6 +1,7 @@
 import React from 'react';
 import {CircularProgress, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, withStyles} from "@material-ui/core";
 import {AddShoppingCart} from "@material-ui/icons";
+import {useTranslation} from "react-i18next";
 
 const styles = theme => ({
     container: {
@@ -19,12 +20,14 @@ const styles = theme => ({
 
 const ProductsList = ({classes, products, handleSelect, isFetching}) => {
 
+    const {t} = useTranslation();
+
     const columns = [
-        {id: 1, label: 'Name', align: 'left', minWidth: '40%', dataId: 'name'},
-        {id: 2, label: 'Price', align: 'center', minWidth: '30%', dataId: 'price'},
-        {id: 3, label: 'Bar-code', align: 'left', minWidth: '10%', dataId: 'barCode'},
-        {id: 4, label: 'Package', align: 'right', minWidth: '10%', dataId: 'package'},
-        {id: 5, label: 'Unit', align: 'left', minWidth: '10%', dataId: 'unit'},
+        {id: 1, label: t('products.columns.name'), align: 'left', minWidth: '40%', dataId: 'name'},
+        {id: 2, label: t('products.columns.price'), align: 'center', minWidth: '30%', dataId: 'price'},
+        {id: 3, label: t('products.columns.barCode'), align: 'left', minWidth: '10%', dataId: 'barCode'},
+        {id: 4, label: t('products.columns.package'), align: 'right', minWidth: '10%', dataId: 'package'},
+        {id: 5, label: t('products.columns.unit'), align: 'left', minWidth: '10%', dataId: 'unit'},
     ];
 
     if (isFetching) {

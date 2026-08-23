@@ -1,4 +1,7 @@
+server:
+  port: 9291
+
 DATASOURCE_URL: jdbc:postgresql://localhost:5432/rama_fm
-DATASOURCE_USERNAME: dgrosu
-DATASOURCE_PASSWD: 123456
-DATA_FOLDER_PATH: /home/dgrosu/Downloads/
+DATASOURCE_USERNAME: postgres
+DATASOURCE_PASSWD:
+DATA_FOLDER_PATH: /Users/grosukirill/Documents/ramaiana/

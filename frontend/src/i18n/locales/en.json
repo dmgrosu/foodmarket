@@ -1,0 +1,252 @@
+{
+  "common": {
+    "ok": "OK",
+    "cancel": "Cancel",
+    "all": "All",
+    "unknownError": "Unknown error",
+    "copyright": "Copyright ©"
+  },
+  "language": {
+    "ru": "Русский",
+    "ro": "Română",
+    "en": "English"
+  },
+  "nav": {
+    "home": "Home",
+    "catalogue": "Catalogue",
+    "orders": "Orders",
+    "admin": "Administration",
+    "profile": "Profile",
+    "logout": "Log out",
+    "signIn": "Sign in",
+    "signUp": "Sign up",
+    "logoutConfirm": "Do you want to logout?"
+  },
+  "home": {
+    "hero": {
+      "title": "Wholesale food procurement platform",
+      "description": "Ramaiana On-line — a convenient system for businesses, letting you quickly place wholesale orders with trusted suppliers.",
+      "login": "Sign in",
+      "register": "Sign up"
+    },
+    "stats": {
+      "title": "Our numbers",
+      "labels": {
+        "products": "products",
+        "clients": "clients",
+        "suppliers": "suppliers",
+        "years": "years on the market"
+      }
+    },
+    "audience": {
+      "title": "Who the platform is for",
+      "cards": {
+        "retail": {
+          "title": "Retail stores",
+          "text": "Regular food deliveries"
+        },
+        "restaurants": {
+          "title": "Restaurants and cafes",
+          "text": "Purchasing for HoReCa"
+        },
+        "hotels": {
+          "title": "Hotels and catering",
+          "text": "Full-scale product supply"
+        },
+        "wholesale": {
+          "title": "Wholesale buyers",
+          "text": "Large batches of goods"
+        }
+      }
+    },
+    "howItWorks": {
+      "title": "How the platform works",
+      "steps": {
+        "registration": {
+          "title": "Registration",
+          "text": "Create a company account"
+        },
+        "catalogAccess": {
+          "title": "Catalogue access",
+          "text": "Browse the assortment and prices"
+        },
+        "orderPlacement": {
+          "title": "Placing orders",
+          "text": "Build your order quickly"
+        }
+      }
+    },
+    "advantages": {
+      "title": "Platform advantages",
+      "cards": {
+        "supply": "Stable deliveries",
+        "assortment": "Large assortment: 4000+ products",
+        "prices": "Wholesale prices",
+        "management": "Convenient order management",
+        "suppliers": "Vetted suppliers",
+        "manager": "Personal account manager"
+      }
+    },
+    "partners": {
+      "title": "Our suppliers",
+      "subTitle": "We work with leading food manufacturers"
+    },
+    "about": {
+      "title": "About the platform",
+      "paragraphs": {
+        "p1": "Ramaiana On-line is a modern digital platform for wholesale food procurement. We bring together suppliers and retail businesses, providing a convenient tool for managing purchases.",
+        "p2": "The platform lets you quickly access the current product assortment, build orders, and track deliveries.",
+        "p3": "Our service is aimed at stores, restaurants, cafes, hotels, and other partners for whom stable deliveries and transparent terms of cooperation matter."
+      }
+    },
+    "contacts": {
+      "title": "Contacts",
+      "labels": {
+        "phone": "Phone:",
+        "email": "Email:",
+        "address": "Address:"
+      },
+      "warehouseTitle": "Warehouse {{n}}",
+      "warehouses": {
+        "w1": {
+          "address": "21/2 Petricani St., Chisinau, Moldova"
+        },
+        "w2": {
+          "address": "21/4 Petricani St., Chisinau, Moldova"
+        },
+        "w3": {
+          "address": "21 Petricani St., Chisinau, Moldova"
+        },
+        "w4": {
+          "address": "7 Uzinelor St., Chisinau, Moldova"
+        },
+        "w5": {
+          "address": "115 Ștefan cel Mare St., Balti, Moldova"
+        }
+      },
+      "getAccess": {
+        "title": "Get access",
+        "text": "To access the catalogue and prices, you need to register in the system.",
+        "button": "Sign up"
+      }
+    },
+    "footer": {
+      "subTitle": "Wholesale food procurement platform"
+    }
+  },
+  "auth": {
+    "fields": {
+      "email": "Email address",
+      "password": "Password",
+      "confirmPassword": "Confirm password",
+      "idno": "IDNO",
+      "firstName": "First name",
+      "lastName": "Last name"
+    },
+    "validation": {
+      "emailRequired": "Email required!",
+      "emailInvalid": "Email is invalid!",
+      "passwordRequired": "Password required!",
+      "passwordNotMatch": "Passwords do not match!",
+      "passwordNotStrong": "Password is not strong enough!"
+    },
+    "signIn": {
+      "title": "Sign in",
+      "submit": "Sign in",
+      "noAccount": "Don't have an account? Sign up"
+    },
+    "signUp": {
+      "title": "Sign up",
+      "submit": "Sign up",
+      "haveAccount": "Already have an account? Sign in",
+      "clientFound": "Found client: {{name}}, with IDNO: {{idno}}"
+    }
+  },
+  "profile": {
+    "placeholder": "Profile section"
+  },
+  "products": {
+    "filter": {
+      "storage": "Storage",
+      "brand": "Brand",
+      "name": "Name"
+    },
+    "columns": {
+      "name": "Name",
+      "price": "Price",
+      "barCode": "Bar-code",
+      "package": "Package",
+      "unit": "Unit"
+    },
+    "groups": {
+      "noGroupsFound": "No groups found"
+    },
+    "addToCart": {
+      "title": "Add to cart",
+      "prompt": "Please input the desired quantity"
+    }
+  },
+  "cart": {
+    "title": "Shopping cart",
+    "backToCatalogue": "Back to catalogue",
+    "columns": {
+      "name": "Name",
+      "price": "Price",
+      "quantity": "Quantity",
+      "sum": "Sum"
+    },
+    "total": "Total",
+    "placeOrder": "Place order",
+    "confirmRemove": "Remove selected product from cart?",
+    "confirmPlaceOrder": "You are about to place the new order. Please confirm!"
+  },
+  "orders": {
+    "placeholder": "Orders section"
+  },
+  "admin": {
+    "title": "Admin dashboard",
+    "tabs": {
+      "products": "Products",
+      "brands": "Brands",
+      "clients": "Clients"
+    },
+    "table": {
+      "rowsPerPage": "Rows per page:",
+      "displayedRows": "{{from}}–{{to}} of {{count}}",
+      "noResults": "Nothing found"
+    },
+    "search": {
+      "byName": "Search by name",
+      "exactMatch": "Exact match"
+    },
+    "brands": {
+      "columns": {
+        "id": "ID",
+        "name": "Name"
+      },
+      "emptyMessage": "No brands found"
+    },
+    "clients": {
+      "columns": {
+        "id": "ID",
+        "name": "Name",
+        "idno": "IDNO"
+      },
+      "emptyMessage": "No clients found"
+    },
+    "products": {
+      "columns": {
+        "id": "ID",
+        "name": "Name",
+        "unit": "Unit",
+        "inPackage": "In package",
+        "barCode": "Bar-code",
+        "prices": "Prices"
+      },
+      "noPrice": "—",
+      "allBrands": "All brands",
+      "brand": "Brand",
+      "emptyMessage": "No products found"
+    }
+  }
+}

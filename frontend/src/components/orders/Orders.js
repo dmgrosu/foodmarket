@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import {withTranslation} from "react-i18next";
 
 class Orders extends Component {
 
@@ -7,12 +8,13 @@ class Orders extends Component {
     }
 
     render() {
+        const {t} = this.props;
         return (
             <div>
-                {"Inside orders component"}
+                {t('orders.placeholder')}
             </div>
         )
     }
 }
 
-export default Orders;    
+export default withTranslation()(Orders);

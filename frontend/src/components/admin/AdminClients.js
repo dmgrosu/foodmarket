@@ -3,16 +3,11 @@ import {TextField} from "@material-ui/core";
 import AdminSearchTable from "./AdminSearchTable";
 import useDebouncedValue from "./useDebouncedValue";
 import {searchClients} from "../../api/admin";
-
-// Must stay within AdminClientSearchUseCase.SORTABLE_PROPERTIES.
-const COLUMNS = [
-    {id: "id", label: "ID"},
-    {id: "name", label: "Название"},
-    {id: "idno", label: "IDNO"},
-];
+import {useTranslation} from "react-i18next";
 
 const AdminClients = () => {
 
+    const {t} = useTranslation();
     const [name, setName] = useState("");
     const [idno, setIdno] = useState("");
     const debouncedName = useDebouncedValue(name);
@@ -23,31 +18,38 @@ const AdminClients = () => {
         idno: debouncedIdno || undefined,
     }), [debouncedName, debouncedIdno]);
 
+    // Must stay within AdminClientSearchUseCase.SORTABLE_PROPERTIES.
+    const columns = [
+        {id: "id", label: t('admin.clients.columns.id')},
+        {id: "name", label: t('admin.clients.columns.name')},
+        {id: "idno", label: t('admin.clients.columns.idno')},
+    ];
+
     const toolbar = (
         <>
-            <TextField label="Поиск по названию"
+            <TextField label={t('admin.search.byName')}
                        value={name}
                        onChange={event => setName(event.target.value)}
                        variant="outlined"
                        size="small"
             />
-            <TextField label="IDNO"
+            <TextField label={t('admin.clients.columns.idno')}
                        value={idno}
                        onChange={event => setIdno(event.target.value)}
                        variant="outlined"
                        size="small"
-                       helperText="Точное совпадение"
+                       helperText={t('admin.search.exactMatch')}
             />
         </>
     );
 
     return (
-        <AdminSearchTable columns={COLUMNS}
+        <AdminSearchTable columns={columns}
                           fetchPage={searchClients}
                           filters={filters}
                           defaultSortColumn="name"
                           toolbar={toolbar}
-                          emptyMessage="Клиенты не найдены"
+                          emptyMessage={t('admin.clients.emptyMessage')}
         />
     );
 };

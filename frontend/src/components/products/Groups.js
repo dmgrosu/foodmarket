@@ -3,6 +3,7 @@ import {TreeItem, TreeView} from "@material-ui/lab";
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import {CircularProgress, withStyles} from "@material-ui/core";
+import {useTranslation} from "react-i18next";
 
 const styles = theme => ({
     root: {
@@ -23,6 +24,8 @@ const styles = theme => ({
 });
 
 const Groups = ({classes, expanded, selected, handleToggle, handleSelect, groups, isFetching}) => {
+
+    const {t} = useTranslation();
 
     const renderTree = (group) => (
         <TreeItem key={group.id} nodeId={group.id.toString()} label={group.name}>
@@ -56,7 +59,7 @@ const Groups = ({classes, expanded, selected, handleToggle, handleSelect, groups
         >
             {Array.isArray(groups) ?
                 groups.map(group => renderTree(group)) :
-                <TreeItem nodeId={"0"} label={"no groups found"}/>}
+                <TreeItem nodeId={"0"} label={t('products.groups.noGroupsFound')}/>}
         </TreeView>
     )
 };

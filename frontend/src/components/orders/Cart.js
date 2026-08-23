@@ -5,6 +5,7 @@ import {Delete} from "@material-ui/icons";
 import {cancelDeleteProduct, closePlaceOrderDialog, deleteProductFromCart, openPlaceOrderDialog, placeOrder, selectProductToDelete} from "../../store/actions/cartActions";
 import {Link} from "react-router-dom";
 import ConfirmDialog from "../ConfirmDialog";
+import {useTranslation} from "react-i18next";
 
 const styles = theme => ({
     root: {
@@ -34,11 +35,13 @@ const styles = theme => ({
 const Cart = ({classes, cart, selectProductToDelete, cancelDeleteProduct, deleteProductFromCart,
                   openPlaceOrderDialog, closePlaceOrderDialog, placeOrder}) => {
 
+    const {t} = useTranslation();
+
     const columns = [
-        {id: 1, label: 'Name', align: 'left', minWidth: '40%', dataId: 'productName'},
-        {id: 2, label: 'Price', align: 'center', minWidth: '20%', dataId: 'price'},
-        {id: 3, label: 'Quantity', align: 'center', minWidth: '20%', dataId: 'quantity'},
-        {id: 4, label: 'Sum', align: 'right', minWidth: '20%', dataId: 'sum'},
+        {id: 1, label: t('cart.columns.name'), align: 'left', minWidth: '40%', dataId: 'productName'},
+        {id: 2, label: t('cart.columns.price'), align: 'center', minWidth: '20%', dataId: 'price'},
+        {id: 3, label: t('cart.columns.quantity'), align: 'center', minWidth: '20%', dataId: 'quantity'},
+        {id: 4, label: t('cart.columns.sum'), align: 'right', minWidth: '20%', dataId: 'sum'},
     ];
 
     const products = cart.products;
@@ -48,13 +51,13 @@ const Cart = ({classes, cart, selectProductToDelete, cancelDeleteProduct, delete
             <Grid item container sm={10} className={classes.toolbar}>
                 <Grid item sm={8}>
                     <Typography variant="h5">
-                        Shopping cart
+                        {t('cart.title')}
                     </Typography>
                 </Grid>
                 <Grid item sm={4} style={{textAlign: "right"}}>
                     <Button variant="contained"
                             component={Link} to="/products">
-                        Back to catalogue
+                        {t('cart.backToCatalogue')}
                     </Button>
                 </Grid>
             </Grid>
@@ -103,7 +106,7 @@ const Cart = ({classes, cart, selectProductToDelete, cancelDeleteProduct, delete
                                 </TableRow>
                             )) : null}
                             <TableRow>
-                                <TableCell colSpan={4} className={classes.total}>Total</TableCell>
+                                <TableCell colSpan={4} className={classes.total}>{t('cart.total')}</TableCell>
                                 <TableCell align="right" className={classes.total}>
                                     {Array.isArray(products) ?
                                         products
@@ -121,18 +124,18 @@ const Cart = ({classes, cart, selectProductToDelete, cancelDeleteProduct, delete
                         color="secondary"
                         onClick={openPlaceOrderDialog}
                 >
-                    Place order
+                    {t('cart.placeOrder')}
                 </Button>
             </Grid>
             <ConfirmDialog isOpen={cart.deleteProductId !== null}
                            onCancel={cancelDeleteProduct}
                            onOk={() => deleteProductFromCart(cart.orderId, cart.deleteProductId)}
-                           title="Remove selected product from cart?"
+                           title={t('cart.confirmRemove')}
             />
             <ConfirmDialog isOpen={cart.placeOrderDialogOpen}
                            onCancel={closePlaceOrderDialog}
                            onOk={() => placeOrder(cart.orderId)}
-                           title="You are about to place the new order. Please confirm!"
+                           title={t('cart.confirmPlaceOrder')}
             />
         </Grid>
     )

@@ -4,29 +4,13 @@ import AdminSearchTable from "./AdminSearchTable";
 import useDebouncedValue from "./useDebouncedValue";
 import {fetchAllBrands, searchProducts} from "../../api/admin";
 import {handleError} from "../../store/actions/authActions";
-
-// Only id and name are both displayed and accepted by AdminProductSearchUseCase for sorting.
-// erpCode/createdAt/updatedAt are sortable server-side but absent from ProductResponse.
-const COLUMNS = [
-    {id: "id", label: "ID"},
-    {id: "name", label: "Название"},
-    {id: "unit", label: "Ед.", sortable: false},
-    {id: "inPackage", label: "В упаковке", sortable: false},
-    {id: "barCode", label: "Штрихкод", sortable: false},
-    {
-        id: "prices",
-        label: "Цены",
-        sortable: false,
-        render: row => (row.prices && row.prices.length > 0)
-            ? row.prices.map(price => `${price.type}: ${price.price}`).join(", ")
-            : "—",
-    },
-];
+import {useTranslation} from "react-i18next";
 
 const ALL_BRANDS = "";
 
 const AdminProducts = () => {
 
+    const {t} = useTranslation();
     const [name, setName] = useState("");
     const [brandId, setBrandId] = useState(ALL_BRANDS);
     const [brands, setBrands] = useState([]);
@@ -43,15 +27,33 @@ const AdminProducts = () => {
         brandId: brandId === ALL_BRANDS ? undefined : brandId,
     }), [debouncedName, brandId]);
 
+    // Only id and name are both displayed and accepted by AdminProductSearchUseCase for sorting.
+    // erpCode/createdAt/updatedAt are sortable server-side but absent from ProductResponse.
+    const columns = [
+        {id: "id", label: t('admin.products.columns.id')},
+        {id: "name", label: t('admin.products.columns.name')},
+        {id: "unit", label: t('admin.products.columns.unit'), sortable: false},
+        {id: "inPackage", label: t('admin.products.columns.inPackage'), sortable: false},
+        {id: "barCode", label: t('admin.products.columns.barCode'), sortable: false},
+        {
+            id: "prices",
+            label: t('admin.products.columns.prices'),
+            sortable: false,
+            render: row => (row.prices && row.prices.length > 0)
+                ? row.prices.map(price => `${price.type}: ${price.price}`).join(", ")
+                : t('admin.products.noPrice'),
+        },
+    ];
+
     const toolbar = (
         <>
-            <TextField label="Поиск по названию"
+            <TextField label={t('admin.search.byName')}
                        value={name}
                        onChange={event => setName(event.target.value)}
                        variant="outlined"
                        size="small"
             />
-            <TextField label="Бренд"
+            <TextField label={t('admin.products.brand')}
                        value={brandId}
                        onChange={event => setBrandId(event.target.value)}
                        variant="outlined"
@@ -59,7 +61,7 @@ const AdminProducts = () => {
                        select
                        style={{minWidth: 200}}
             >
-                <MenuItem value={ALL_BRANDS}>Все бренды</MenuItem>
+                <MenuItem value={ALL_BRANDS}>{t('admin.products.allBrands')}</MenuItem>
                 {brands.map(brand => (
                     <MenuItem key={brand.id} value={brand.id}>{brand.name}</MenuItem>
                 ))}
@@ -68,12 +70,12 @@ const AdminProducts = () => {
     );
 
     return (
-        <AdminSearchTable columns={COLUMNS}
+        <AdminSearchTable columns={columns}
                           fetchPage={searchProducts}
                           filters={filters}
                           defaultSortColumn="name"
                           toolbar={toolbar}
-                          emptyMessage="Товары не найдены"
+                          emptyMessage={t('admin.products.emptyMessage')}
         />
     );
 };
