@@ -6,6 +6,7 @@ import {Assignment, ShopTwo, SupervisorAccount} from "@material-ui/icons";
 import MenuIcon from "@material-ui/icons/Menu";
 import {withStyles} from "@material-ui/styles";
 import {Link} from "react-router-dom";
+import {withTranslation} from "react-i18next";
 
 const styles = (theme) => ({
     menuButton: {
@@ -29,7 +30,7 @@ class MainMenu extends Component {
     render() {
 
         const open = this.state.open;
-        const {isAuthenticated, isAdmin, classes} = this.props;
+        const {isAuthenticated, isAdmin, classes, t} = this.props;
 
         return (
             <div>
@@ -55,18 +56,18 @@ class MainMenu extends Component {
                         <ListItemIcon>
                             <HomeIcon/>
                         </ListItemIcon>
-                        <ListItemText primary="Домой"/>
+                        <ListItemText primary={t('nav.home')}/>
                     </MenuItem>
                     {isAuthenticated && <Divider/>}
-                    {isAuthenticated && <MainMenuItem text="Каталог" linkTo="/products" icon={<ShopTwo/>}/>}
-                    {isAuthenticated && <MainMenuItem text="Заказы" linkTo="/orders" icon={<Assignment/>}/>}
+                    {isAuthenticated && <MainMenuItem text={t('nav.catalogue')} linkTo="/products" icon={<ShopTwo/>}/>}
+                    {isAuthenticated && <MainMenuItem text={t('nav.orders')} linkTo="/orders" icon={<Assignment/>}/>}
                     {isAuthenticated && isAdmin && <Divider/>}
                     {isAuthenticated && isAdmin &&
-                    <MainMenuItem text="Клиенты" linkTo="/admin" icon={<SupervisorAccount/>}/>}
+                    <MainMenuItem text={t('nav.admin')} linkTo="/admin" icon={<SupervisorAccount/>}/>}
                 </Menu>
             </div>
         )
     }
 }
 
-export default withStyles(styles)(MainMenu);
+export default withTranslation()(withStyles(styles)(MainMenu));

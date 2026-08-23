@@ -205,11 +205,6 @@
   },
   "admin": {
     "title": "Панель администратора",
-    "tabs": {
-      "products": "Товары",
-      "brands": "Бренды",
-      "clients": "Клиенты"
-    },
     "table": {
       "rowsPerPage": "Строк на странице:",
       "displayedRows": "{{from}}–{{to}} из {{count}}",
@@ -219,13 +214,6 @@
       "byName": "Поиск по названию",
       "exactMatch": "Точное совпадение"
     },
-    "brands": {
-      "columns": {
-        "id": "ID",
-        "name": "Название"
-      },
-      "emptyMessage": "Бренды не найдены"
-    },
     "clients": {
       "columns": {
         "id": "ID",
@@ -233,20 +221,6 @@
         "idno": "IDNO"
       },
       "emptyMessage": "Клиенты не найдены"
-    },
-    "products": {
-      "columns": {
-        "id": "ID",
-        "name": "Название",
-        "unit": "Ед.",
-        "inPackage": "В упаковке",
-        "barCode": "Штрихкод",
-        "prices": "Цены"
-      },
-      "noPrice": "—",
-      "allBrands": "Все бренды",
-      "brand": "Бренд",
-      "emptyMessage": "Товары не найдены"
     }
   }
 }

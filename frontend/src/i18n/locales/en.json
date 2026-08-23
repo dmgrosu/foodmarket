@@ -205,11 +205,6 @@
   },
   "admin": {
     "title": "Admin dashboard",
-    "tabs": {
-      "products": "Products",
-      "brands": "Brands",
-      "clients": "Clients"
-    },
     "table": {
       "rowsPerPage": "Rows per page:",
       "displayedRows": "{{from}}–{{to}} of {{count}}",
@@ -219,13 +214,6 @@
       "byName": "Search by name",
       "exactMatch": "Exact match"
     },
-    "brands": {
-      "columns": {
-        "id": "ID",
-        "name": "Name"
-      },
-      "emptyMessage": "No brands found"
-    },
     "clients": {
       "columns": {
         "id": "ID",
@@ -233,20 +221,6 @@
         "idno": "IDNO"
       },
       "emptyMessage": "No clients found"
-    },
-    "products": {
-      "columns": {
-        "id": "ID",
-        "name": "Name",
-        "unit": "Unit",
-        "inPackage": "In package",
-        "barCode": "Bar-code",
-        "prices": "Prices"
-      },
-      "noPrice": "—",
-      "allBrands": "All brands",
-      "brand": "Brand",
-      "emptyMessage": "No products found"
     }
   }
 }

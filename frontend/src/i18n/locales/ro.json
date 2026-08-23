@@ -205,11 +205,6 @@
   },
   "admin": {
     "title": "Panou de administrare",
-    "tabs": {
-      "products": "Produse",
-      "brands": "Branduri",
-      "clients": "Clienți"
-    },
     "table": {
       "rowsPerPage": "Rânduri pe pagină:",
       "displayedRows": "{{from}}–{{to}} din {{count}}",
@@ -219,13 +214,6 @@
       "byName": "Căutare după denumire",
       "exactMatch": "Potrivire exactă"
     },
-    "brands": {
-      "columns": {
-        "id": "ID",
-        "name": "Denumire"
-      },
-      "emptyMessage": "Nu au fost găsite branduri"
-    },
     "clients": {
       "columns": {
         "id": "ID",
@@ -233,20 +221,6 @@
         "idno": "IDNO"
       },
       "emptyMessage": "Nu au fost găsiți clienți"
-    },
-    "products": {
-      "columns": {
-        "id": "ID",
-        "name": "Denumire",
-        "unit": "U.M.",
-        "inPackage": "În ambalaj",
-        "barCode": "Cod de bare",
-        "prices": "Prețuri"
-      },
-      "noPrice": "—",
-      "allBrands": "Toate brandurile",
-      "brand": "Brand",
-      "emptyMessage": "Nu au fost găsite produse"
     }
   }
 }
