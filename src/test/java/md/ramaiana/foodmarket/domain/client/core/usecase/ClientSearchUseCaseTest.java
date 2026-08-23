@@ -7,6 +7,7 @@ import md.ramaiana.foodmarket.domain.client.core.response.ClientResponse;
 import md.ramaiana.foodmarket.domain.client.data.ClientEntity;
 import md.ramaiana.foodmarket.domain.client.data.ClientRepository;
 import md.ramaiana.foodmarket.shared.exception.http.BadRequestException;
+import md.ramaiana.foodmarket.shared.exception.http.NotFoundException;
 import md.ramaiana.foodmarket.shared.response.PagedResponse;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -30,13 +31,13 @@ import static org.mockito.Mockito.when;
 
 @Tag("unit")
 @ExtendWith(MockitoExtension.class)
-class AdminClientSearchUseCaseTest {
+class ClientSearchUseCaseTest {
 
   @Mock
   ClientRepository clientRepository;
 
   @InjectMocks
-  AdminClientSearchUseCase useCase;
+  ClientSearchUseCase useCase;
 
   @Test
   void should_pass_filters_through_and_map_page_to_paged_response() {
@@ -63,5 +64,33 @@ class AdminClientSearchUseCaseTest {
         .hasMessageContaining("passwd");
 
     verifyNoInteractions(clientRepository);
+  }
+
+  @Test
+  void executeByIdno_should_return_the_single_matching_client() {
+    ClientEntity entity = new ClientEntity(3, "Linella", "1003600011111", "info@linella.md",
+        Instant.now(), null, Set.of(), Set.of());
+    when(clientRepository.search(eq(null), eq("1003600011111"), any(Pageable.class)))
+        .thenReturn(new PageImpl<>(List.of(entity), PageRequest.of(0, 1), 1));
+
+    ClientResponse response = useCase.executeByIdno("1003600011111");
+
+    assertThat(response.getId()).isEqualTo(3);
+    assertThat(response.getIdno()).isEqualTo("1003600011111");
+
+    // The lookup narrows to a single row rather than paging through the whole table.
+    ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
+    verify(clientRepository).search(eq(null), eq("1003600011111"), pageableCaptor.capture());
+    assertThat(pageableCaptor.getValue().getPageSize()).isEqualTo(1);
+  }
+
+  @Test
+  void executeByIdno_should_throw_not_found_when_no_client_matches() {
+    when(clientRepository.search(eq(null), eq("0000000000000"), any(Pageable.class)))
+        .thenReturn(new PageImpl<>(List.of(), PageRequest.of(0, 1), 0));
+
+    assertThatThrownBy(() -> useCase.executeByIdno("0000000000000"))
+        .isInstanceOf(NotFoundException.class)
+        .hasMessageContaining("0000000000000");
   }
 }
