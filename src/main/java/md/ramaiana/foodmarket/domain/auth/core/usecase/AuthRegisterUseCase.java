@@ -9,6 +9,7 @@ import md.ramaiana.foodmarket.domain.auth.data.AppUserEntity;
 import md.ramaiana.foodmarket.domain.auth.data.AppUserRepository;
 import md.ramaiana.foodmarket.shared.annotation.UseCase;
 import md.ramaiana.foodmarket.shared.enums.Role;
+import md.ramaiana.foodmarket.shared.enums.UserState;
 import md.ramaiana.foodmarket.shared.exception.http.BadRequestException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,14 +36,15 @@ public class AuthRegisterUseCase {
     // Create new user
     AppUserEntity user = new AppUserEntity(
         request.getEmail(),
-        passwordEncoder.encode(request.getPassword())
+        passwordEncoder.encode(request.getPassword()),
+        UserState.ACTIVE
     );
     user.addRole(Role.USER);
 
     // Save user
     AppUserEntity savedUser = appUserRepository.save(user);
 
-    return loginUseCase.execute(new LoginRequest(savedUser.getEmail(), savedUser.getPasswd()));
+    return loginUseCase.execute(new LoginRequest(savedUser.getEmail(), request.getPassword()));
   }
 
 }
