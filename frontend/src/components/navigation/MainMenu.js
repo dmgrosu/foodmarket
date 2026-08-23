@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import {Divider, IconButton, ListItemIcon, ListItemText, Menu, MenuItem} from "@material-ui/core";
 import HomeIcon from "@material-ui/icons/Home";
 import MainMenuItem from "./MainMenuItem";
-import {Assignment, ShopTwo} from "@material-ui/icons";
+import {Assignment, ShopTwo, SupervisorAccount} from "@material-ui/icons";
 import MenuIcon from "@material-ui/icons/Menu";
 import {withStyles} from "@material-ui/styles";
 import {Link} from "react-router-dom";
@@ -29,7 +29,7 @@ class MainMenu extends Component {
     render() {
 
         const open = this.state.open;
-        const {isAuthenticated, classes} = this.props;
+        const {isAuthenticated, isAdmin, classes} = this.props;
 
         return (
             <div>
@@ -60,6 +60,9 @@ class MainMenu extends Component {
                     {isAuthenticated && <Divider/>}
                     {isAuthenticated && <MainMenuItem text="Каталог" linkTo="/products" icon={<ShopTwo/>}/>}
                     {isAuthenticated && <MainMenuItem text="Заказы" linkTo="/orders" icon={<Assignment/>}/>}
+                    {isAuthenticated && isAdmin && <Divider/>}
+                    {isAuthenticated && isAdmin &&
+                    <MainMenuItem text="Администрирование" linkTo="/admin" icon={<SupervisorAccount/>}/>}
                 </Menu>
             </div>
         )

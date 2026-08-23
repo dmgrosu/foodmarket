@@ -6,14 +6,16 @@ Separate CRA React 17 deployable — **not** bundled into the Spring Boot jar (n
 Dev: CRA proxy `"proxy": "http://localhost:8080"` in `frontend/package.json`. Prod: `REACT_APP_API_URL` baked in at build time by `npm run build:prod`, plus backend CORS.
 Client: `frontend/src/axios-instance.js` — `baseURL` from `REACT_APP_API_URL` (default `""` = same origin), request interceptor sets `Authorization` from `localStorage`. **No response interceptor, so no global 401 handling.**
 
-There is no `services/` or `api/` layer — calls are inline in redux thunks and in two components.
+Admin calls go through `frontend/src/api/admin.js`, written against the backend's OpenAPI document. Everything older is still inline in redux thunks and in two components.
 
 ## Call sites
 
-Schema: `| caller | http | backend path | params | dispatches |`. 11 rows = every `axios.<verb>` in `frontend/src`.
+Schema: `| caller | http | backend path | params | dispatches |`. 13 rows = every `axios.<verb>` in `frontend/src`. `searchRequest` is one call site shared by `searchBrands`/`searchClients`/`searchProducts`.
 
 | caller | http | backend path | params | dispatches |
 |---|---|---|---|---|
+| admin.js#searchRequest | GET | /admin/{brand,client,product}/search | name,idno,brandId,groupId,pageNo,pageSize,sortColumn,sortDirection |  |
+| admin.js#fetchAllBrands | GET | /brand/getAll |  |  |
 | authActions.js#loginStart | POST | /auth/login | email,password | LOGIN_START,LOGIN_SUCCESS,LOGIN_FAIL |
 | authActions.js#signUpStart | POST | /auth/register | email,password,clientId | LOGIN_START,LOGIN_SUCCESS,LOGIN_FAIL |
 | Products.js#fetchBrands | GET | /brand/getAll |  |  |
@@ -31,6 +33,7 @@ Schema: `| caller | http | backend path | params | dispatches |`. 11 rows = ever
 | path | component | guard |
 |---|---|---|
 | / | Home | public |
+| /admin | AdminDashboard | authed **and** roles contains ADMIN; nested /admin/{products,brands,clients} |
 | /signIn | SignIn | public; redirects to /products when authed |
 | /signUp | SignUp | public; redirects to /products when authed |
 | /products | Products | authed; own Redirect to /signIn |
@@ -52,8 +55,18 @@ No catch-all/404 route. When logged out the authed paths are simply absent from 
 
 ## Auth
 
-`localStorage` keys `token`, `userId`, `validUntil`. The interceptor sets `Authorization` to the stored value **verbatim** — this works only because `JwtCreateTokenUseCase` returns the token already prefixed with `"Bearer "`, which `JwtFilter` then strips. Expiry is a client-side `setTimeout(logout, ttl*1000)`; there is no 401 interceptor. Real enforcement is server-side in `SecurityConfig`.
+`localStorage` keys `token`, `userId`, `validUntil`, `roles` (JSON array, from `AuthResponse.user.roles`). The interceptor sets `Authorization` to the stored value **verbatim** — this works only because `JwtCreateTokenUseCase` returns the token already prefixed with `"Bearer "`, which `JwtFilter` then strips. Expiry is a client-side `setTimeout(logout, ttl*1000)`; there is no 401 interceptor. Real enforcement is server-side in `SecurityConfig`.
 
 ## Backend endpoints with no frontend consumer
 
 `GET /order/getById/{orderId}`, `DELETE /order/deleteById/{orderId}`, `POST /order/getOrdersByPeriod`, `PUT /order/update`.
+
+## Admin dashboard
+
+`/admin` renders `components/admin/AdminDashboard` (tabs over Товары / Бренды / Клиенты). All three tabs reuse
+`AdminSearchTable`, which owns paging, sorting and the loading/empty states and calls one of the `api/admin.js`
+search functions. A column is only marked sortable when the matching use case whitelists that property — the
+backend answers 400 otherwise.
+
+Role gating is display-only: `store/selectors/authSelectors#isAdmin` hides the menu entry and the route.
+Enforcement is server-side in `SecurityConfig` and each `Admin*AccessVoter`.

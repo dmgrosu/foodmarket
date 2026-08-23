@@ -15,7 +15,7 @@ export const loginStart = (email, password) => {
             .then(resp => {
                 const data = resp.data;
                 storeAuthData(data);
-                dispatch(loginSuccess(data.token, data.user.id));
+                dispatch(loginSuccess(data.token, data.user.id, data.user.roles));
                 dispatch(checkAuthTimeout(data.tokenTtl))
             })
             .catch(err => {
@@ -29,12 +29,13 @@ export const loginStart = (email, password) => {
     };
 };
 
-export const loginSuccess = (token, userId) => {
+export const loginSuccess = (token, userId, roles) => {
     return {
         type: LOGIN_SUCCESS,
         payload: {
             token: token,
-            userId: userId
+            userId: userId,
+            roles: roles || []
         }
     };
 }
@@ -46,7 +47,7 @@ export const signUpStart = (email, password, clientId) => {
             .then(resp => {
                 const data = resp.data;
                 storeAuthData(data);
-                dispatch(loginSuccess(data.token, data.user.id));
+                dispatch(loginSuccess(data.token, data.user.id, data.user.roles));
                 dispatch(checkAuthTimeout(data.tokenTtl))
             })
             .catch(err => {
@@ -76,7 +77,7 @@ export const authCheckState = () => {
                 const validUntil = moment(Number(validUntilStr));
                 if (moment().isBefore(validUntil)) {
                     const userId = localStorage.getItem('userId');
-                    dispatch(loginSuccess(storedToken, userId));
+                    dispatch(loginSuccess(storedToken, userId, readStoredRoles()));
                     dispatch(checkAuthTimeout(validUntil.diff(moment(), 'second')));
                 }
             }
@@ -99,11 +100,23 @@ const storeAuthData = (authData) => {
     localStorage.setItem('token', authData.token);
     localStorage.setItem('userId', authData.user.id);
     localStorage.setItem('validUntil', moment().add(Number(authData.tokenTtl), 'second').valueOf().toString());
+    localStorage.setItem('roles', JSON.stringify(authData.user.roles || []));
+}
+
+const readStoredRoles = () => {
+    try {
+        const stored = localStorage.getItem('roles');
+        return stored ? JSON.parse(stored) : [];
+    } catch (e) {
+        // A corrupted entry must not block sign-in; fall back to no roles.
+        return [];
+    }
 }
 
 const removeAuthData = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('validUntil');
     localStorage.removeItem('userId');
+    localStorage.removeItem('roles');
 }
 
