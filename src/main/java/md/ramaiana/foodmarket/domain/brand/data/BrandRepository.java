@@ -5,6 +5,6 @@ import org.springframework.data.repository.ListCrudRepository;
 /**
  * Brand Repository.
  */
-public interface BrandRepository extends ListCrudRepository<BrandEntity, Integer> {
+public interface BrandRepository extends ListCrudRepository<BrandEntity, Integer>, BrandRepositoryCustom {
 
 }

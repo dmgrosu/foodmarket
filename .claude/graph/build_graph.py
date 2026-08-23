@@ -360,7 +360,7 @@ def verify():
 
     kinds = {"controller", "voter", "usecase", "entity", "repo", "request",
              "response", "dto", "enum", "exception", "config", "service",
-             "annotation", "abstract", "app", "fe-action", "fe-component",
+             "annotation", "abstract", "util", "app", "fe-action", "fe-component",
              "fe-reducer", "fe-util"}
     for r in nodes:
         if r[1] not in kinds:
@@ -386,8 +386,8 @@ def verify():
             problems.append("edges.md: unknown target node '%s'" % target)
 
     n_routes = len(graph_routes())
-    if n_routes != 15:
-        problems.append("routes.md: %d rows, expected 15" % n_routes)
+    if n_routes != 18:
+        problems.append("routes.md: %d rows, expected 18" % n_routes)
 
     for r in graph_routes():
         for repo in filter(None, r[7].split(",")):

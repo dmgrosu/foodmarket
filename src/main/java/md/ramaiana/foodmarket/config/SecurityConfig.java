@@ -4,6 +4,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import md.ramaiana.foodmarket.domain.auth.core.usecase.JwtGetAuthenticationUseCase;
 import md.ramaiana.foodmarket.domain.auth.presentation.service.AppUserDetailsService;
+import md.ramaiana.foodmarket.shared.enums.Role;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -34,6 +35,8 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
+  private static final String ADMIN_PATH_PATTERN = "/admin/**";
+
   private final JwtGetAuthenticationUseCase jwtGetAuthenticationUseCase;
   private final AppUserDetailsService appUserDetailsService;
 
@@ -55,6 +58,9 @@ public class SecurityConfig {
                 "/swagger-ui/**",
                 "/swagger-ui.html"
             ).permitAll()
+            // Admin-only endpoints. hasRole() prepends "ROLE_", matching the authorities
+            // built by AppUserEntity.getAuthorities(). Also enforced in the access voters.
+            .requestMatchers(ADMIN_PATH_PATTERN).hasRole(Role.ADMIN.name())
             // All other endpoints require authentication
             .anyRequest().authenticated()
         )

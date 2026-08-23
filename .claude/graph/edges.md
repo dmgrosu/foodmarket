@@ -10,7 +10,23 @@ Schema: `| from | rel | to | detail |`
 
 | from | rel | to | detail |
 |---|---|---|---|
+| AccessVoter | throws | ForbiddenException | thrown by assertUserIsAdmin() when the user lacks Role.ADMIN |
 | AccessVoter | throws | UnauthorizedException | thrown when principal missing or not AppUserEntity |
+| AdminBrandAccessVoter | extends | AccessVoter | inherits assertUserIsAdmin |
+| AdminBrandAccessVoter | guards | AdminBrandController#search | assertCanSearch |
+| AdminBrandController | injects | AdminBrandAccessVoter | constructor injection |
+| AdminBrandController | injects | AdminBrandSearchUseCase | constructor injection |
+| AdminBrandSearchUseCase | injects | BrandRepository | constructor injection |
+| AdminClientAccessVoter | extends | AccessVoter | inherits assertUserIsAdmin |
+| AdminClientAccessVoter | guards | AdminClientController#search | assertCanSearch |
+| AdminClientController | injects | AdminClientAccessVoter | constructor injection |
+| AdminClientController | injects | AdminClientSearchUseCase | constructor injection |
+| AdminClientSearchUseCase | injects | ClientRepository | constructor injection |
+| AdminProductAccessVoter | extends | AccessVoter | inherits assertUserIsAdmin |
+| AdminProductAccessVoter | guards | AdminProductController#search | assertCanSearch |
+| AdminProductController | injects | AdminProductAccessVoter | constructor injection |
+| AdminProductController | injects | AdminProductSearchUseCase | constructor injection |
+| AdminProductSearchUseCase | injects | ProductRepository | constructor injection |
 | AppUserDetailsService | implements | UserDetailsService | Spring Security loadUserByUsername |
 | AppUserDetailsService | injects | AppUserFindByEmailUseCase | constructor injection |
 | AppUserEntity | embeds | UserRoleRef | @MappedCollection(idColumn="user_id") Set<UserRoleRef> |
@@ -45,7 +61,9 @@ Schema: `| from | rel | to | detail |`
 | BrandController | injects | BrandAccessVoter | constructor injection |
 | BrandController | injects | BrandSearchUseCase | constructor injection |
 | BrandEntity | table | brand | @Table("brand") |
+| BrandRepository | extends | BrandRepositoryCustom | composed custom repository fragment |
 | BrandRepository | extends | ListCrudRepository | ListCrudRepository<BrandEntity,Integer> |
+| BrandRepositoryImpl | implements | BrandRepositoryCustom | Spring Data JDBC repository composition via <Repo>Impl naming convention |
 | BrandSearchUseCase | injects | BrandRepository | constructor injection |
 | ClientAccessVoter | extends | AccessVoter | inherits assertUserIsAuthenticated |
 | ClientAccessVoter | guards | ClientController#findByIdno | assertCanFindByIdno |
@@ -60,7 +78,9 @@ Schema: `| from | rel | to | detail |`
 | ClientFindByIdnoUseCase | injects | ClientRepository | constructor injection |
 | ClientFindByIdnoUseCase | throws | NotFoundException | client idno not found |
 | ClientPhoneEntity | table | client_phones | @Table("client_phones") |
+| ClientRepository | extends | ClientRepositoryCustom | composed custom repository fragment |
 | ClientRepository | extends | CrudRepository | CrudRepository<ClientEntity,Integer> |
+| ClientRepositoryImpl | implements | ClientRepositoryCustom | Spring Data JDBC repository composition via <Repo>Impl naming convention |
 | ImportBalancesUseCase | injects | BalancesUpdateUseCase | CROSS-LAYER shared->product constructor injection |
 | ImportClientsUseCase | calls | ClientAddressEntity | CROSS-LAYER shared->client new ClientAddressEntity(...) |
 | ImportClientsUseCase | calls | ClientEntity | CROSS-LAYER shared->client new ClientEntity(...) |
@@ -150,6 +170,8 @@ Schema: `| from | rel | to | detail |`
 | ProductLoadUseCase | injects | ProductGroupRepository | constructor injection |
 | ProductLoadUseCase | injects | ProductRepository | constructor injection |
 | ProductRepository | extends | CrudRepository | CrudRepository<ProductEntity,Integer> |
+| ProductRepository | extends | ProductRepositoryCustom | composed custom repository fragment |
+| ProductRepositoryImpl | implements | ProductRepositoryCustom | Spring Data JDBC repository composition via <Repo>Impl naming convention |
 | ProductResponse | calls | PriceResponse | CROSS-DOMAIN product->price PriceResponse::new mapping |
 | ProductSearchUseCase | injects | ProductGroupRepository | constructor injection |
 | ProductSearchUseCase | injects | ProductRepository | constructor injection |
