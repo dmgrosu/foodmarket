@@ -29,3 +29,9 @@ jobs:
         restore-keys: ${{ runner.os }}-m2
     - name: Test with Maven
       run: mvn -B verify --file pom.xml
+
+    - name: Check .claude/graph is fresh
+      run: |
+        python3 .claude/graph/build_graph.py --verify
+        python3 .claude/graph/build_graph.py --check \
+          || echo "::warning::.claude/graph is stale — run: python3 .claude/graph/build_graph.py --check"
