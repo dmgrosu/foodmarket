@@ -4,6 +4,7 @@ import md.ramaiana.foodmarket.config.DataExchangeConfig;
 import md.ramaiana.foodmarket.domain.product.core.usecase.BalancesUpdateUseCase;
 import md.ramaiana.foodmarket.shared.dataexchange.dto.ErpBalanceDto;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -26,6 +27,7 @@ import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+@Tag("integration")
 @ExtendWith(SpringExtension.class)
 @ExtendWith(MockitoExtension.class)
 @TestPropertySource(locations = "classpath:application.yml")
