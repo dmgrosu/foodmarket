@@ -1,124 +1,37 @@
-export const heroContent = {
-    title: "Платформа оптовой закупки продуктов питания",
-    description: "Ramaiana On-line — удобная система для бизнеса, позволяющая быстро оформлять оптовые заказы у проверенных поставщиков.",
-}
+// Copy for the home page lives in src/i18n/locales/*.json. This file keeps only what is not
+// translatable — asset paths and contact data — so a phone number is edited in one place
+// instead of three. See Contacts.js / Partners.js for how these pair up with translation keys.
 
-export const audience = {
-    title: "Кому подходит платформа",
-    cards: [
-        {
-            title: "Розничные магазины",
-            text: "Регулярные поставки продуктов питания"
-        },
-        {
-            title: "Рестораны и кафе",
-            text: "Закупки для HoReCa"
-        },
-        {
-            title: "Отели и кейтеринг",
-            text: "Комплексное обеспечение продуктами"
-        },
-        {
-            title: "Оптовые покупатели",
-            text: "Крупные партии товаров"
-        }
-    ]
-}
-
-export const howItWorks = {
-    title: "Как работает платформа",
-    steps: [
-        {
-            title: "Регистрация",
-            text: "Создайте аккаунт компании"
-        },
-        {
-            title: "Доступ к каталогу",
-            text: "Просматривайте ассортимент и цены"
-        },
-        {
-            title: "Оформление заказов",
-            text: "Быстро формируйте закупки"
-        }
-    ]
-}
-
-export const advantages = {
-    title: "Преимущества платформы",
-    cards: [
-        "Стабильные поставки",
-        "Большой ассортимент: 4000+ товаров",
-        "Оптовые цены",
-        "Удобное управление заказами",
-        "Проверенные поставщики",
-        "Персональный менеджер"
-    ]
-}
-
-export const partners = {
-    title: "Наши поставщики",
-    subTitle: "Мы сотрудничаем с ведущими производителями продуктов питания",
-    logos: [
-        "/logos/tera.png",
-        "/logos/bucuria.png",
-        "/logos/franzeluta.png",
-        "/logos/nestle.png",
-        "/logos/unilever.png",
-        "/logos/coca-cola.png"
-    ]
-}
-
-export const about = {
-    title: "О платформе",
-    paragraphs: [
-        "Ramaiana On-line — это современная цифровая платформа для оптовых закупок продуктов питания. Мы объединяем поставщиков и предприятия торговли, предоставляя удобный инструмент для управления закупками.",
-        "Платформа позволяет быстро получать доступ к актуальному ассортименту товаров, формировать заказы и контролировать поставки.",
-        "Наш сервис ориентирован на магазины, рестораны, кафе, гостиницы и других партнеров, которым важны стабильные поставки и прозрачные условия сотрудничества."
-    ]
-}
+export const partnerLogos = [
+    "/logos/tera.png",
+    "/logos/bucuria.png",
+    "/logos/franzeluta.png",
+    "/logos/nestle.png",
+    "/logos/unilever.png",
+    "/logos/coca-cola.png"
+]
 
 export const contacts = {
-    title: "Контакты",
     cards: [
         {
-            title: "Склад 1",
-            phone: "Телефон: +373 22 317 901",
-            email: "Email: info@ramaiana.md",
-            address: "Адрес: ул. Петрикань 21/2, Кишинёв, Молдова",
+            phone: "+373 22 317 901",
+            email: "info@ramaiana.md",
         },
         {
-            title: "Склад 2",
-            phone: "Телефон: +373 22 312 161",
-            email: "Email: depozit2@ramaiana.md",
-            address: "Адрес: ул. Петрикань 21/4, Кишинёв, Молдова",
+            phone: "+373 22 312 161",
+            email: "depozit2@ramaiana.md",
         },
         {
-            title: "Склад 3",
-            phone: "Телефон: +373 22 317 514",
-            email: "Email: depozit3@ramaiana.md",
-            address: "Адрес: ул. Петрикань 21, Кишинёв, Молдова",
+            phone: "+373 22 317 514",
+            email: "depozit3@ramaiana.md",
         },
         {
-            title: "Склад 4",
-            phone: "Телефон: +373 22 410 855",
-            email: "Email: depozit4@ramaiana.md",
-            address: "Адрес: ул. Узинелор 7, Кишинёв, Молдова",
+            phone: "+373 22 410 855",
+            email: "depozit4@ramaiana.md",
         },
         {
-            title: "Склад 5",
-            phone: "Телефон: +373 60 365 710",
-            email: "Email: info@ramaiana.md",
-            address: "Адрес: ул. Штефан чел Маре 115, Бельцы, Молдова",
+            phone: "+373 60 365 710",
+            email: "info@ramaiana.md",
         }
-    ],
-    getAccess: {
-        title: "Получить доступ",
-        text: "Для доступа к каталогу и ценам необходимо зарегистрироваться в системе.",
-        button: "Зарегистрироваться"
-    }
-}
-
-export const footerContent = {
-    title: "Ramaiana On-line",
-    subTitle: "Платформа оптовой закупки продуктов питания",
+    ]
 }

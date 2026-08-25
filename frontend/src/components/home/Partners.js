@@ -1,18 +1,20 @@
 import React from "react"
 import { Grid, Typography, Box } from "@material-ui/core"
-import {partners} from "../../data/homepageContent";
+import {useTranslation} from "react-i18next";
+import {partnerLogos} from "../../data/homepageContent";
 
 export default function Partners() {
+    const {t} = useTranslation();
 
     return (
         <Box py={8} textAlign="center">
 
             <Typography variant="h4" gutterBottom>
-                {partners.title}
+                {t('home.partners.title')}
             </Typography>
 
             <Typography color="textSecondary" gutterBottom>
-                {partners.subTitle}
+                {t('home.partners.subTitle')}
             </Typography>
 
             <Grid
@@ -21,7 +23,7 @@ export default function Partners() {
                 justify="center"
                 style={{ marginTop: 20 }}
             >
-                {partners.logos.map((logo, i) => (
+                {partnerLogos.map((logo, i) => (
                     <Grid item key={i}>
                         <img
                             src={logo}

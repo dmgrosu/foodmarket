@@ -1,18 +1,20 @@
 import React from "react"
 import { Typography, Grid, Paper } from "@material-ui/core"
+import {useTranslation} from "react-i18next";
 
 const stats = [
-    { value: "4000+", label: "товаров" },
-    { value: "250+", label: "клиентов" },
-    { value: "100+", label: "поставщиков" },
-    { value: "20+", label: "лет на рынке" }
+    { value: "4000+", labelKey: "products" },
+    { value: "250+", labelKey: "clients" },
+    { value: "100+", labelKey: "suppliers" },
+    { value: "20+", labelKey: "years" }
 ]
 
 export default function Stats() {
+    const {t} = useTranslation();
     return (
         <>
             <Typography variant="h4" gutterBottom>
-                Наша статистика
+                {t('home.stats.title')}
             </Typography>
 
             <Grid container spacing={3}>
@@ -24,7 +26,7 @@ export default function Stats() {
                             </Typography>
 
                             <Typography color="textSecondary">
-                                {s.label}
+                                {t(`home.stats.labels.${s.labelKey}`)}
                             </Typography>
                         </Paper>
                     </Grid>

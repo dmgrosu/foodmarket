@@ -10,6 +10,7 @@ Schema: `| from | rel | to | detail |`
 
 | from | rel | to | detail |
 |---|---|---|---|
+| AccessVoter | throws | ForbiddenException | thrown by assertUserIsAdmin() when the user lacks Role.ADMIN |
 | AccessVoter | throws | UnauthorizedException | thrown when principal missing or not AppUserEntity |
 | AppUserDetailsService | implements | UserDetailsService | Spring Security loadUserByUsername |
 | AppUserDetailsService | injects | AppUserFindByEmailUseCase | constructor injection |
@@ -49,18 +50,22 @@ Schema: `| from | rel | to | detail |`
 | BrandSearchUseCase | injects | BrandRepository | constructor injection |
 | ClientAccessVoter | extends | AccessVoter | inherits assertUserIsAuthenticated |
 | ClientAccessVoter | guards | ClientController#findByIdno | assertCanFindByIdno |
+| ClientAccessVoter | guards | ClientController#search | assertCanSearch, ADMIN only |
 | ClientAddressEntity | table | client_addresses | @Table("client_addresses") |
 | ClientController | injects | ClientAccessVoter | constructor injection |
-| ClientController | injects | ClientFindByIdnoUseCase | constructor injection |
+| ClientController | injects | ClientSearchUseCase | constructor injection |
 | ClientEntity | embeds | ClientAddressEntity | @MappedCollection(idColumn="client_id") Set<ClientAddressEntity> |
 | ClientEntity | embeds | ClientPhoneEntity | @MappedCollection(idColumn="client_id") Set<ClientPhoneEntity> |
 | ClientEntity | table | client | @Table("client") |
 | ClientFindByIdUseCase | injects | ClientRepository | constructor injection |
 | ClientFindByIdUseCase | throws | NotFoundException | client id not found |
-| ClientFindByIdnoUseCase | injects | ClientRepository | constructor injection |
-| ClientFindByIdnoUseCase | throws | NotFoundException | client idno not found |
 | ClientPhoneEntity | table | client_phones | @Table("client_phones") |
+| ClientRepository | extends | ClientRepositoryCustom | composed custom repository fragment |
 | ClientRepository | extends | CrudRepository | CrudRepository<ClientEntity,Integer> |
+| ClientRepositoryImpl | implements | ClientRepositoryCustom | Spring Data JDBC repository composition via <Repo>Impl naming convention |
+| ClientSearchUseCase | injects | ClientRepository | constructor injection |
+| ClientSearchUseCase | throws | BadRequestException | sort column outside the whitelist |
+| ClientSearchUseCase | throws | NotFoundException | executeByIdno found no live client |
 | ImportBalancesUseCase | injects | BalancesUpdateUseCase | CROSS-LAYER shared->product constructor injection |
 | ImportClientsUseCase | calls | ClientAddressEntity | CROSS-LAYER shared->client new ClientAddressEntity(...) |
 | ImportClientsUseCase | calls | ClientEntity | CROSS-LAYER shared->client new ClientEntity(...) |

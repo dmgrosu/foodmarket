@@ -1,6 +1,7 @@
 import axios from "../../axios-instance";
 import {toast} from "material-react-toastify";
 import moment from "moment";
+import i18n from "../../i18n";
 
 export const LOGIN_START = "LOGIN_START";
 export const LOGIN_SUCCESS = "LOGIN_SUCCESS";
@@ -15,7 +16,7 @@ export const loginStart = (email, password) => {
             .then(resp => {
                 const data = resp.data;
                 storeAuthData(data);
-                dispatch(loginSuccess(data.token, data.user.id));
+                dispatch(loginSuccess(data.token, data.user.id, data.user.roles));
                 dispatch(checkAuthTimeout(data.tokenTtl))
             })
             .catch(err => {
@@ -29,12 +30,13 @@ export const loginStart = (email, password) => {
     };
 };
 
-export const loginSuccess = (token, userId) => {
+export const loginSuccess = (token, userId, roles) => {
     return {
         type: LOGIN_SUCCESS,
         payload: {
             token: token,
-            userId: userId
+            userId: userId,
+            roles: roles || []
         }
     };
 }
@@ -46,7 +48,7 @@ export const signUpStart = (email, password, clientId) => {
             .then(resp => {
                 const data = resp.data;
                 storeAuthData(data);
-                dispatch(loginSuccess(data.token, data.user.id));
+                dispatch(loginSuccess(data.token, data.user.id, data.user.roles));
                 dispatch(checkAuthTimeout(data.tokenTtl))
             })
             .catch(err => {
@@ -76,7 +78,7 @@ export const authCheckState = () => {
                 const validUntil = moment(Number(validUntilStr));
                 if (moment().isBefore(validUntil)) {
                     const userId = localStorage.getItem('userId');
-                    dispatch(loginSuccess(storedToken, userId));
+                    dispatch(loginSuccess(storedToken, userId, readStoredRoles()));
                     dispatch(checkAuthTimeout(validUntil.diff(moment(), 'second')));
                 }
             }
@@ -91,7 +93,7 @@ export const logout = () => {
 
 export const handleError = (err) => {
     console.log(err);
-    const errorMessage = err.response ? err.response.status + ": " + err.response.data.message || err.response.statusText : "Unknown error";
+    const errorMessage = err.response ? err.response.status + ": " + err.response.data.message || err.response.statusText : i18n.t('common.unknownError');
     toast.error(errorMessage);
 }
 
@@ -99,11 +101,23 @@ const storeAuthData = (authData) => {
     localStorage.setItem('token', authData.token);
     localStorage.setItem('userId', authData.user.id);
     localStorage.setItem('validUntil', moment().add(Number(authData.tokenTtl), 'second').valueOf().toString());
+    localStorage.setItem('roles', JSON.stringify(authData.user.roles || []));
+}
+
+const readStoredRoles = () => {
+    try {
+        const stored = localStorage.getItem('roles');
+        return stored ? JSON.parse(stored) : [];
+    } catch (e) {
+        // A corrupted entry must not block sign-in; fall back to no roles.
+        return [];
+    }
 }
 
 const removeAuthData = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('validUntil');
     localStorage.removeItem('userId');
+    localStorage.removeItem('roles');
 }
 

@@ -8,7 +8,8 @@ Schema: `| id | kind | dir | api | note |` — `dir` omits the prefix `src/main/
 | id | kind | dir | api | note |
 |---|---|---|---|---|
 | About | fe-component | frontend/src/components/home | renders company description text |  |
-| AccessVoter | abstract | shared/util/abstraction/voter | getCurrentUser();assertUserIsAuthenticated() | DEVIATION: getCurrentUser() returns void, only validates principal |
+| AccessVoter | abstract | shared/util/abstraction/voter | getCurrentUser()->AppUserEntity;assertUserIsAuthenticated();assertUserIsAdmin() | assertUserIsAdmin() checks Role.ADMIN membership, throws ForbiddenException |
+| AccessVoterTest | abstract | src/test/java/md/ramaiana/foodmarket/shared/util/abstraction/voter | 5 tests: assertUserIsAdmin (admin-pass, non-admin-reject, anonymous-reject, no-auth-reject), assertUserIsAuthenticated (pass) | test |
 | AddProductToOrderRequest | request | domain/order/core/request | orderId:int;storageId:Integer;productId:Integer;priceType:PriceType;quantity:float;clientId:Integer |  |
 | AddressType | enum | shared/enums | LEGAL;POINT;OFFICE |  |
 | Advantages | fe-component | frontend/src/components/home | renders advantage cards grid |  |
@@ -43,10 +44,16 @@ Schema: `| id | kind | dir | api | note |` — `dir` omits the prefix `src/main/
 | ClientController | controller | domain/client/presentation/controller | findByIdno(String)->ClientResponse |  |
 | ClientEntity | entity | domain/client/data | id:Integer;name:String;idno:String;email:String;createdAt:Instant;deletedAt:Instant;addresses:Set;phones:Set |  |
 | ClientFindByIdUseCase | usecase | domain/client/core/usecase | execute(AggregateReference)->ClientEntity | returns entity not DTO, unlike its sibling |
-| ClientFindByIdnoUseCase | usecase | domain/client/core/usecase | execute(String)->ClientResponse |  |
 | ClientPhoneEntity | entity | domain/client/data | number:String;name:String | DEVIATION: no @Id; embedded child of ClientEntity |
 | ClientRepository | repo | domain/client/data | findByIdnoAndDeletedAtIsNull |  |
+| ClientRepositoryCustom | repo | domain/client/data | search(String,String,Pageable)->Page<ClientEntity> |  |
+| ClientRepositoryImpl | repo | domain/client/data | search(String,String,Pageable)->Page<ClientEntity> | same criteria-query pattern as BrandRepositoryImpl; aggregate path also loads addresses/phones |
+| ClientRepositoryTest | repo | src/test/java/md/ramaiana/foodmarket/domain/client/data | 3 tests: page+sort, filter by name and idno, child collections loaded | test |
 | ClientResponse | response | domain/client/core/response | id:Integer;name:String;idno:String |  |
+| ClientSearchCriteria | request | domain/client/core/usecase | nameLike:String;idno:String;pageNo:int;pageSize:int;sortColumn:String;sortDirection:Sort.Direction |  |
+| ClientSearchSecurityTest | config | src/test/java/md/ramaiana/foodmarket/config | 3 tests: anonymous rejected, non-admin rejected, admin reaches the voter | test |
+| ClientSearchUseCase | usecase | domain/client/core/usecase | execute(ClientSearchCriteria)->PagedResponse<ClientResponse>;executeByIdno(String)->ClientResponse | DEVIATION: two public methods; executeByIdno wraps execute so the not-found rule stays out of the controller |
+| ClientSearchUseCaseTest | usecase | src/test/java/md/ramaiana/foodmarket/domain/client/core/usecase | 4 tests: filters+paging, sort whitelist, executeByIdno found and not-found | test |
 | ClientsDataDto | dto | shared/dataexchange/dto | clients:List<ErpClientDto> |  |
 | ConfirmDialog | fe-component | frontend/src/components | ConfirmDialog |  |
 | Contacts | fe-component | frontend/src/components/home | renders contact details and CTA button |  |
@@ -104,6 +111,7 @@ Schema: `| id | kind | dir | api | note |` — `dir` omits the prefix `src/main/
 | OrderState | enum | shared/enums | NEW;PLACED;PROCESSED;NOT_PROCESSED |  |
 | OrderUpdateUseCase | usecase | domain/order/core/usecase | execute(UpdateOrderRequest)->void |  |
 | Orders | fe-component | frontend/src/components/orders | Orders | DEVIATION: placeholder stub rendering literal text |
+| PagedResponse | response | shared/response | items:List<T>;currentPage:int;pageSize:int;totalPages:int;totalElements:long | generic paging envelope shared by all /admin/*/search endpoints |
 | Partners | fe-component | frontend/src/components/home | renders partner logos grid |  |
 | PriceEntity | entity | domain/price/data | type:PriceType;storage:AggregateReference;price:Float | DEVIATION: no @Id; embedded child of ProductEntity |
 | PriceResponse | response | domain/price/core/response | type:String;price:float |  |
@@ -128,7 +136,7 @@ Schema: `| id | kind | dir | api | note |` — `dir` omits the prefix `src/main/
 | Profile | fe-component | frontend/src/components/auth | Profile | DEVIATION: placeholder stub rendering literal text |
 | RegisterRequest | request | domain/auth/core/request | email:String;password:String;clientId:Integer |  |
 | RightMenu | fe-component | frontend/src/components/navigation | RightMenu |  |
-| Role | enum | shared/enums | ADMIN;USER | carries lowercase dbValue; never checked anywhere |
+| Role | enum | shared/enums | ADMIN;USER | carries lowercase dbValue (still unread); checked by AccessVoter.assertUserIsAdmin() |
 | ScheduleDataService | service | shared/schedule | runDataExchange()->void | exportOrders() is an empty TODO stub |
 | SecurityConfig | config | config | securityFilterChain;authenticationManager;passwordEncoder;authenticationProvider;corsConfigurationSource |  |
 | SignIn | fe-component | frontend/src/components/auth | SignIn |  |
@@ -156,3 +164,4 @@ Schema: `| id | kind | dir | api | note |` — `dir` omits the prefix `src/main/
 | reportWebVitals | fe-util | frontend/src | reportWebVitals | CRA boilerplate |
 | rootReducer | fe-reducer | frontend/src/store/reducers | combineReducers({authReducer,cartReducer}) | file is index.js |
 | setupTests | fe-util | frontend/src |  | CRA boilerplate, imports jest-dom |
+

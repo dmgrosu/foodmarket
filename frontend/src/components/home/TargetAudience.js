@@ -5,26 +5,29 @@ import {
     Card,
     CardContent
 } from "@material-ui/core"
-import {audience} from "../../data/homepageContent";
+import {useTranslation} from "react-i18next";
+
+const CARD_KEYS = ["retail", "restaurants", "hotels", "wholesale"];
 
 export default function TargetAudience() {
+    const {t} = useTranslation();
     return (
         <>
             <Typography variant="h4" gutterBottom>
-                {audience.title}
+                {t('home.audience.title')}
             </Typography>
 
             <Grid container spacing={3}>
-                {audience.cards.map((item, i) => (
-                    <Grid item xs={12} sm={6} md={3} key={i}>
+                {CARD_KEYS.map((key) => (
+                    <Grid item xs={12} sm={6} md={3} key={key}>
                         <Card>
                             <CardContent>
                                 <Typography variant="h6">
-                                    {item.title}
+                                    {t(`home.audience.cards.${key}.title`)}
                                 </Typography>
 
                                 <Typography color="textSecondary">
-                                    {item.text}
+                                    {t(`home.audience.cards.${key}.text`)}
                                 </Typography>
                             </CardContent>
                         </Card>
