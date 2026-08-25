@@ -6,7 +6,9 @@ import {logout} from "../../store/actions/authActions";
 import {withStyles} from "@material-ui/styles";
 import RightMenu from "./RightMenu";
 import MainMenu from "./MainMenu";
+import LanguageSwitcher from "./LanguageSwitcher";
 import {Link} from "react-router-dom";
+import {isAdmin} from "../../store/selectors/authSelectors";
 
 const styles = theme => ({
     title: {
@@ -22,7 +24,7 @@ const styles = theme => ({
 
 const Navbar = (props) => {
 
-    const {classes, auth, logout, cart} = props;
+    const {classes, auth, logout, cart, userIsAdmin} = props;
     const isAuthenticated = auth.token !== null;
 
     const getProductsCount = () => {
@@ -34,7 +36,7 @@ const Navbar = (props) => {
     return (
         <AppBar position="sticky">
             <Toolbar>
-                <MainMenu isAuthenticated={isAuthenticated}/>
+                <MainMenu isAuthenticated={isAuthenticated} isAdmin={userIsAdmin}/>
                 <img src="/logos/rama-dark.png" alt="Ramaiana" style={{height: 40, marginRight: 12}}/>
                 <Typography variant="h6" className={classes.title}>
                     Ramaiana SRL
@@ -44,6 +46,7 @@ const Navbar = (props) => {
                         <ShoppingCartIcon/>
                     </Badge>
                 </IconButton>}
+                <LanguageSwitcher/>
                 <RightMenu isAuthenticated={isAuthenticated}
                            handleLogout={logout}
                 />
@@ -55,6 +58,7 @@ const Navbar = (props) => {
 const mapStateToProps = state => ({
     auth: state.authReducer,
     cart: state.cartReducer,
+    userIsAdmin: isAdmin(state),
 });
 
 export default connect(mapStateToProps, {

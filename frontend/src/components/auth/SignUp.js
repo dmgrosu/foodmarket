@@ -15,6 +15,8 @@ import {signUpStart} from "../../store/actions/authActions";
 import {CircularProgress, Container, IconButton} from "@material-ui/core";
 import axios from "../../axios-instance";
 import {toast} from "material-react-toastify";
+import {withTranslation} from "react-i18next";
+import {VALIDATION_MESSAGE_KEYS} from "../../i18n/validationCodes";
 
 
 const styles = (theme) => ({
@@ -71,13 +73,11 @@ class SignUp extends Component {
             errors.push({
                 field: 'email',
                 code: 'EMAIL_EMPTY',
-                description: 'Email обязателен!'
             })
         } else if (!emailRegEx.test(email)) {
             errors.push({
                 field: 'email',
                 code: 'EMAIL_INVALID',
-                description: 'Email неправильный!'
             })
         }
         const passRegexp = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/;
@@ -85,19 +85,16 @@ class SignUp extends Component {
             errors.push({
                 field: 'password',
                 code: 'PASSWORD_EMPTY',
-                description: 'Пароль обязателен!'
             })
         } else if (password !== confirmPassword) {
             errors.push({
                 field: 'confirmPassword',
                 code: 'PASSWORD_NOT_MATCH',
-                description: 'Пароли не совпадают!'
             })
         } else if (!passRegexp.test(password)) {
             errors.push({
                 field: 'password',
                 code: 'PASSWORD_NOT_STRONG',
-                description: 'Пароль не достаточно надежный!'
             })
         }
         if (errors.length > 0) {
@@ -135,25 +132,30 @@ class SignUp extends Component {
 
     getClientInfo = () => {
         const {entityFound} = this.state;
+        const {t} = this.props;
         if (!entityFound) {
             return "";
         }
         if (entityFound.errors) {
             return entityFound.errors[0].code;
         } else {
-            return "Found Client: " + entityFound.name + ", with IDNO: " + entityFound.idno;
+            return t('auth.signUp.clientFound', {name: entityFound.name, idno: entityFound.idno});
         }
     }
 
+    // Errors are stored as {field, code} and translated here, at render time, so a language
+    // switch after a failed submit updates the message instead of leaving it frozen in
+    // whatever language was active when validateInput() ran.
     getErrorForField(fieldName) {
         const {errors} = this.state;
+        const {t} = this.props;
         if (errors.length === 0) {
             return false;
         }
         for (let i = 0; i < errors.length; i++) {
             const error = errors[i];
             if (error.field === fieldName) {
-                return error.description;
+                return t(VALIDATION_MESSAGE_KEYS[error.code]);
             }
         }
         return false;
@@ -168,7 +170,7 @@ class SignUp extends Component {
 
     render = () => {
 
-        const {classes, auth} = this.props;
+        const {classes, auth, t} = this.props;
         const {isLoading, token} = auth;
         const {
             firstName, lastName, email, password,
@@ -185,7 +187,7 @@ class SignUp extends Component {
                         <LockOutlinedIcon/>
                     </Avatar>
                     <Typography component="h1" variant="h5" gutterBottom>
-                        {"Регистрация"}
+                        {t('auth.signUp.title')}
                     </Typography>
                     <Grid container spacing={2}>
                         <Grid item xs={10}>
@@ -193,7 +195,7 @@ class SignUp extends Component {
                                 variant="outlined"
                                 fullWidth
                                 id="idno"
-                                label="IDNO"
+                                label={t('auth.fields.idno')}
                                 name="idno"
                                 value={idno}
                                 disabled={searching}
@@ -220,7 +222,7 @@ class SignUp extends Component {
                                 variant="outlined"
                                 fullWidth
                                 id="firstName"
-                                label="Имя"
+                                label={t('auth.fields.firstName')}
                                 autoFocus
                                 value={firstName}
                                 disabled={isLoading}
@@ -232,7 +234,7 @@ class SignUp extends Component {
                                 variant="outlined"
                                 fullWidth
                                 id="lastName"
-                                label="Фамилия"
+                                label={t('auth.fields.lastName')}
                                 name="lastName"
                                 value={lastName}
                                 disabled={isLoading}
@@ -245,7 +247,7 @@ class SignUp extends Component {
                                 required
                                 fullWidth
                                 id="email"
-                                label="Email адрес"
+                                label={t('auth.fields.email')}
                                 name="email"
                                 error={this.getErrorForField("email") !== false}
                                 helperText={this.getErrorForField("email")}
@@ -260,7 +262,7 @@ class SignUp extends Component {
                                 required
                                 fullWidth
                                 name="password"
-                                label="Пароль"
+                                label={t('auth.fields.password')}
                                 type="password"
                                 id="password"
                                 error={this.getErrorForField("password") !== false}
@@ -276,7 +278,7 @@ class SignUp extends Component {
                                 required
                                 fullWidth
                                 name="confirmPassword"
-                                label="Confirm password"
+                                label={t('auth.fields.confirmPassword')}
                                 error={this.getErrorForField("confirmPassword") !== false}
                                 helperText={this.getErrorForField("confirmPassword")}
                                 type="password"
@@ -295,13 +297,13 @@ class SignUp extends Component {
                         className={classes.submit}
                         disabled={isLoading}
                     >
-                        {"Зарегистрироваться"}
+                        {t('auth.signUp.submit')}
                     </Button>
                     {isLoading && <CircularProgress size={24} className={classes.buttonProgress}/>}
                     <Grid container justify="flex-end">
                         <Grid item>
                             <Link to="/signIn" variant="body2">
-                                {"Уже есть аккаунт? Войти"}
+                                {t('auth.signUp.haveAccount')}
                             </Link>
                         </Grid>
                     </Grid>
@@ -318,6 +320,6 @@ const mapStateToProps = state => ({
     auth: state.authReducer
 });
 
-export default connect(mapStateToProps, {
+export default withTranslation()(connect(mapStateToProps, {
     signUpStart
-})(withStyles(styles)(SignUp));
+})(withStyles(styles)(SignUp)));

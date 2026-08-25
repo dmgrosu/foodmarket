@@ -1,7 +1,9 @@
 import React from 'react';
 import {Button, Dialog, DialogActions, DialogTitle} from "@material-ui/core";
+import {useTranslation} from "react-i18next";
 
 const ConfirmDialog = ({isOpen, title, onCancel, onOk}) => {
+    const {t} = useTranslation();
     return (
         <Dialog
             open={isOpen}
@@ -13,12 +15,12 @@ const ConfirmDialog = ({isOpen, title, onCancel, onOk}) => {
                 <Button onClick={onOk}
                         color="primary"
                 >
-                    OK
+                    {t('common.ok')}
                 </Button>
                 <Button onClick={onCancel}
                         autoFocus
                 >
-                    Cancel
+                    {t('common.cancel')}
                 </Button>
             </DialogActions>
         </Dialog>

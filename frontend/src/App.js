@@ -15,6 +15,8 @@ import CssBaseline from "@material-ui/core/CssBaseline";
 import Orders from "./components/orders/Orders";
 import {authCheckState} from "./store/actions/authActions";
 import Cart from "./components/orders/Cart";
+import AdminDashboard from "./components/admin/AdminDashboard";
+import {isAdmin} from "./store/selectors/authSelectors";
 
 const theme = createMuiTheme({
     palette: {
@@ -57,6 +59,12 @@ const App = (props) => {
         );
     }
 
+    if (isAuthenticated && props.userIsAdmin) {
+        routes.push(
+            <Route path='/admin' component={AdminDashboard} key={8}/>,
+        );
+    }
+
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline/>
@@ -73,6 +81,7 @@ const App = (props) => {
 
 const mapStateToProps = state => ({
     auth: state.authReducer,
+    userIsAdmin: isAdmin(state),
 });
 
 export default withRouter(connect(mapStateToProps, {
