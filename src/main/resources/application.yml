@@ -23,3 +23,14 @@ springdoc:
     operations-sorter: method
   api-docs:
     path: /v3/api-docs
+
+mailjet:
+  enabled: ${MAILJET_ENABLED:true}
+  base-url: ${MAILJET_BASE_URL:https://api.mailjet.com}
+  api-key: ${MAILJET_API_KEY:}
+  secret-key: ${MAILJET_SECRET_KEY:}
+  connect-timeout-ms: 5000
+  read-timeout-ms: 10000
+  sender:
+    email: ${MAILJET_SENDER_EMAIL:}
+    name: ${MAILJET_SENDER_NAME:Ramaiana Foodmarket}
