@@ -16,3 +16,13 @@ jwt:
 dataFolderPath: src/test/resources/dataExchange/
 # milliseconds
 dataLoadingDelay: 3000
+mailjet:
+  enabled: false
+  base-url: http://localhost:9000
+  api-key: test-key
+  secret-key: test-secret
+  connect-timeout-ms: 1000
+  read-timeout-ms: 1000
+  sender:
+    email: test@example.com
+    name: Test
