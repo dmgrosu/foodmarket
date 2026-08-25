@@ -5,6 +5,13 @@ server:
   port: 9291
 
 DATASOURCE_URL: jdbc:postgresql://localhost:5432/rama_fm
-DATASOURCE_USERNAME: postgres
-DATASOURCE_PASSWD:
-DATA_FOLDER_PATH: /Users/grosukirill/Documents/ramaiana/
+DATASOURCE_USERNAME: dgrosu
+DATASOURCE_PASSWD: 123456
+DATA_FOLDER_PATH: /home/dgrosu/Downloads/
+mailjet:
+  enabled: false
+  api-key: "ca125df2c7f45eba174a370cdf8441b1"
+  secret-key: "ec199c7b3c3c4142d8ec98ef09b157d8"
+  sender:
+    email: ""
+    name: ""
