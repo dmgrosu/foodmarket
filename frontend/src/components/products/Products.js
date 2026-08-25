@@ -20,6 +20,7 @@ import Grid from "@material-ui/core/Grid";
 import ProductsList from "./ProductsList";
 import {handleError} from "../../store/actions/authActions";
 import {addProductToCart, changeQuantity, selectProduct} from "../../store/actions/cartActions";
+import {withTranslation} from "react-i18next";
 
 const styles = theme => ({
     root: {
@@ -199,7 +200,7 @@ class Products extends Component {
 
     render() {
 
-        const {auth, classes, cart} = this.props;
+        const {auth, classes, cart, t} = this.props;
         const isAuthorized = auth.token !== null;
         const {filter, allStorages, allBrands, products, groups, isFetchingGroups, isFetchingProducts} = this.state;
 
@@ -239,11 +240,11 @@ class Products extends Component {
                         onClose={() => this.handleProductSelect(null)}
                 >
                     <DialogTitle>
-                        Add to cart
+                        {t('products.addToCart.title')}
                     </DialogTitle>
                     <DialogContent>
                         <DialogContentText>
-                            Please input the desired quantity
+                            {t('products.addToCart.prompt')}
                         </DialogContentText>
                         <TextField autoFocus
                                    fullWidth
@@ -257,13 +258,13 @@ class Products extends Component {
                         <Button onClick={this.addToCart}
                                 disabled={cart.isAdding}
                         >
-                            OK
+                            {t('common.ok')}
                         </Button>
                         {cart.isAdding && <CircularProgress size={28} className={classes.buttonProgress}/>}
                         <Button onClick={() => this.handleProductSelect(null)}
                                 disabled={cart.isAdding}
                         >
-                            Cancel
+                            {t('common.cancel')}
                         </Button>
                     </DialogActions>
                 </Dialog>
@@ -277,8 +278,8 @@ const mapStateToProps = state => ({
     cart: state.cartReducer,
 });
 
-export default connect(mapStateToProps, {
+export default withTranslation()(connect(mapStateToProps, {
     addProductToCart,
     selectProduct,
     changeQuantity
-})(withStyles(styles)(Products));
+})(withStyles(styles)(Products)));

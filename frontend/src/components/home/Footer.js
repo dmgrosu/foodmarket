@@ -1,9 +1,10 @@
 import React from "react"
 import { Box, Typography, Container } from "@material-ui/core"
 import {Link} from "react-router-dom";
-import {footerContent} from "../../data/homepageContent";
+import {useTranslation} from "react-i18next";
 
 export default function Footer() {
+    const {t} = useTranslation();
     return (
         <Box bgcolor="#2f3b52" color="white" py={6} mt={8}>
             <Container maxWidth="lg">
@@ -14,14 +15,14 @@ export default function Footer() {
                         style={{ height: 50, marginRight: 16 }}
                     />
                     <Typography variant="h6">
-                        {footerContent.title}
+                        Ramaiana On-line
                     </Typography>
                 </Box>
                 <Typography variant="body2" style={{ marginTop: 8 }}>
-                    {footerContent.subTitle}
+                    {t('home.footer.subTitle')}
                 </Typography>
                 <Typography variant="body2" style={{ marginTop: 16 }}>
-                    Copyright ©
+                    {t('common.copyright')}
                     <Link color="inherit" to="/">
                         Ramaiana SRL
                     </Link>

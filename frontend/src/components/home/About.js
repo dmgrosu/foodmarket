@@ -1,18 +1,21 @@
 import React from "react"
 import {Typography, Paper} from "@material-ui/core"
-import {about} from "../../data/homepageContent";
+import {useTranslation} from "react-i18next";
+
+const PARAGRAPH_KEYS = ["p1", "p2", "p3"];
 
 export default function About() {
+    const {t} = useTranslation();
     return (
         <>
             <Typography variant="h4" gutterBottom>
-                {about.title}
+                {t('home.about.title')}
             </Typography>
 
             <Paper style={{padding: 24}}>
-                {about.paragraphs.map((step) => (
-                    <Typography paragraph>
-                        {step}
+                {PARAGRAPH_KEYS.map((key) => (
+                    <Typography paragraph key={key}>
+                        {t(`home.about.paragraphs.${key}`)}
                     </Typography>
                 ))}
             </Paper>

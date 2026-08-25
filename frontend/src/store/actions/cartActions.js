@@ -1,5 +1,6 @@
 import axios from "../../axios-instance";
 import {handleError} from "./authActions";
+import i18n from "../../i18n";
 
 export const ADD_TO_CART_START = "ADD_TO_CART_START";
 export const ADD_TO_CART_SUCCESS = "ADD_TO_CART_SUCCESS";
@@ -36,7 +37,7 @@ export const addProductToCart = (productId, orderId, quantity) => {
                 dispatch({
                     type: ADD_TO_CART_FAIL,
                     payload: {
-                        error: err.response ? err.response.status + ": " + err.response.data.message || err.response.statusText : "Unknown error"
+                        error: err.response ? err.response.status + ": " + err.response.data.message || err.response.statusText : i18n.t('common.unknownError')
                     }
                 })
                 handleError(err);

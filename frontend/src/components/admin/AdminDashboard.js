@@ -3,6 +3,7 @@ import {Container, Typography} from "@material-ui/core";
 import {makeStyles} from "@material-ui/styles";
 import {connect} from "react-redux";
 import {Redirect} from "react-router-dom";
+import {useTranslation} from "react-i18next";
 import AdminClients from "./AdminClients";
 import {isAdmin} from "../../store/selectors/authSelectors";
 
@@ -19,6 +20,7 @@ const useStyles = makeStyles(theme => ({
 const AdminDashboard = (props) => {
 
     const classes = useStyles();
+    const {t} = useTranslation();
 
     // Belt-and-braces: App only mounts this route for admins, and the backend rejects the
     // request anyway, but a direct URL should not render an empty shell either.
@@ -28,7 +30,7 @@ const AdminDashboard = (props) => {
 
     return (
         <Container maxWidth="lg" className={classes.root}>
-            <Typography variant="h5" className={classes.title}>Клиенты</Typography>
+            <Typography variant="h5" className={classes.title}>{t('admin.title')}</Typography>
             <AdminClients/>
         </Container>
     );

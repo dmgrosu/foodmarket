@@ -12,6 +12,8 @@ import {withStyles} from "@material-ui/styles";
 import {connect} from "react-redux";
 import {loginStart} from "../../store/actions/authActions";
 import {CircularProgress, Container} from "@material-ui/core";
+import {withTranslation} from "react-i18next";
+import {VALIDATION_MESSAGE_KEYS} from "../../i18n/validationCodes";
 
 
 const styles = (theme) => ({
@@ -54,14 +56,12 @@ class SignIn extends Component {
             errors.push({
                 field: 'email',
                 code: 'EMAIL_EMPTY',
-                description: 'Email required!'
             })
         }
         if (!password) {
             errors.push({
                 field: 'password',
                 code: 'PASSWORD_EMPTY',
-                description: 'Password required!'
             })
         }
         if (errors.length > 0) {
@@ -73,15 +73,19 @@ class SignIn extends Component {
         return true;
     }
 
+    // Errors are stored as {field, code} and translated here, at render time, so a language
+    // switch after a failed submit updates the message instead of leaving it frozen in
+    // whatever language was active when validateInput() ran.
     getErrorForField(fieldName) {
         const {errors} = this.state;
+        const {t} = this.props;
         if (errors.length === 0) {
             return false;
         }
         for (let i = 0; i < errors.length; i++) {
             const error = errors[i];
             if (error.field === fieldName) {
-                return error.description;
+                return t(VALIDATION_MESSAGE_KEYS[error.code]);
             }
         }
         return false;
@@ -103,7 +107,7 @@ class SignIn extends Component {
 
     render() {
 
-        const {classes, auth} = this.props;
+        const {classes, auth, t} = this.props;
         const {isLoading, token} = auth;
 
         return (
@@ -116,7 +120,7 @@ class SignIn extends Component {
                         <LockOutlinedIcon/>
                     </Avatar>
                     <Typography component="h1" variant="h5">
-                        Войти
+                        {t('auth.signIn.title')}
                     </Typography>
                     <TextField
                         variant="outlined"
@@ -124,7 +128,7 @@ class SignIn extends Component {
                         required
                         fullWidth
                         id="email"
-                        label="Email адрес"
+                        label={t('auth.fields.email')}
                         name="email"
                         autoComplete="email"
                         autoFocus
@@ -139,7 +143,7 @@ class SignIn extends Component {
                         required
                         fullWidth
                         name="password"
-                        label="Пароль"
+                        label={t('auth.fields.password')}
                         type="password"
                         id="password"
                         disabled={isLoading}
@@ -156,7 +160,7 @@ class SignIn extends Component {
                         className={classes.submit}
                         onClick={this.requestLogin}
                     >
-                        {"Вход"}
+                        {t('auth.signIn.submit')}
                     </Button>
                     {isLoading && <CircularProgress size={24} className={classes.buttonProgress}/>}
                     <Grid container>
@@ -167,7 +171,7 @@ class SignIn extends Component {
                         </Grid>
                         <Grid item xs={6}>
                             <Link to="/signUp">
-                                {"Нет аккаунта? Зарегистрироваться"}
+                                {t('auth.signIn.noAccount')}
                             </Link>
                         </Grid>
                     </Grid>
@@ -185,6 +189,6 @@ const mapStateToProps = state => ({
     auth: state.authReducer,
 });
 
-export default connect(mapStateToProps, {
+export default withTranslation()(connect(mapStateToProps, {
     loginStart
-})(withStyles(styles)(SignIn));
+})(withStyles(styles)(SignIn)));

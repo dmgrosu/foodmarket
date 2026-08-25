@@ -14,6 +14,7 @@ import {
 } from "@material-ui/core";
 import {makeStyles} from "@material-ui/styles";
 import {handleError} from "../../store/actions/authActions";
+import {useTranslation} from "react-i18next";
 
 const useStyles = makeStyles(theme => ({
     stateCell: {
@@ -47,6 +48,7 @@ const AdminSearchTable = (props) => {
 
     const {columns, fetchPage, filters, defaultSortColumn, toolbar, emptyMessage} = props;
     const classes = useStyles();
+    const {t} = useTranslation();
 
     const [rows, setRows] = useState([]);
     const [totalElements, setTotalElements] = useState(0);
@@ -127,7 +129,7 @@ const AdminSearchTable = (props) => {
             return (
                 <TableRow>
                     <TableCell colSpan={columns.length} className={classes.stateCell}>
-                        <Typography color="textSecondary">{emptyMessage || "Ничего не найдено"}</Typography>
+                        <Typography color="textSecondary">{emptyMessage || t('admin.table.noResults')}</Typography>
                     </TableCell>
                 </TableRow>
             );
@@ -181,7 +183,8 @@ const AdminSearchTable = (props) => {
                     setPageSize(parseInt(event.target.value, 10));
                     setPageNo(0);
                 }}
-                labelRowsPerPage="Строк на странице:"
+                labelRowsPerPage={t('admin.table.rowsPerPage')}
+                labelDisplayedRows={({from, to, count}) => t('admin.table.displayedRows', {from, to, count})}
             />
         </Paper>
     );

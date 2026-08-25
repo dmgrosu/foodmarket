@@ -6,6 +6,7 @@ import {logout} from "../../store/actions/authActions";
 import {withStyles} from "@material-ui/styles";
 import RightMenu from "./RightMenu";
 import MainMenu from "./MainMenu";
+import LanguageSwitcher from "./LanguageSwitcher";
 import {Link} from "react-router-dom";
 import {isAdmin} from "../../store/selectors/authSelectors";
 
@@ -45,6 +46,7 @@ const Navbar = (props) => {
                         <ShoppingCartIcon/>
                     </Badge>
                 </IconButton>}
+                <LanguageSwitcher/>
                 <RightMenu isAuthenticated={isAuthenticated}
                            handleLogout={logout}
                 />

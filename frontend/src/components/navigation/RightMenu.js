@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import {Button, Dialog, DialogActions, DialogTitle, IconButton, Menu, MenuItem} from "@material-ui/core";
 import {Link} from "react-router-dom";
 import {AccountCircle} from "@material-ui/icons";
+import {withTranslation} from "react-i18next";
 
 class RightMenu extends Component {
 
@@ -30,7 +31,7 @@ class RightMenu extends Component {
     render() {
 
         const {open, dialogOpen} = this.state;
-        const {isAuthenticated} = this.props;
+        const {isAuthenticated, t} = this.props;
 
         return (
             <div>
@@ -50,23 +51,23 @@ class RightMenu extends Component {
                       }}
                       getContentAnchorEl={null}
                 >
-                    {isAuthenticated && <MenuItem component={Link} to="/profile">Профиль</MenuItem>}
-                    {isAuthenticated && <MenuItem onClick={this.toggleDialog}>Выйти из системы</MenuItem>}
-                    {!isAuthenticated && <MenuItem component={Link} to="/signIn">Войти</MenuItem>}
-                    {!isAuthenticated && <MenuItem component={Link} to="/signUp">Зарегистрироваться</MenuItem>}
+                    {isAuthenticated && <MenuItem component={Link} to="/profile">{t('nav.profile')}</MenuItem>}
+                    {isAuthenticated && <MenuItem onClick={this.toggleDialog}>{t('nav.logout')}</MenuItem>}
+                    {!isAuthenticated && <MenuItem component={Link} to="/signIn">{t('nav.signIn')}</MenuItem>}
+                    {!isAuthenticated && <MenuItem component={Link} to="/signUp">{t('nav.signUp')}</MenuItem>}
                 </Menu>
                 <Dialog
                     open={dialogOpen}
                     onClose={this.toggleDialog}
                     aria-labelledby="alert-dialog-title"
                 >
-                    <DialogTitle id="alert-dialog-title">{"Do you want to logout?"}</DialogTitle>
+                    <DialogTitle id="alert-dialog-title">{t('nav.logoutConfirm')}</DialogTitle>
                     <DialogActions>
                         <Button onClick={this.handleLogout} color="primary">
-                            OK
+                            {t('common.ok')}
                         </Button>
                         <Button onClick={this.toggleDialog} color="primary" autoFocus>
-                            Cancel
+                            {t('common.cancel')}
                         </Button>
                     </DialogActions>
                 </Dialog>
@@ -76,4 +77,4 @@ class RightMenu extends Component {
     }
 }
 
-export default RightMenu;
+export default withTranslation()(RightMenu);

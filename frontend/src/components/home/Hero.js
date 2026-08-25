@@ -1,9 +1,10 @@
 import React from "react"
 import { Grid, Typography, Button, Box, Container } from "@material-ui/core"
 import {Link} from "react-router-dom";
-import {heroContent} from "../../data/homepageContent";
+import {useTranslation} from "react-i18next";
 
 export default function Hero() {
+    const {t} = useTranslation();
     return (
         <Box py={10}>
             <Container maxWidth="lg">
@@ -11,11 +12,11 @@ export default function Hero() {
 
                     <Grid item xs={12} md={6}>
                         <Typography variant="h3" gutterBottom>
-                            {heroContent.title}
+                            {t('home.hero.title')}
                         </Typography>
 
                         <Typography variant="h6" color="textSecondary">
-                            {heroContent.description}
+                            {t('home.hero.description')}
                         </Typography>
 
                         <Box mt={4}>
@@ -26,7 +27,7 @@ export default function Hero() {
                                 style={{ marginRight: 16 }}
                                 component={Link} to="/signIn"
                             >
-                                Войти
+                                {t('home.hero.login')}
                             </Button>
 
                             <Button
@@ -35,7 +36,7 @@ export default function Hero() {
                                 size="large"
                                 component={Link} to="/signUp"
                             >
-                                Регистрация
+                                {t('home.hero.register')}
                             </Button>
                         </Box>
                     </Grid>
