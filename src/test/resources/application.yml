@@ -30,3 +30,4 @@ registration:
   confirmation-page-url: http://localhost:3000/confirmEmail
   confirmation-link-validity-hours: 24
   resend-cooldown-seconds: 60
+  login-page-url: http://localhost:3000/signIn

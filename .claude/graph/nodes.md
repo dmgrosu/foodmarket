@@ -11,22 +11,37 @@ Schema: `| id | kind | dir | api | note |` — `dir` omits the prefix `src/main/
 | AbstractRegistrationEndpointTest | service | src/test/java/md/ramaiana/foodmarket/domain/auth/presentation/controller | uniqueEmail();registerAndCaptureToken(String);captureEmailedToken();latestTokenFor(String);overwriteToken() | test; shared fixture for the three registration endpoints, spies EmailSendUseCase to capture the emailed token |
 | AccessVoter | abstract | shared/util/abstraction/voter | getCurrentUser()->AppUserEntity;assertUserIsAuthenticated();assertUserIsAdmin() | assertUserIsAdmin() checks Role.ADMIN membership, throws ForbiddenException |
 | AccessVoterTest | abstract | src/test/java/md/ramaiana/foodmarket/shared/util/abstraction/voter | 5 tests: assertUserIsAdmin (admin-pass, non-admin-reject, anonymous-reject, no-auth-reject), assertUserIsAuthenticated (pass) | test |
+| AccountActivatedMailUseCase | usecase | domain/auth/core/usecase | execute(AppUserEntity)->boolean | Propagation.NEVER; swallows MailException, logs at ERROR, returns whether it sent |
+| AccountActivatedMailUseCaseTest | usecase | src/test/java/md/ramaiana/foodmarket/domain/auth/core/usecase | 2 tests: sends in the recipient's own language, swallows MailException | test |
+| AccountActivatedVariables | request | domain/email/core/request | loginUrl:String;language:Language |  |
 | AddProductToOrderRequest | request | domain/order/core/request | orderId:int;storageId:Integer;productId:Integer;priceType:PriceType;quantity:float;clientId:Integer |  |
 | AddressType | enum | shared/enums | LEGAL;POINT;OFFICE |  |
+| AdminUserActivateTest | controller | src/test/java/md/ramaiana/foodmarket/domain/auth/presentation/controller | 5 tests: activates a CONFIRMED user, rejects every other state, forbids non-admin, 404s an unknown id, commits before the activation email is sent | test |
+| AdminUserSearchTest | controller | src/test/java/md/ramaiana/foodmarket/domain/auth/presentation/controller | 5 tests: admin gets a page, forbids non-admin, rejects anonymous, filters by state, rejects an unknown sort column | test |
 | Advantages | fe-component | frontend/src/components/home | renders advantage cards grid |  |
 | App | fe-component | frontend/src | App |  |
 | App.test | fe-component | frontend/src |  | DEVIATION: stale CRA smoke test asserting "learn react" |
+| AppUserActivateRequestHandler | service | domain/auth/core/handler | handle(Integer)->AppUserResponse;persist(Integer)->AppUserEntity | resolves clientName via ClientRepository itself, since the use case returns only the entity |
+| AppUserActivateUseCase | usecase | domain/auth/core/usecase | executeTransactionalEffect(Integer)->AppUserEntity;executeSideEffects(AppUserEntity)->boolean | no preExecute phase; only CONFIRMED->ACTIVE is allowed, else BadRequestException |
+| AppUserActivateUseCaseTest | usecase | src/test/java/md/ramaiana/foodmarket/domain/auth/core/usecase | 6 tests: activates a CONFIRMED user, rejects every other state, delegates side effects to the mail use case | test |
 | AppUserDetailsService | service | domain/auth/presentation/service | loadUserByUsername(String)->UserDetails |  |
 | AppUserEntity | entity | domain/auth/data | id:Integer;email:String;passwd:String;createdAt:Instant;state:UserState;language:Language;userRoles:Set;client:AggregateReference;addRole();getRoles();hasClient();withState();withClient();isActive() | entity implements Spring Security UserDetails |
 | AppUserFindByEmailUseCase | usecase | domain/auth/core/usecase | execute(String)->AppUserEntity |  |
 | AppUserFindByIdUseCase | usecase | domain/auth/core/usecase | execute(Integer)->AppUserEntity |  |
 | AppUserRepository | repo | domain/auth/data | findByEmail |  |
+| AppUserRepositoryCustom | abstract | domain/auth/data | search(String,UserState,Pageable)->Page<AppUserEntity> |  |
+| AppUserRepositoryImpl | repo | domain/auth/data | search(String,UserState,Pageable)->Page<AppUserEntity> | JdbcAggregateOperations paging fragment; the pattern the retired ClientRepositoryImpl used |
+| AppUserRepositoryTest | repo | src/test/java/md/ramaiana/foodmarket/domain/auth/data | 3 tests: pages and sorts, filters by email and state, loads userRoles through the paged search | test |
+| AppUserResponse | response | domain/auth/core/response | id:Integer;email:String;state:UserState;language:Language;clientId:Integer;clientName:String;createdAt:Instant | clientName is resolved by the caller in a batch, never per row |
+| AppUserSearchCriteria | request | domain/auth/core/usecase | emailLike:String;state:UserState;pageNo:int;pageSize:int;sortColumn:String;sortDirection:Sort.Direction |  |
+| AppUserSearchUseCase | usecase | domain/auth/core/usecase | execute(AppUserSearchCriteria)->PagedResponse<AppUserResponse> | resolves every linked client's name in one findAllById call |
+| AppUserSearchUseCaseTest | usecase | src/test/java/md/ramaiana/foodmarket/domain/auth/core/usecase | 3 tests: rejects an unknown sort column, resolves client names in one batched call, skips the lookup when no row has a client | test |
 | AuthAccessVoter | voter | domain/auth/presentation/voter | assertCanLogin();assertCanRegister();assertCanConfirmEmail();assertCanResendConfirmation() | DEVIATION: all four asserts are empty no-ops |
 | AuthConfirmEmailTest | controller | src/test/java/md/ramaiana/foodmarket/domain/auth/presentation/controller | 7 tests: confirms pending, idempotent replay, unknown token, expired token, blank token, missing token, no-auth-required | test |
-| AuthController | controller | domain/auth/presentation/controller | login(LoginRequest)->AuthResponse;register(RegisterRequest)->RegistrationResponse;confirmEmail(RegistrationConfirmRequest)->RegistrationConfirmResponse;resendConfirmation(RegistrationConfirmationResendRequest)->RegistrationResponse | register/confirmEmail/resendConfirmation delegate to request handlers, login still calls its use case directly |
+| AuthController | controller | domain/auth/presentation/controller | login(LoginRequest)->AuthResponse;register(RegisterRequest)->RegistrationResponse;confirmEmail(RegistrationConfirmRequest)->RegistrationConfirmResponse;resendConfirmation(RegistrationConfirmationResendRequest)->RegistrationResponse | register/resendConfirmation delegate to request handlers; login and confirmEmail call their use cases directly (neither has an external-call side effect) |
 | AuthLoginTest | controller | src/test/java/md/ramaiana/foodmarket/domain/auth/presentation/controller | 5 tests: token for active user, forbidden while pending, forbidden while awaiting approval, wrong password, invalid email | test |
 | AuthLoginUseCase | usecase | domain/auth/core/usecase | execute(LoginRequest)->AuthResponse |  |
-| AuthRegisterRequestHandler | service | domain/auth/core/handler | handle(RegisterRequest)->RegistrationResponse;persist(RegisterRequest)->PendingRegistration | persist() commits before handle() triggers the confirmation email |
+| AuthRegisterRequestHandler | service | domain/auth/core/handler | handle(RegisterRequest)->RegistrationResponse;persist(RegisterRequest)->TransactionalEffectResult | persist() commits before handle() triggers the confirmation email |
 | AuthRegisterUseCase | usecase | domain/auth/core/usecase | preExecute(RegisterRequest);executeTransactionalEffect(RegisterRequest)->PendingRegistration;executeSideEffects(PendingRegistration)->boolean | three-phase, sequenced by AuthRegisterRequestHandler |
 | AuthRegisterUseCaseTest | usecase | src/test/java/md/ramaiana/foodmarket/domain/auth/core/usecase | 6 tests: preExecute duplicate/free email, transactional effect (no/zero/positive clientId), side effects delegate | test |
 | AuthRegistrationTest | controller | src/test/java/md/ramaiana/foodmarket/domain/auth/presentation/controller | 8 tests: registers pending user, stores only a token hash, commits before emailing, keeps user when mail fails, duplicate email, invalid email, blank password, no-auth-required | test |
@@ -51,16 +66,11 @@ Schema: `| id | kind | dir | api | note |` — `dir` omits the prefix `src/main/
 | ClientController | controller | domain/client/presentation/controller | findByIdno(String)->ClientResponse |  |
 | ClientEntity | entity | domain/client/data | id:Integer;name:String;idno:String;email:String;createdAt:Instant;deletedAt:Instant;addresses:Set;phones:Set |  |
 | ClientFindByIdUseCase | usecase | domain/client/core/usecase | execute(AggregateReference)->ClientEntity | returns entity not DTO, unlike its sibling |
+| ClientFindByIdnoUseCase | usecase | domain/client/core/usecase | execute(String)->ClientResponse | replaces ClientSearchUseCase now that /client/search is retired |
+| ClientFindByIdnoUseCaseTest | usecase | src/test/java/md/ramaiana/foodmarket/domain/client/core/usecase | 2 tests: found, not-found -> NotFoundException | test |
 | ClientPhoneEntity | entity | domain/client/data | number:String;name:String | DEVIATION: no @Id; embedded child of ClientEntity |
 | ClientRepository | repo | domain/client/data | findByIdnoAndDeletedAtIsNull |  |
-| ClientRepositoryCustom | repo | domain/client/data | search(String,String,Pageable)->Page<ClientEntity> |  |
-| ClientRepositoryImpl | repo | domain/client/data | search(String,String,Pageable)->Page<ClientEntity> | same criteria-query pattern as BrandRepositoryImpl; aggregate path also loads addresses/phones |
-| ClientRepositoryTest | repo | src/test/java/md/ramaiana/foodmarket/domain/client/data | 3 tests: page+sort, filter by name and idno, child collections loaded | test |
 | ClientResponse | response | domain/client/core/response | id:Integer;name:String;idno:String |  |
-| ClientSearchCriteria | request | domain/client/core/usecase | nameLike:String;idno:String;pageNo:int;pageSize:int;sortColumn:String;sortDirection:Sort.Direction |  |
-| ClientSearchSecurityTest | config | src/test/java/md/ramaiana/foodmarket/config | 3 tests: anonymous rejected, non-admin rejected, admin reaches the voter | test |
-| ClientSearchUseCase | usecase | domain/client/core/usecase | execute(ClientSearchCriteria)->PagedResponse<ClientResponse>;executeByIdno(String)->ClientResponse | DEVIATION: two public methods; executeByIdno wraps execute so the not-found rule stays out of the controller |
-| ClientSearchUseCaseTest | usecase | src/test/java/md/ramaiana/foodmarket/domain/client/core/usecase | 4 tests: filters+paging, sort whitelist, executeByIdno found and not-found | test |
 | ClientsDataDto | dto | shared/dataexchange/dto | clients:List<ErpClientDto> |  |
 | ConfirmDialog | fe-component | frontend/src/components | ConfirmDialog |  |
 | Contacts | fe-component | frontend/src/components/home | renders contact details and CTA button |  |
@@ -195,6 +205,8 @@ Schema: `| id | kind | dir | api | note |` — `dir` omits the prefix `src/main/
 | UnauthorizedException | exception | shared/exception/http |  |  |
 | UpdateOrderRequest | request | domain/order/core/request | orderId:Integer;productId:Integer;quantity:float |  |
 | UseCase | annotation | shared/annotation |  | @Component meta-annotation marking use-case beans |
+| UserAccessVoter | voter | domain/auth/presentation/voter | assertCanSearch();assertCanActivate() | both delegate to assertUserIsAdmin() |
+| UserController | controller | domain/auth/presentation/controller | search(...)->PagedResponse<AppUserResponse>;activate(Integer)->AppUserResponse | admin-only |
 | UserRoleRef | entity | domain/auth/data | role:Role | DEVIATION: no @Id |
 | UserState | enum | shared/enums | PENDING_CONFIRMATION;CONFIRMED;ACTIVE;INACTIVE;SUSPENDED |  |
 | authActions | fe-action | frontend/src/store/actions | LOGIN_START;LOGIN_SUCCESS;LOGIN_FAIL;LOGOUT;loginStart;loginSuccess;signUpStart;checkAuthTimeout;authCheckState;logout;handleError |  |
