@@ -1,0 +1,22 @@
+server:
+  port: your-port
+
+DATASOURCE_URL: your-postgres-url
+DATASOURCE_USERNAME: your-postgres-user
+DATASOURCE_PASSWD: your-postgres-password
+
+DATA_FOLDER_PATH: your-data-folder-path
+
+dataLoadingDelay: 60000
+
+mailjet:
+  enabled: false
+  api-key: api-key
+  secret-key: secret
+  sender:
+    email:
+    name:
+
+registration:
+  confirmation-page-url: http://localhost:3000/confirmEmail
+  resend-cooldown-seconds: 0
