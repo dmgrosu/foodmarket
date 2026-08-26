@@ -18,9 +18,12 @@ import md.ramaiana.foodmarket.domain.email.core.request.EmailRecipient;
 import md.ramaiana.foodmarket.domain.email.core.request.EmailTemplateVariables;
 import md.ramaiana.foodmarket.domain.email.core.response.EmailSendResponse;
 import md.ramaiana.foodmarket.shared.enums.EmailTemplate;
+import md.ramaiana.foodmarket.shared.enums.Language;
 import okhttp3.OkHttpClient;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 
@@ -31,6 +34,7 @@ import java.time.Duration;
 @Slf4j
 @Component
 @EnableConfigurationProperties(MailjetProperties.class)
+@Transactional(propagation = Propagation.NEVER)
 public class MailjetAdapter {
 
     private static final String DISABLED_MESSAGE_UUID = "disabled";
@@ -55,12 +59,17 @@ public class MailjetAdapter {
     @NonNull
     public EmailSendResponse send(@NonNull EmailRecipient recipient, @NonNull EmailTemplateVariables variables) {
         EmailTemplate template = variables.template();
-        long templateId = Long.parseLong(template.getId());
+        Language language = variables.language();
+        long templateId = Long.parseLong(template.getId(language));
 
         // If Mailjet is disabled (local dev, CI), log and return synthetic success
         if (!properties.enabled()) {
-            log.info("Mailjet disabled - skipping template {} (id {}), recipient {}",
-                template, templateId, recipient.email());
+            // The variables are logged here on purpose: only the hash of a confirmation token is
+            // persisted, so with sending disabled the magic link would otherwise be unrecoverable
+            // and no local registration could ever be completed. This branch runs only when
+            // mailjet.enabled=false, i.e. local dev and CI — never where real tokens are issued.
+            log.info("Mailjet disabled - skipping template {}/{} (id {}), recipient {}, variables {}",
+                template, language, templateId, recipient.email(), variables.variables());
             return new EmailSendResponse(DISABLED_MESSAGE_UUID, recipient.email());
         }
 
@@ -72,7 +81,7 @@ public class MailjetAdapter {
             .variables(variables.variables())
             .build();
 
-        log.info("Sending email via Mailjet - template {}, id {}", template, templateId);
+        log.info("Sending email via Mailjet - template {}/{}, id {}", template, language, templateId);
         SendEmailsResponse response;
         try {
             response = SendEmailsRequest.builder().message(message).build().sendWith(client);

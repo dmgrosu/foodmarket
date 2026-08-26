@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.NonNull;
 import md.ramaiana.foodmarket.domain.client.data.ClientEntity;
+import md.ramaiana.foodmarket.shared.enums.Language;
 import md.ramaiana.foodmarket.shared.enums.Role;
 import md.ramaiana.foodmarket.shared.enums.UserState;
 import org.springframework.data.annotation.Id;
@@ -35,6 +36,8 @@ public class AppUserEntity implements UserDetails {
   private final Instant createdAt;
   @NonNull
   private final UserState state;
+  @NonNull
+  private final Language language;
   @MappedCollection(idColumn = "user_id")
   private final Set<UserRoleRef> userRoles;
   @Column("client_id")
@@ -42,19 +45,22 @@ public class AppUserEntity implements UserDetails {
 
   @PersistenceCreator
   public AppUserEntity(Integer id, @NonNull String email, @NonNull String passwd, @NonNull Instant createdAt,
-                       @NonNull UserState state, @NonNull Set<UserRoleRef> userRoles,
+                       @NonNull UserState state, @NonNull Language language,
+                       @NonNull Set<UserRoleRef> userRoles,
                        AggregateReference<ClientEntity, Integer> client) {
     this.id = id;
     this.email = email;
     this.passwd = passwd;
     this.createdAt = createdAt;
     this.state = state;
+    this.language = language;
     this.userRoles = userRoles;
     this.client = client;
   }
 
-  public AppUserEntity(@NonNull String email, @NonNull String passwd, @NonNull UserState state) {
-    this(null, email, passwd, Instant.now(), state, new HashSet<>(), null);
+  public AppUserEntity(@NonNull String email, @NonNull String passwd, @NonNull UserState state,
+                       @NonNull Language language) {
+    this(null, email, passwd, Instant.now(), state, language, new HashSet<>(), null);
   }
 
   public void addRole(@NonNull Role role) {
@@ -67,6 +73,22 @@ public class AppUserEntity implements UserDetails {
 
   public boolean hasClient() {
     return client != null;
+  }
+
+  /**
+   * Copy of this user with a new state.
+   */
+  @NonNull
+  public AppUserEntity withState(@NonNull UserState newState) {
+    return new AppUserEntity(id, email, passwd, createdAt, newState, language, userRoles, client);
+  }
+
+  /**
+   * Copy of this user with a client attached.
+   */
+  @NonNull
+  public AppUserEntity withClient(@NonNull AggregateReference<ClientEntity, Integer> newClient) {
+    return new AppUserEntity(id, email, passwd, createdAt, state, language, userRoles, newClient);
   }
 
   @Override
@@ -86,21 +108,6 @@ public class AppUserEntity implements UserDetails {
   @NonNull
   public String getUsername() {
     return email;
-  }
-
-  @Override
-  public boolean isAccountNonExpired() {
-    return true;
-  }
-
-  @Override
-  public boolean isAccountNonLocked() {
-    return true;
-  }
-
-  @Override
-  public boolean isCredentialsNonExpired() {
-    return true;
   }
 
   @Override

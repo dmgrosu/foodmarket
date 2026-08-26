@@ -10,27 +10,102 @@ domain/<name>/data                                entities + repositories
 domain/<name>/presentation/{controller,voter}     HTTP + authorization
 ```
 
-`price` has only `core/response` + `data` (value-object domain, no HTTP). `auth` adds a fourth sub-package `presentation/service` for the Spring Security `UserDetailsService` SPI adapter. No `core/adapter` package exists in any domain.
+`price` has only `core/response` + `data` (value-object domain, no HTTP). `auth` adds a fourth sub-package `presentation/service` for the Spring Security `UserDetailsService` SPI adapter, and a fifth `core/handler` for `RequestHandler`s (see below). No `core/adapter` package exists in any domain.
 
 Non-domain code: `config/` (4 classes), `shared/{annotation,dataexchange,enums,exception/http,schedule,util}`.
 
 ## Naming
 
-Suffixes are load-bearing: `*Controller`, `*AccessVoter`, `*UseCase`, `*Entity`, `*Repository`, `*Request`, `*Response`, `Erp*Dto`.
-Use cases are **noun-first**: `OrderAddProductUseCase`, `ProductFindByErpCodeUseCase` — not `AddProductToOrderUseCase`.
+Suffixes are load-bearing: `*Controller`, `*AccessVoter`, `*UseCase`, `*RequestHandler`, `*Entity`, `*Repository`, `*Request`, `*Response`, `Erp*Dto`.
+
+Use cases are **noun-first, verb-last** — `<Domain|Noun><Verb>UseCase`:
+`OrderAddProductUseCase`, `ProductFindByErpCodeUseCase`, `RegistrationConfirmUseCase`,
+`RegistrationTokenIssueUseCase` — never `AddProductToOrderUseCase` or `AuthConfirmRegistrationUseCase`
+(verb stranded in the middle). Pick the noun the use case actually operates on, so it lines up with the
+entity/repository/table it touches: `RegistrationTokenIssueUseCase` writes `RegistrationTokenEntity`
+into `registration_token`. Request handlers and their request/response DTOs take the same noun as the
+use case they front (`RegistrationConfirmRequestHandler`, `RegistrationConfirmRequest`).
+
+Names must say what the thing is without a comment. Config properties in particular: prefer
+`confirmationLinkValidityHours` over `tokenTtlHours`, and never reuse one name for two things —
+`confirmationPageUrl` (the page, from config) and `confirmationUrl` (that page plus the token) are
+deliberately distinct.
+
+Values passed between the phases of a three-phase use case are `record`s **nested inside the use case
+that produces them**, named after the phase — e.g.
+`RegistrationTokenIssueUseCase.TransactionalEffectResult`. They are internal plumbing, never bound
+from or to HTTP, so they do not live in `core/request` or `core/response`.
 
 ## UseCase shape
 
 `@UseCase` (a `@Component` meta-annotation at `shared/annotation/UseCase.java`) + `@RequiredArgsConstructor`, all fields `final`, **one public `execute(...)` method**.
 `@Transactional(readOnly = true)` for reads, `@Transactional(rollbackFor = Exception.class)` for writes.
 
+**Exception — a use case that combines a database write with a call to an external system** (email, a
+third-party API) does not get a single `execute()`. It splits into three phases and is sequenced by a
+`RequestHandler` (below), never called directly by a controller:
+
+- `preExecute(...)` — validation that can fail before any transaction is held. No `@Transactional`.
+- `executeTransactionalEffect(...)` — the database write. `@Transactional(propagation = Propagation.MANDATORY)`:
+  it refuses to run without a caller-provided transaction, so it can never quietly open its own.
+- `executeSideEffects(...)` — the external call, run only after the write has committed.
+  `@Transactional(propagation = Propagation.NEVER)`: it **throws** if a transaction is active, which is
+  what actually enforces "never call an external system inside a transaction" — see
+  `domain/auth/core/usecase/AuthRegisterUseCase.java` and its sibling `RegistrationConfirmationResendUseCase`.
+  `MailjetAdapter` carries the same `Propagation.NEVER` at the class level for the same reason.
+
+A use case that is *only* a database write still gets a single `execute()`. A use case that is *only* an
+external call (e.g. `RegistrationConfirmationMailUseCase`) also gets a single `execute()`, annotated
+`Propagation.NEVER`, and is called directly from `executeSideEffects` — it does not need its own handler.
+
+## RequestHandler shape
+
+`@RequestHandler` (a `@Component` meta-annotation at `shared/annotation/RequestHandler.java`, identical
+in shape to `@UseCase`) + `@RequiredArgsConstructor`. Exists only for endpoints backed by a three-phase
+use case; a use case with a single `execute()` is still called directly from the controller.
+
+```java
+@RequestHandler
+@RequiredArgsConstructor
+public class XRequestHandler {
+
+  // Use cases
+  private final XUseCase xUseCase;
+
+  // Proxies
+  @Lazy @Autowired private XRequestHandler thisProxy;
+
+  @NonNull
+  public XResponse handle(@NonNull XRequest request) {
+    xUseCase.preExecute(request);
+    Effect effect = thisProxy.persist(request);           // tx opens AND COMMITS here
+    xUseCase.executeSideEffects(effect);                   // runs only after that commit
+    return new XResponse(effect);
+  }
+
+  @NonNull
+  @Transactional(readOnly = false, rollbackFor = Exception.class)
+  protected Effect persist(@NonNull XRequest request) {
+    return xUseCase.executeTransactionalEffect(request);
+  }
+}
+```
+
+**Only a genuine phase split earns a handler.** With no external call there is nothing to sequence, so the use case keeps a single self-managing `@Transactional(rollbackFor = Exception.class) execute(...)` and the controller calls it directly (`RegistrationConfirmUseCase`). A handler that only delegates adds a layer and removes the signal that the layer exists to carry.
+
+`thisProxy` (`@Lazy @Autowired` on one line, to break the self-reference cycle) lives on the **handler**,
+never on the use case. `handle()` must call `thisProxy.persist(...)`, not `persist(...)` directly — a
+plain self-invocation bypasses the Spring AOP proxy, so no transaction would actually open and the split
+would compile without doing anything. `persist()` is `protected`, not `public`: CGLIB can advise it, and
+it has no reason to be part of the class's public surface.
+
 ## Controller shape
 
-`@RestController @RequestMapping("/<domain-singular>") @RequiredArgsConstructor`. The voter field is always named exactly `accessVoter`. Fields are grouped under `// Access voters` and `// Use cases` comments. **Every handler body is exactly two lines:**
+`@RestController @RequestMapping("/<domain-singular>") @RequiredArgsConstructor`. The voter field is always named exactly `accessVoter`. Fields are grouped under `// Access voters`, `// Use cases`, and (where applicable) `// Request handlers` comments. **Every handler body is exactly two lines:**
 
 ```java
 accessVoter.assertCanX();
-return xUseCase.execute(...);
+return xUseCase.execute(...);          // or xRequestHandler.handle(...)
 ```
 
 Paths are verb-style camelCase (`/getAll`, `/addProduct`, `/getOrdersByPeriod`), not REST-resource style. Follow the existing style rather than "fixing" it piecemeal.
@@ -56,6 +131,20 @@ Interfaces extending `CrudRepository<E,Integer>` with derived query names, or `@
 Newer domains (`brand`, `storage`, `price`, `product`) use **`record`s** with an entity-copy compact constructor. Older ones (`auth`, `client`, `order`) use Lombok `@Data @NoArgsConstructor @AllArgsConstructor` classes. `LoginRequest` is a record while its sibling `RegisterRequest` is a class.
 
 **New DTOs should be records.** Validation goes on requests via `jakarta.validation` + `@Valid` at the controller. Only `auth` and `order` have `core/request` packages; other domains take query params directly.
+
+## Transactional email
+
+Copy is translated by having **one imported Mailjet template per language**, not by branching inside a
+template. `EmailTemplate` holds an id per `Language` and refuses to initialise if one is missing, so a
+new language fails at startup rather than at send time. The source HTML lives in `docs/mailjet/` as
+`<name>.<lang>.html` — those files are reference copies of what is in the Mailjet console, not loaded
+at runtime; keep them structurally identical and change only the copy between them.
+
+The language is a property of the **recipient** (`app_user.language`), never of the request, so an
+email triggered by an administrator still reaches the user in their own language. It selects the
+template id and is therefore not part of the variables payload.
+
+`MailjetAdapter` is `@Transactional(propagation = Propagation.NEVER)` — see the UseCase shape section.
 
 ## Exceptions
 

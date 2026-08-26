@@ -12,6 +12,7 @@ import Copyright from "../home/Copyright";
 import {connect} from "react-redux";
 import {withStyles} from "@material-ui/styles";
 import {signUpStart} from "../../store/actions/authActions";
+import CheckEmail from "./CheckEmail";
 import {CircularProgress, Container, IconButton} from "@material-ui/core";
 import axios from "../../axios-instance";
 import {toast} from "material-react-toastify";
@@ -171,7 +172,7 @@ class SignUp extends Component {
     render = () => {
 
         const {classes, auth, t} = this.props;
-        const {isLoading, token} = auth;
+        const {isLoading, token, signUpEmail} = auth;
         const {
             firstName, lastName, email, password,
             idno, searching, entityFound, confirmPassword
@@ -183,6 +184,7 @@ class SignUp extends Component {
             >
                 {token && <Redirect to="/products"/>}
                 <div className={classes.paper}>
+                    {signUpEmail ? <CheckEmail/> : <>
                     <Avatar className={classes.avatar}>
                         <LockOutlinedIcon/>
                     </Avatar>
@@ -307,6 +309,7 @@ class SignUp extends Component {
                             </Link>
                         </Grid>
                     </Grid>
+                    </>}
                 </div>
                 <Box mt={5}>
                     <Copyright/>

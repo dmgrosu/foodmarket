@@ -24,16 +24,24 @@ Schema: `| from | rel | to | detail |`
 | AppUserFindByIdUseCase | throws | NotFoundException | user id not found |
 | AppUserRepository | extends | CrudRepository | CrudRepository<AppUserEntity,Integer> |
 | AuthAccessVoter | extends | AccessVoter | base voter class |
+| AuthAccessVoter | guards | AuthController#confirmEmail | assertCanConfirmEmail, public endpoint, no check |
 | AuthAccessVoter | guards | AuthController#login | assertCanLogin, public endpoint, no check |
 | AuthAccessVoter | guards | AuthController#register | assertCanRegister, public endpoint, no check |
+| AuthAccessVoter | guards | AuthController#resendConfirmation | assertCanResendConfirmation, public endpoint, no check |
 | AuthController | injects | AuthAccessVoter | constructor injection |
 | AuthController | injects | AuthLoginUseCase | constructor injection |
-| AuthController | injects | AuthRegisterUseCase | constructor injection |
+| AuthController | injects | AuthRegisterRequestHandler | constructor injection |
+| AuthController | injects | RegistrationConfirmUseCase |  |
+| AuthController | injects | RegistrationConfirmationResendRequestHandler | constructor injection |
 | AuthLoginUseCase | calls | ClientResponse | CROSS-DOMAIN auth->client new ClientResponse(client) |
 | AuthLoginUseCase | injects | ClientFindByIdUseCase | CROSS-DOMAIN auth->client constructor injection |
 | AuthLoginUseCase | injects | JwtCreateTokenUseCase | constructor injection |
+| AuthLoginUseCase | throws | ForbiddenException | user is not ACTIVE; message depends on UserState |
+| AuthRegisterRequestHandler | injects | AuthRegisterUseCase | constructor injection |
 | AuthRegisterUseCase | injects | AppUserRepository | constructor injection |
-| AuthRegisterUseCase | injects | AuthLoginUseCase | constructor injection |
+| AuthRegisterUseCase | injects | ClientFindByIdUseCase | CROSS-DOMAIN auth->client constructor injection |
+| AuthRegisterUseCase | injects | RegistrationConfirmationMailUseCase | constructor injection |
+| AuthRegisterUseCase | injects | RegistrationTokenIssueUseCase | constructor injection |
 | AuthRegisterUseCase | throws | BadRequestException | email already registered |
 | BalanceEntity | fk | ProductEntity | AggregateReference<ProductEntity,Integer> product |
 | BalanceEntity | fk | StorageEntity | CROSS-DOMAIN product->storage AggregateReference<StorageEntity,Integer> |
@@ -66,6 +74,7 @@ Schema: `| from | rel | to | detail |`
 | ClientSearchUseCase | injects | ClientRepository | constructor injection |
 | ClientSearchUseCase | throws | BadRequestException | sort column outside the whitelist |
 | ClientSearchUseCase | throws | NotFoundException | executeByIdno found no live client |
+| EmailSendUseCase | injects | MailjetAdapter | constructor injection |
 | ImportBalancesUseCase | injects | BalancesUpdateUseCase | CROSS-LAYER shared->product constructor injection |
 | ImportClientsUseCase | calls | ClientAddressEntity | CROSS-LAYER shared->client new ClientAddressEntity(...) |
 | ImportClientsUseCase | calls | ClientEntity | CROSS-LAYER shared->client new ClientEntity(...) |
@@ -82,6 +91,10 @@ Schema: `| from | rel | to | detail |`
 | JwtFilter | injects | JwtGetAuthenticationUseCase | CROSS-LAYER config->auth constructor injection |
 | JwtGetAuthenticationUseCase | injects | AppUserFindByIdUseCase | constructor injection |
 | JwtGetAuthenticationUseCase | injects | JwtVerifyTokenUseCase | constructor injection |
+| JwtGetAuthenticationUseCase | throws | ForbiddenException | authenticated user is not ACTIVE |
+| JwtGetAuthenticationUseCase | throws | UnauthorizedException | token failed verification |
+| MailjetAdapter | injects | MailjetProperties | @EnableConfigurationProperties(MailjetProperties.class) |
+| MailjetAdapter | throws | MailException | Mailjet call failed, rejected, or malformed response |
 | OrderAccessVoter | extends | AccessVoter | inherits assertUserIsAuthenticated |
 | OrderAccessVoter | guards | OrderController#addProduct | assertCanAddProduct |
 | OrderAccessVoter | guards | OrderController#deleteById | assertCanDelete |
@@ -158,6 +171,26 @@ Schema: `| from | rel | to | detail |`
 | ProductResponse | calls | PriceResponse | CROSS-DOMAIN product->price PriceResponse::new mapping |
 | ProductSearchUseCase | injects | ProductGroupRepository | constructor injection |
 | ProductSearchUseCase | injects | ProductRepository | constructor injection |
+| RegistrationConfirmUseCase | injects | AppUserFindByIdUseCase | constructor injection |
+| RegistrationConfirmUseCase | injects | AppUserRepository | constructor injection |
+| RegistrationConfirmUseCase | injects | JwtCreateTokenUseCase | constructor injection |
+| RegistrationConfirmUseCase | injects | RegistrationTokenRepository | constructor injection |
+| RegistrationConfirmUseCase | injects | SecureTokenGenerator | constructor injection |
+| RegistrationConfirmUseCase | throws | BadRequestException | unknown, expired, or already-confirmed-while-pending token |
+| RegistrationConfirmationMailUseCase | injects | EmailSendUseCase | constructor injection |
+| RegistrationConfirmationResendRequestHandler | injects | RegistrationConfirmationResendUseCase | constructor injection |
+| RegistrationConfirmationResendUseCase | injects | AppUserFindByEmailUseCase | constructor injection |
+| RegistrationConfirmationResendUseCase | injects | RegistrationConfirmationMailUseCase | constructor injection |
+| RegistrationConfirmationResendUseCase | injects | RegistrationProperties | constructor injection |
+| RegistrationConfirmationResendUseCase | injects | RegistrationTokenIssueUseCase | constructor injection |
+| RegistrationConfirmationResendUseCase | injects | RegistrationTokenRepository | constructor injection |
+| RegistrationConfirmationResendUseCase | throws | BadRequestException | not pending confirmation, or inside the resend cooldown |
+| RegistrationTokenEntity | fk | AppUserEntity | AggregateReference<AppUserEntity,Integer> user |
+| RegistrationTokenEntity | table | registration_token | @Table("registration_token") |
+| RegistrationTokenIssueUseCase | injects | RegistrationProperties | @EnableConfigurationProperties(RegistrationProperties.class) |
+| RegistrationTokenIssueUseCase | injects | RegistrationTokenRepository | constructor injection |
+| RegistrationTokenIssueUseCase | injects | SecureTokenGenerator | constructor injection |
+| RegistrationTokenRepository | extends | CrudRepository | CrudRepository<RegistrationTokenEntity,Integer> |
 | ScheduleDataService | injects | ImportBalancesUseCase | constructor injection |
 | ScheduleDataService | injects | ImportClientsUseCase | constructor injection |
 | ScheduleDataService | injects | ImportProductsUseCase | constructor injection |
@@ -172,7 +205,7 @@ Schema: `| from | rel | to | detail |`
 | StorageRepository | extends | CrudRepository | CrudRepository<StorageEntity,Integer> |
 | StorageSearchUseCase | injects | StorageRepository | constructor injection |
 | StorageSearchUseCase | throws | NotFoundException | storage erp code not found |
-| UserRoleRef | table | app_user_role | @Table("app_user_role") vs test schema app_user_roles |
+| UserRoleRef | table | app_user_role | @Table("app_user_role") |
 
 ## Deliberately excluded
 

@@ -8,8 +8,10 @@ import md.ramaiana.foodmarket.domain.auth.data.AppUserEntity;
 import md.ramaiana.foodmarket.domain.client.core.response.ClientResponse;
 import md.ramaiana.foodmarket.domain.client.core.usecase.ClientFindByIdUseCase;
 import md.ramaiana.foodmarket.domain.client.data.ClientEntity;
-
 import md.ramaiana.foodmarket.shared.annotation.UseCase;
+import md.ramaiana.foodmarket.shared.enums.UserState;
+import md.ramaiana.foodmarket.shared.exception.http.ForbiddenException;
+import md.ramaiana.foodmarket.shared.exception.http.UnauthorizedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -53,15 +55,24 @@ public class AuthLoginUseCase {
 
   private @NonNull AppUserEntity validateAuthentication(Authentication authentication) {
     if (!authentication.isAuthenticated()) {
-      throw new SecurityException("Authentication failed");
+      throw new UnauthorizedException("Authentication failed");
     }
     AppUserEntity user = (AppUserEntity) authentication.getPrincipal();
     if (user == null) {
-      throw new SecurityException("Could not find principal for user");
+      throw new UnauthorizedException("Could not find principal for user");
     }
     if (!user.isActive()) {
-      throw new SecurityException("Found user is not active");
+      // Revealed only to someone who has already passed the password check.
+      throw new ForbiddenException(loginBlockedMessage(user.getState()));
     }
     return user;
+  }
+
+  private @NonNull String loginBlockedMessage(@NonNull UserState state) {
+    return switch (state) {
+      case PENDING_CONFIRMATION -> "Please confirm your email before logging in";
+      case CONFIRMED -> "Your registration is awaiting administrator approval";
+      default -> "This account is not active";
+    };
   }
 }

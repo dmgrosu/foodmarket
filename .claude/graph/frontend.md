@@ -10,13 +10,16 @@ Admin calls go through `frontend/src/api/admin.js`, written against the backend'
 
 ## Call sites
 
-Schema: `| caller | http | backend path | params | dispatches |`. 12 rows = every `axios.<verb>` in `frontend/src`.
+Schema: `| caller | http | backend path | params | dispatches |`. 15 rows = every `axios.<verb>` in `frontend/src`.
 
 | caller | http | backend path | params | dispatches |
 |---|---|---|---|---|
 | admin.js#searchClients | GET | /client/search | name,idno,pageNo,pageSize,sortColumn,sortDirection |  |
 | authActions.js#loginStart | POST | /auth/login | email,password | LOGIN_START,LOGIN_SUCCESS,LOGIN_FAIL |
-| authActions.js#signUpStart | POST | /auth/register | email,password,clientId | LOGIN_START,LOGIN_SUCCESS,LOGIN_FAIL |
+| authActions.js#signUpStart | POST | /auth/register | email,password,clientId,language | SIGNUP_START,SIGNUP_SUCCESS,SIGNUP_FAIL |
+| authActions.js#confirmEmail | POST | /auth/confirmEmail | confirmationToken | CONFIRM_EMAIL_START,CONFIRM_EMAIL_SUCCESS,CONFIRM_EMAIL_FAIL,LOGIN_SUCCESS |
+| authActions.js#promotePendingSession | GET | /storage | (Authorization: parked confirm token) | LOGIN_SUCCESS |
+| authActions.js#resendConfirmation | POST | /auth/resendConfirmation | email | RESEND_CONFIRMATION_START,RESEND_CONFIRMATION_SUCCESS,RESEND_CONFIRMATION_FAIL |
 | Products.js#fetchBrands | GET | /brand/getAll |  |  |
 | SignUp.js#findEntity | GET | /client/findByIdno | idno |  |
 | cartActions.js#addProductToCart | POST | /order/addProduct | orderId,productId,quantity | ADD_TO_CART_START,ADD_TO_CART_SUCCESS,ADD_TO_CART_FAIL |
@@ -34,7 +37,8 @@ Schema: `| caller | http | backend path | params | dispatches |`. 12 rows = ever
 | / | Home | public |
 | /admin | AdminDashboard | authed **and** roles contains ADMIN; nested /admin/{products,brands,clients} |
 | /signIn | SignIn | public; redirects to /products when authed |
-| /signUp | SignUp | public; redirects to /products when authed |
+| /signUp | SignUp | public; redirects to /products when authed; swaps in the CheckEmail panel once registered |
+| /confirmEmail | ConfirmEmail | public; reads ?confirmationToken= from the query string |
 | /products | Products | authed; own Redirect to /signIn |
 | /orders | Orders | authed; stub, no own guard |
 | /profile | Profile | authed; stub, no own guard |
@@ -47,6 +51,8 @@ No catch-all/404 route. When logged out the authed paths are simply absent from 
 - `App.js` -> authActions: authCheckState (called during render, not in an effect)
 - `SignIn.js` -> authActions: loginStart
 - `SignUp.js` -> authActions: signUpStart, plus a direct non-redux GET /client/findByIdno
+- `CheckEmail.js` -> authActions: resendConfirmation (not a route; rendered by SignUp.js in place of the form)
+- `ConfirmEmail.js` -> authActions: confirmEmail, resendConfirmation
 - `Navbar.js` -> authActions: logout
 - `Products.js` -> cartActions: addProductToCart, selectProduct, changeQuantity; plus 5 direct non-redux GETs; imports handleError from authActions as a plain util
 - `Cart.js` -> cartActions: selectProductToDelete, deleteProductFromCart, cancelDeleteProduct, openPlaceOrderDialog, closePlaceOrderDialog, placeOrder

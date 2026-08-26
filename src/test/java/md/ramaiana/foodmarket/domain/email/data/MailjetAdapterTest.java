@@ -1,12 +1,15 @@
 package md.ramaiana.foodmarket.domain.email.data;
 
 import com.jayway.jsonpath.JsonPath;
+import java.io.IOException;
+import java.util.Base64;
 import md.ramaiana.foodmarket.config.MailjetProperties;
 import md.ramaiana.foodmarket.domain.email.core.exception.MailException;
 import md.ramaiana.foodmarket.domain.email.core.request.EmailRecipient;
-import md.ramaiana.foodmarket.domain.email.core.request.LoginConfirmationVariables;
+import md.ramaiana.foodmarket.domain.email.core.request.RegistrationConfirmationVariables;
 import md.ramaiana.foodmarket.domain.email.core.response.EmailSendResponse;
 import md.ramaiana.foodmarket.shared.enums.EmailTemplate;
+import md.ramaiana.foodmarket.shared.enums.Language;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
@@ -14,10 +17,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-
-import java.io.IOException;
-import java.util.Base64;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -53,9 +52,10 @@ class MailjetAdapterTest {
     @Test
     void send_should_post_to_mailjet_and_return_message_uuid() throws InterruptedException {
         EmailRecipient recipient = new EmailRecipient("user@example.com", "Test User");
-        LoginConfirmationVariables variables = new LoginConfirmationVariables(
-            "https://app.example.com/confirm?token=abc123",
-            15
+        RegistrationConfirmationVariables variables = new RegistrationConfirmationVariables(
+            "https://app.example.com/confirmEmail?confirmationToken=abc123",
+            24,
+            Language.RU
         );
 
         server.enqueue(new MockResponse()
@@ -93,21 +93,22 @@ class MailjetAdapterTest {
 
         String body = request.getBody().readUtf8();
         assertThat(((Number) JsonPath.read(body, "$.Messages[0].TemplateID")).longValue())
-            .isEqualTo(Long.parseLong(EmailTemplate.LOGIN_CONFIRMATION.getId()));
+            .isEqualTo(Long.parseLong(EmailTemplate.REGISTRATION_CONFIRMATION.getId(Language.RU)));
         assertThat((Boolean) JsonPath.read(body, "$.Messages[0].TemplateLanguage")).isTrue();
         assertThat((String) JsonPath.read(body, "$.Messages[0].Variables.confirmation_url"))
-            .isEqualTo("https://app.example.com/confirm?token=abc123");
-        assertThat(((Number) JsonPath.read(body, "$.Messages[0].Variables.expires_in_minutes")).intValue())
-            .isEqualTo(15);
+            .isEqualTo("https://app.example.com/confirmEmail?confirmationToken=abc123");
+        assertThat(((Number) JsonPath.read(body, "$.Messages[0].Variables.expires_in_hours")).intValue())
+            .isEqualTo(24);
     }
 
     @Test
     void send_should_throw_on_http_200_with_error_status() {
         // Arrange
         EmailRecipient recipient = new EmailRecipient("user@example.com", "Test User");
-        LoginConfirmationVariables variables = new LoginConfirmationVariables(
-            "https://app.example.com/confirm?token=abc123",
-            15
+        RegistrationConfirmationVariables variables = new RegistrationConfirmationVariables(
+            "https://app.example.com/confirmEmail?confirmationToken=abc123",
+            24,
+            Language.RU
         );
 
         server.enqueue(new MockResponse()
@@ -141,9 +142,10 @@ class MailjetAdapterTest {
     void send_should_throw_on_http_400() {
         // Arrange
         EmailRecipient recipient = new EmailRecipient("user@example.com", "Test User");
-        LoginConfirmationVariables variables = new LoginConfirmationVariables(
-            "https://app.example.com/confirm?token=abc123",
-            15
+        RegistrationConfirmationVariables variables = new RegistrationConfirmationVariables(
+            "https://app.example.com/confirmEmail?confirmationToken=abc123",
+            24,
+            Language.RU
         );
 
         server.enqueue(new MockResponse().setResponseCode(400).setBody("{}"));
@@ -169,9 +171,10 @@ class MailjetAdapterTest {
         MailjetAdapter disabledAdapter = new MailjetAdapter(disabledProps);
 
         EmailRecipient recipient = new EmailRecipient("user@example.com", "Test User");
-        LoginConfirmationVariables variables = new LoginConfirmationVariables(
-            "https://app.example.com/confirm?token=abc123",
-            15
+        RegistrationConfirmationVariables variables = new RegistrationConfirmationVariables(
+            "https://app.example.com/confirmEmail?confirmationToken=abc123",
+            24,
+            Language.RU
         );
 
         // Act
@@ -187,9 +190,10 @@ class MailjetAdapterTest {
     void send_should_throw_when_recipient_result_is_missing() {
         // Arrange: Status success but no To array at all
         EmailRecipient recipient = new EmailRecipient("user@example.com", "Test User");
-        LoginConfirmationVariables variables = new LoginConfirmationVariables(
-            "https://app.example.com/confirm?token=abc123",
-            15
+        RegistrationConfirmationVariables variables = new RegistrationConfirmationVariables(
+            "https://app.example.com/confirmEmail?confirmationToken=abc123",
+            24,
+            Language.RU
         );
 
         server.enqueue(new MockResponse()
@@ -215,9 +219,10 @@ class MailjetAdapterTest {
     void send_should_throw_when_message_uuid_is_blank() {
         // Arrange: To entry present but its MessageUUID is blank
         EmailRecipient recipient = new EmailRecipient("user@example.com", "Test User");
-        LoginConfirmationVariables variables = new LoginConfirmationVariables(
-            "https://app.example.com/confirm?token=abc123",
-            15
+        RegistrationConfirmationVariables variables = new RegistrationConfirmationVariables(
+            "https://app.example.com/confirmEmail?confirmationToken=abc123",
+            24,
+            Language.RU
         );
 
         server.enqueue(new MockResponse()

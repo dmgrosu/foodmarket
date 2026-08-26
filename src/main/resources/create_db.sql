@@ -115,6 +115,7 @@ create table if not exists rama_fm."app_user"
     email      text                     not null,
     passwd     text                     not null,
     state      text                     not null,
+    language   text                     not null default 'RU',
     client_id  integer
         constraint app_user_client_id_fk
             references rama_fm.client (id),
@@ -134,6 +135,25 @@ create table if not exists rama_fm."app_user_role"
     created_at timestamp with time zone not null default now(),
     deleted_at timestamp with time zone
 );
+
+create table if not exists rama_fm.registration_token
+(
+    id           serial                   not null
+        constraint registration_token_pk
+            primary key,
+    user_id      integer                  not null
+        constraint registration_token_user_id_fk
+            references rama_fm.app_user (id),
+    token_hash   text                     not null,
+    expires_at   timestamp with time zone not null,
+    confirmed_at timestamp with time zone,
+    created_at   timestamp with time zone not null default now()
+);
+
+create unique index if not exists registration_token_token_hash_uindex
+    on rama_fm.registration_token (token_hash);
+create index if not exists registration_token_user_id_index
+    on rama_fm.registration_token (user_id);
 
 create table if not exists rama_fm."storages"
 (
@@ -207,3 +227,4 @@ create table if not exists rama_fm.client_addresses
 
 create index if not exists client_addresses_client_id_index
     on rama_fm.client_addresses (client_id);
+

@@ -34,3 +34,6 @@ build/
 
 ### Claude Code ###
 .claude/settings.local.json
+
+# Local dev profile: machine-specific paths and credentials (see the .example alongside it)
+src/main/resources/application-local.yml

@@ -17,6 +17,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -269,6 +270,29 @@ public class ControllerAdviceConfig {
     body.put("status", status.value());
     body.put("error", status.getReasonPhrase());
     body.put("message", ex.getMessage());
+    body.put("traceId", MDC.get(MDC_REQUEST_ID_KEY));
+
+    return new ResponseEntity<>(body, new HttpHeaders(), status);
+  }
+
+  /**
+   * Handle a failed Spring Security authentication (bad credentials, unknown user). Without this the
+   * generic handler below turns a mistyped password into a 500 "contact support".
+   *
+   * @param ex The exception.
+   * @return The response.
+   */
+  @NonNull
+  @ExceptionHandler(AuthenticationException.class)
+  protected ResponseEntity<@NonNull Map<String, Object>> handle(@NonNull AuthenticationException ex) {
+    HttpStatus status = HttpStatus.UNAUTHORIZED;
+
+    Map<String, Object> body = new HashMap<>();
+    body.put("timestamp", new Date());
+    body.put("status", status.value());
+    body.put("error", status.getReasonPhrase());
+    // Deliberately generic: never reveal whether the email exists.
+    body.put("message", "Invalid email or password");
     body.put("traceId", MDC.get(MDC_REQUEST_ID_KEY));
 
     return new ResponseEntity<>(body, new HttpHeaders(), status);

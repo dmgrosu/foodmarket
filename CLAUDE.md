@@ -38,17 +38,19 @@ A grep hit arrives without its header, so the column order lives here.
 
 ## Invariants
 
-1. Domains are strictly 3-slice: `core/{request,response,usecase}` · `data` · `presentation/{controller,voter}`.
-2. One public `execute(...)` per use case, annotated `@UseCase`, constructor-injected `final` fields.
+1. Domains are strictly 3-slice: `core/{request,response,usecase}` · `data` · `presentation/{controller,voter}`. `auth` has a fourth `core/handler` slice — see invariant 8.
+2. One public `execute(...)` per use case, annotated `@UseCase`, constructor-injected `final` fields — except a use case that mixes a database write with an external call, which splits into `preExecute`/`executeTransactionalEffect`/`executeSideEffects` (invariant 8).
 3. One `assertCanX()` per controller handler, named 1:1 with it.
-4. Controller handlers are exactly two lines: `accessVoter.assertCanX();` then `return useCase.execute(...);`.
+4. Controller handlers are exactly two lines: `accessVoter.assertCanX();` then `return useCase.execute(...);` (or `return xRequestHandler.handle(...);` for the handler-backed endpoints in invariant 8).
 5. Soft delete is a nullable `deletedAt` plus `...AndDeletedAtIsNull` finders. Never hard-delete.
-6. **Any schema change edits BOTH `src/main/resources/create_db.sql` and `src/test/resources/schema.sql`.** They have already drifted in 49 columns — read `schema.md` Table B first.
+6. **Any schema change edits BOTH `src/main/resources/create_db.sql` and `src/test/resources/schema.sql`.** They still drift in ~40 columns — read `schema.md` Table B first.
 7. New DTOs are `record`s with an entity-copy constructor.
+8. **A transaction must never span an external call.** A use case that needs both a database write and a call to an external system (email, a third-party API) splits into three phases and is sequenced by a `@RequestHandler` in `core/handler`, using a `thisProxy` self-injection so the write commits in its own transaction before the external call runs. See `.claude/graph/conventions.md` for the exact shape — `domain/auth/core/handler/AuthRegisterRequestHandler` is the reference example.
+   **A handler is only justified by that split.** A use case with no external call keeps one self-managing `@Transactional execute(...)` and is called straight from the controller — adding a handler that only delegates makes the layer meaningless as a signal. `RegistrationConfirmUseCase` is the reference for that side.
 
 ## The installed scaffolding skills do not match this repo
 
-`/new-entity`, `/new-usecase`, `/new-endpoint`, `/new-migration` generate **JPA entities, Flyway migrations, `Specification` queries, and a `RequestHandler` layer**. This repo has none of those. Follow `.claude/graph/conventions.md` instead of those templates.
+`/new-entity`, `/new-usecase`, `/new-endpoint`, `/new-migration` generate **JPA entities, Flyway migrations, `Specification` queries, and a `RequestHandler` layer shaped for a different (JPA-based) codebase**. This repo has none of the JPA/Flyway/Specification parts, and its own `RequestHandler` layer (invariant 8) is narrower and Spring-Data-JDBC-shaped — don't reach for those skills' version of it. Follow `.claude/graph/conventions.md` instead of those templates.
 
 ## Commands
 
