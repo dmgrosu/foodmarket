@@ -49,6 +49,8 @@ public class SecurityConfig {
             // Public endpoints
             .requestMatchers(
                 "/auth/register",
+                "/auth/confirmEmail",
+                "/auth/resendConfirmation",
                 "/auth/login",
                 "/client/findByIdno",
                 "/v3/api-docs/**",

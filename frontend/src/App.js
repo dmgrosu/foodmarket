@@ -4,6 +4,7 @@ import {createMuiTheme} from "@material-ui/core";
 import {Route, Switch, withRouter} from "react-router-dom";
 import SignIn from "./components/auth/SignIn";
 import SignUp from "./components/auth/SignUp";
+import ConfirmEmail from "./components/auth/ConfirmEmail";
 import Home from "./components/home/Home";
 import {ToastContainer} from "material-react-toastify";
 import 'material-react-toastify/dist/ReactToastify.min.css';
@@ -48,6 +49,7 @@ const App = (props) => {
         <Route path='/signIn' component={SignIn} key={1}/>,
         <Route path='/signUp' component={SignUp} key={2}/>,
         <Route exact path='/' component={Home} key={3}/>,
+        <Route path='/confirmEmail' component={ConfirmEmail} key={9}/>,
     ];
 
     if (isAuthenticated) {

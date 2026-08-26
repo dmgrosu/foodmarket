@@ -8,6 +8,7 @@ Schema: `| id | kind | dir | api | note |` — `dir` omits the prefix `src/main/
 | id | kind | dir | api | note |
 |---|---|---|---|---|
 | About | fe-component | frontend/src/components/home | renders company description text |  |
+| AbstractRegistrationEndpointTest | service | src/test/java/md/ramaiana/foodmarket/domain/auth/presentation/controller | uniqueEmail();registerAndCaptureToken(String);captureEmailedToken();latestTokenFor(String);overwriteToken() | test; shared fixture for the three registration endpoints, spies EmailSendUseCase to capture the emailed token |
 | AccessVoter | abstract | shared/util/abstraction/voter | getCurrentUser()->AppUserEntity;assertUserIsAuthenticated();assertUserIsAdmin() | assertUserIsAdmin() checks Role.ADMIN membership, throws ForbiddenException |
 | AccessVoterTest | abstract | src/test/java/md/ramaiana/foodmarket/shared/util/abstraction/voter | 5 tests: assertUserIsAdmin (admin-pass, non-admin-reject, anonymous-reject, no-auth-reject), assertUserIsAuthenticated (pass) | test |
 | AddProductToOrderRequest | request | domain/order/core/request | orderId:int;storageId:Integer;productId:Integer;priceType:PriceType;quantity:float;clientId:Integer |  |
@@ -16,14 +17,20 @@ Schema: `| id | kind | dir | api | note |` — `dir` omits the prefix `src/main/
 | App | fe-component | frontend/src | App |  |
 | App.test | fe-component | frontend/src |  | DEVIATION: stale CRA smoke test asserting "learn react" |
 | AppUserDetailsService | service | domain/auth/presentation/service | loadUserByUsername(String)->UserDetails |  |
-| AppUserEntity | entity | domain/auth/data | id:Integer;email:String;passwd:String;createdAt:Instant;state:UserState;userRoles:Set;client:AggregateReference;addRole();getRoles();hasClient();isActive() | entity implements Spring Security UserDetails |
+| AppUserEntity | entity | domain/auth/data | id:Integer;email:String;passwd:String;createdAt:Instant;state:UserState;language:Language;userRoles:Set;client:AggregateReference;addRole();getRoles();hasClient();withState();withClient();isActive() | entity implements Spring Security UserDetails |
 | AppUserFindByEmailUseCase | usecase | domain/auth/core/usecase | execute(String)->AppUserEntity |  |
 | AppUserFindByIdUseCase | usecase | domain/auth/core/usecase | execute(Integer)->AppUserEntity |  |
 | AppUserRepository | repo | domain/auth/data | findByEmail |  |
-| AuthAccessVoter | voter | domain/auth/presentation/voter | assertCanLogin();assertCanRegister() | DEVIATION: both asserts are empty no-ops |
-| AuthController | controller | domain/auth/presentation/controller | login(LoginRequest)->AuthResponse;register(RegisterRequest)->AuthResponse |  |
+| AuthAccessVoter | voter | domain/auth/presentation/voter | assertCanLogin();assertCanRegister();assertCanConfirmEmail();assertCanResendConfirmation() | DEVIATION: all four asserts are empty no-ops |
+| AuthConfirmEmailTest | controller | src/test/java/md/ramaiana/foodmarket/domain/auth/presentation/controller | 7 tests: confirms pending, idempotent replay, unknown token, expired token, blank token, missing token, no-auth-required | test |
+| AuthController | controller | domain/auth/presentation/controller | login(LoginRequest)->AuthResponse;register(RegisterRequest)->RegistrationResponse;confirmEmail(RegistrationConfirmRequest)->RegistrationConfirmResponse;resendConfirmation(RegistrationConfirmationResendRequest)->RegistrationResponse | register/confirmEmail/resendConfirmation delegate to request handlers, login still calls its use case directly |
+| AuthLoginTest | controller | src/test/java/md/ramaiana/foodmarket/domain/auth/presentation/controller | 5 tests: token for active user, forbidden while pending, forbidden while awaiting approval, wrong password, invalid email | test |
 | AuthLoginUseCase | usecase | domain/auth/core/usecase | execute(LoginRequest)->AuthResponse |  |
-| AuthRegisterUseCase | usecase | domain/auth/core/usecase | execute(RegisterRequest)->AuthResponse | DEVIATION: re-logins passing bcrypt hash as raw password |
+| AuthRegisterRequestHandler | service | domain/auth/core/handler | handle(RegisterRequest)->RegistrationResponse;persist(RegisterRequest)->PendingRegistration | persist() commits before handle() triggers the confirmation email |
+| AuthRegisterUseCase | usecase | domain/auth/core/usecase | preExecute(RegisterRequest);executeTransactionalEffect(RegisterRequest)->PendingRegistration;executeSideEffects(PendingRegistration)->boolean | three-phase, sequenced by AuthRegisterRequestHandler |
+| AuthRegisterUseCaseTest | usecase | src/test/java/md/ramaiana/foodmarket/domain/auth/core/usecase | 6 tests: preExecute duplicate/free email, transactional effect (no/zero/positive clientId), side effects delegate | test |
+| AuthRegistrationTest | controller | src/test/java/md/ramaiana/foodmarket/domain/auth/presentation/controller | 8 tests: registers pending user, stores only a token hash, commits before emailing, keeps user when mail fails, duplicate email, invalid email, blank password, no-auth-required | test |
+| AuthResendConfirmationTest | controller | src/test/java/md/ramaiana/foodmarket/domain/auth/presentation/controller | 6 tests: reissues and kills the old link, cooldown, already-confirmed user, unknown email, invalid email, no-auth-required | test |
 | AuthResponse | response | domain/auth/core/response | user:UserResponse;token:String;tokenTtl:int | nested static UserResponse{id,email,client} has no own file |
 | BadRequestException | exception | shared/exception/http |  |  |
 | BalanceDataDto | dto | shared/dataexchange/dto | prices:List<ErpPriceDto>;balances:List<ErpBalanceDto> |  |
@@ -60,6 +67,14 @@ Schema: `| id | kind | dir | api | note |` — `dir` omits the prefix `src/main/
 | ControllerAdviceConfig | config | config | 11 @ExceptionHandler methods -> JSON error body |  |
 | Copyright | fe-component | frontend/src/components/home | renders copyright line with link |  |
 | DataExchangeConfig | config | config | marshaller;unmarshaller |  |
+| EmailRecipient | request | domain/email/core/request | email:String;name:String |  |
+| EmailSendRequest | request | domain/email/core/request | recipient:EmailRecipient;variables:EmailTemplateVariables |  |
+| EmailSendResponse | response | domain/email/core/response | messageUuid:String;recipientEmail:String |  |
+| EmailSendUseCase | usecase | domain/email/core/usecase | execute(EmailSendRequest)->EmailSendResponse | vendor-agnostic; callers never depend on MailjetAdapter directly |
+| EmailSendUseCaseTest | usecase | src/test/java/md/ramaiana/foodmarket/domain/email/core/usecase | 2 tests: delegates to adapter and returns result, propagates MailException | test |
+| EmailTemplate | enum | shared/enums | REGISTRATION_CONFIRMATION;getId(Language) | one Mailjet template id per Language; constructor rejects a language with no id at startup; sources in docs/mailjet/ |
+| EmailTemplateTest | enum | src/test/java/md/ramaiana/foodmarket/shared/enums | 3 tests: an id exists per language, ids are numeric, RU points at the imported template | test |
+| EmailTemplateVariables | abstract | domain/email/core/request | template()->EmailTemplate;language()->Language;variables()->Map | sealed interface, permits RegistrationConfirmationVariables |
 | ErpAddressDto | dto | shared/dataexchange/dto | type:AddressType;fullAddress:String;description:String | DEVIATION: description maps XML attribute "desrc" typo |
 | ErpBalanceDto | dto | shared/dataexchange/dto | storageCode:String;productCode:String;quantity:float |  |
 | ErpBrandDto | dto | shared/dataexchange/dto | code:String;name:String |  |
@@ -86,11 +101,19 @@ Schema: `| id | kind | dir | api | note |` — `dir` omits the prefix `src/main/
 | ImportProductsUseCaseTest | usecase | src/test/java/md/ramaiana/foodmarket/shared/dataexchange/core/usecase | should_import_products() | test; writes its own XML fixture |
 | JwtCreateTokenUseCase | usecase | domain/auth/core/usecase | execute(AppUserEntity)->String;getTokenValidityInSeconds()->int | DEVIATION: second public method; returns "Bearer "-prefixed token |
 | JwtFilter | config | config | doFilterInternal;shouldNotFilter | DEVIATION: not a @Component; instantiated manually in SecurityConfig |
-| JwtGetAuthenticationUseCase | usecase | domain/auth/core/usecase | execute(String)->Authentication |  |
+| JwtGetAuthenticationUseCase | usecase | domain/auth/core/usecase | execute(String)->Authentication | re-checks UserState on every request, so suspension and pending approval take effect immediately rather than at token expiry |
+| JwtGetAuthenticationUseCaseTest | usecase | src/test/java/md/ramaiana/foodmarket/domain/auth/core/usecase | 6 tests: active user authenticates, every non-ACTIVE state rejected, unverifiable token rejected | test |
 | JwtVerifyTokenUseCase | usecase | domain/auth/core/usecase | execute(String)->Map | DEVIATION: returns null on verification failure |
+| Language | enum | shared/enums | RU;RO;EN;getTag();fromTag(String) | mirrors frontend i18n supportedLngs; fromTag falls back to RU for unknown/regional tags |
+| LanguageTest | enum | src/test/java/md/ramaiana/foodmarket/shared/enums | 12 tests: each supported tag, regional/untidy tags, null-empty-unknown fallback, tags match the frontend | test |
 | LoginRequest | request | domain/auth/core/request | email:String;password:String | record; sibling RegisterRequest is a Lombok class |
+| MailException | exception | domain/email/core/exception |  | thrown when a Mailjet call fails; falls through to ControllerAdviceConfig#handle(Exception) -> 500 |
+| MailjetAdapter | service | domain/email/data | send(EmailRecipient,EmailTemplateVariables)->EmailSendResponse | Propagation.NEVER; mailjet.enabled=false returns a synthetic success without an HTTP call |
+| MailjetAdapterTest | service | src/test/java/md/ramaiana/foodmarket/domain/email/data | 6 tests: success, HTTP-200-with-error, HTTP-400, disabled-skip, missing-recipient, blank-message-uuid | test; MockWebServer |
+| MailjetProperties | config | config | enabled:boolean;baseUrl:String;apiKey:String;secretKey:String;connectTimeoutMs:int;readTimeoutMs:int;sender:Sender |  |
 | MainMenu | fe-component | frontend/src/components/navigation | MainMenu |  |
 | MainMenuItem | fe-component | frontend/src/components/navigation | MainMenuItem |  |
+| MockedAuthenticationController | abstract | src/test/java/md/ramaiana/foodmarket/shared/abstraction | authenticateAs(Role...);authenticateAsAnonymous();post(String,Object);get(String);get(String,Map) | test; base class giving controller tests a real signed JWT for a real AppUserEntity |
 | Navbar | fe-component | frontend/src/components/navigation | Navbar |  |
 | NotFoundException | exception | shared/exception/http |  |  |
 | OrderAccessVoter | voter | domain/order/presentation/voter | assertCanAddProduct();assertCanGetById();assertCanDelete();assertCanDeleteProduct();assertCanGetOrdersByPeriod();assertCanUpdate();assertCanPlaceOrder() | all 7 are identical assertUserIsAuthenticated delegates |
@@ -134,10 +157,30 @@ Schema: `| id | kind | dir | api | note |` — `dir` omits the prefix `src/main/
 | Products | fe-component | frontend/src/components/products | Products |  |
 | ProductsList | fe-component | frontend/src/components/products | ProductsList |  |
 | Profile | fe-component | frontend/src/components/auth | Profile | DEVIATION: placeholder stub rendering literal text |
-| RegisterRequest | request | domain/auth/core/request | email:String;password:String;clientId:Integer |  |
+| RegisterRequest | request | domain/auth/core/request | email:String;password:String;clientId:Integer;language:String | clientId>0 is resolved via ClientFindByIdUseCase; language is an i18next tag, unknown values fall back to RU |
+| RegistrationConfirmRequest | request | domain/auth/core/request | confirmationToken:String |  |
+| RegistrationConfirmResponse | response | domain/auth/core/response | email:String;state:UserState;token:String;tokenTtl:int | field names mirror AuthResponse |
+| RegistrationConfirmUseCase | usecase | domain/auth/core/usecase | execute(RegistrationConfirmRequest)->RegistrationConfirmResponse | self-transactional: no side effects, so no handler; idempotent for an already-confirmed user |
+| RegistrationConfirmUseCaseTest | usecase | src/test/java/md/ramaiana/foodmarket/domain/auth/core/usecase | 5 tests: confirm pending, idempotent confirmed, idempotent active, unknown token, expired token | test |
+| RegistrationConfirmationMailUseCase | usecase | domain/auth/core/usecase | execute(PendingRegistration)->boolean | Propagation.NEVER; swallows MailException and reports false rather than propagating |
+| RegistrationConfirmationMailUseCaseTest | usecase | src/test/java/md/ramaiana/foodmarket/domain/auth/core/usecase | 2 tests: sends correct template and variables, swallows MailException | test |
+| RegistrationConfirmationResendRequest | request | domain/auth/core/request | email:String |  |
+| RegistrationConfirmationResendRequestHandler | service | domain/auth/core/handler | handle(RegistrationConfirmationResendRequest)->RegistrationResponse;persist(RegistrationConfirmationResendRequest)->PendingRegistration | same thisProxy split as AuthRegisterRequestHandler |
+| RegistrationConfirmationResendUseCase | usecase | domain/auth/core/usecase | executeTransactionalEffect(RegistrationConfirmationResendRequest)->PendingRegistration;executeSideEffects(PendingRegistration)->boolean | enforces registration.resend-cooldown-seconds via RegistrationTokenRepository.findLatestForUser |
+| RegistrationConfirmationResendUseCaseTest | usecase | src/test/java/md/ramaiana/foodmarket/domain/auth/core/usecase | 6 tests: reissue no prior token, reissue after cooldown, reject inside cooldown, reject non-pending, propagate not-found, side effects delegate | test |
+| RegistrationConfirmationVariables | request | domain/email/core/request | confirmationUrl:String;expiresInHours:int;language:Language | language selects the template id, so it is not part of the variables payload |
+| RegistrationProperties | config | config | confirmationPageUrl:String;confirmationLinkValidityHours:int;resendCooldownSeconds:int |  |
+| RegistrationResponse | response | domain/auth/core/response | email:String;state:UserState;confirmationEmailSent:boolean |  |
+| RegistrationTokenEntity | entity | domain/auth/data | id:Integer;user:AggregateReference;tokenHash:String;expiresAt:Instant;confirmedAt:Instant;createdAt:Instant;withConfirmedAt();isConfirmed();isExpired() | only a SHA-256 hash of the token is persisted, table registration_token |
+| RegistrationTokenIssueUseCase | usecase | domain/auth/core/usecase | execute(AppUserEntity)->PendingRegistration | Propagation.MANDATORY; the database half of issuing a confirmation link |
+| RegistrationTokenIssueUseCaseTest | usecase | src/test/java/md/ramaiana/foodmarket/domain/auth/core/usecase | 1 test: expires prior tokens, persists a hash distinct from the raw token, builds the url | test |
+| RegistrationTokenRepository | repo | domain/auth/data | findByTokenHash;expireLiveTokensForUser;findLatestForUser;findAllForUser |  |
+| RequestHandler | annotation | shared/annotation |  | @Component meta-annotation marking request-handler beans; owns the transaction boundary around a use case's external call |
 | RightMenu | fe-component | frontend/src/components/navigation | RightMenu |  |
 | Role | enum | shared/enums | ADMIN;USER | carries lowercase dbValue (still unread); checked by AccessVoter.assertUserIsAdmin() |
 | ScheduleDataService | service | shared/schedule | runDataExchange()->void | exportOrders() is an empty TODO stub |
+| SecureTokenGenerator | util | shared/util | generate()->String;hash(String)->String | only the hash is ever persisted; raw token exists only in memory and in the emailed link |
+| SecureTokenGeneratorTest | util | src/test/java/md/ramaiana/foodmarket/shared/util | 5 tests: url-safe length, uniqueness, hash stable, hash differs from input, hash differs per input | test |
 | SecurityConfig | config | config | securityFilterChain;authenticationManager;passwordEncoder;authenticationProvider;corsConfigurationSource |  |
 | SignIn | fe-component | frontend/src/components/auth | SignIn |  |
 | SignUp | fe-component | frontend/src/components/auth | SignUp |  |
@@ -152,8 +195,8 @@ Schema: `| id | kind | dir | api | note |` — `dir` omits the prefix `src/main/
 | UnauthorizedException | exception | shared/exception/http |  |  |
 | UpdateOrderRequest | request | domain/order/core/request | orderId:Integer;productId:Integer;quantity:float |  |
 | UseCase | annotation | shared/annotation |  | @Component meta-annotation marking use-case beans |
-| UserRoleRef | entity | domain/auth/data | role:Role | DEVIATION: no @Id; @Table("app_user_role") vs test schema app_user_roles |
-| UserState | enum | shared/enums | ACTIVE;INACTIVE;SUSPENDED |  |
+| UserRoleRef | entity | domain/auth/data | role:Role | DEVIATION: no @Id |
+| UserState | enum | shared/enums | PENDING_CONFIRMATION;CONFIRMED;ACTIVE;INACTIVE;SUSPENDED |  |
 | authActions | fe-action | frontend/src/store/actions | LOGIN_START;LOGIN_SUCCESS;LOGIN_FAIL;LOGOUT;loginStart;loginSuccess;signUpStart;checkAuthTimeout;authCheckState;logout;handleError |  |
 | authReducer | fe-reducer | frontend/src/store/reducers | token;userId;clientId;isLoading;error |  |
 | axios-instance | fe-util | frontend/src | instance | baseURL from REACT_APP_API_URL; request interceptor adds Authorization |
@@ -164,4 +207,3 @@ Schema: `| id | kind | dir | api | note |` — `dir` omits the prefix `src/main/
 | reportWebVitals | fe-util | frontend/src | reportWebVitals | CRA boilerplate |
 | rootReducer | fe-reducer | frontend/src/store/reducers | combineReducers({authReducer,cartReducer}) | file is index.js |
 | setupTests | fe-util | frontend/src |  | CRA boilerplate, imports jest-dom |
-

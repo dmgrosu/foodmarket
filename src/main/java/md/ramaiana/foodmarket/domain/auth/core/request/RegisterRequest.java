@@ -27,4 +27,11 @@ public class RegisterRequest {
 
   @Nullable
   private Integer clientId;
+
+  /**
+   * The user's language tag as resolved by the frontend (i18next resolvedLanguage), e.g. "ro".
+   * Optional: an unknown or absent tag falls back to Russian, matching the frontend's fallbackLng.
+   */
+  @Nullable
+  private String language;
 }

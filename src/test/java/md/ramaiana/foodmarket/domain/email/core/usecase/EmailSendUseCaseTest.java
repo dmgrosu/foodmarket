@@ -1,17 +1,17 @@
 package md.ramaiana.foodmarket.domain.email.core.usecase;
 
+import md.ramaiana.foodmarket.domain.email.core.exception.MailException;
 import md.ramaiana.foodmarket.domain.email.core.request.EmailRecipient;
 import md.ramaiana.foodmarket.domain.email.core.request.EmailSendRequest;
 import md.ramaiana.foodmarket.domain.email.core.response.EmailSendResponse;
 import md.ramaiana.foodmarket.domain.email.data.MailjetAdapter;
-import md.ramaiana.foodmarket.domain.email.core.exception.MailException;
+import md.ramaiana.foodmarket.shared.enums.Language;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.verify;
@@ -31,9 +31,10 @@ class EmailSendUseCaseTest {
     void execute_should_delegate_to_adapter_and_return_result() {
         // Arrange
         EmailRecipient recipient = new EmailRecipient("user@example.com", "User Name");
-        var variables = new md.ramaiana.foodmarket.domain.email.core.request.LoginConfirmationVariables(
-            "https://app.example.com/confirm?token=abc123",
-            15
+        var variables = new md.ramaiana.foodmarket.domain.email.core.request.RegistrationConfirmationVariables(
+            "https://app.example.com/confirmEmail?confirmationToken=abc123",
+            24,
+            Language.RU
         );
         EmailSendRequest request = new EmailSendRequest(recipient, variables);
         EmailSendResponse expectedResult = new EmailSendResponse("msg-uuid-123", recipient.email());
@@ -52,9 +53,10 @@ class EmailSendUseCaseTest {
     void execute_should_propagate_mail_send_exception() {
         // Arrange
         EmailRecipient recipient = new EmailRecipient("user@example.com", "User Name");
-        var variables = new md.ramaiana.foodmarket.domain.email.core.request.LoginConfirmationVariables(
-            "https://app.example.com/confirm?token=abc123",
-            15
+        var variables = new md.ramaiana.foodmarket.domain.email.core.request.RegistrationConfirmationVariables(
+            "https://app.example.com/confirmEmail?confirmationToken=abc123",
+            24,
+            Language.RU
         );
         EmailSendRequest request = new EmailSendRequest(recipient, variables);
 

@@ -34,3 +34,8 @@ mailjet:
   sender:
     email: ${MAILJET_SENDER_EMAIL:}
     name: ${MAILJET_SENDER_NAME:Ramaiana Foodmarket}
+
+registration:
+  confirmation-page-url: ${REGISTRATION_CONFIRMATION_PAGE_URL:http://localhost:3000/confirmEmail}
+  confirmation-link-validity-hours: 24
+  resend-cooldown-seconds: 60

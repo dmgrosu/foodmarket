@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.Set;
 import md.ramaiana.foodmarket.domain.auth.data.AppUserEntity;
 import md.ramaiana.foodmarket.domain.auth.data.UserRoleRef;
+import md.ramaiana.foodmarket.shared.enums.Language;
 import md.ramaiana.foodmarket.shared.enums.Role;
 import md.ramaiana.foodmarket.shared.enums.UserState;
 import md.ramaiana.foodmarket.shared.exception.http.ForbiddenException;
@@ -14,7 +15,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -65,7 +65,7 @@ class AccessVoterTest {
   }
 
   private void authenticateAs(Set<Role> roles) {
-    AppUserEntity user = new AppUserEntity(1, "user@example.com", "hash", Instant.now(), UserState.ACTIVE,
+    AppUserEntity user = new AppUserEntity(1, "user@example.com", "hash", Instant.now(), UserState.ACTIVE, Language.RU,
         roles.stream().map(UserRoleRef::new).collect(java.util.stream.Collectors.toSet()), null);
 
     SecurityContextHolder.getContext().setAuthentication(

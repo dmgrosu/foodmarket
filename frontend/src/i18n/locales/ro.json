@@ -160,6 +160,22 @@
       "submit": "Înregistrare",
       "haveAccount": "Aveți deja un cont? Autentificați-vă",
       "clientFound": "Client găsit: {{name}}, IDNO: {{idno}}"
+    },
+    "checkEmail": {
+      "title": "Verificați emailul",
+      "sent": "Am trimis un email cu un link de confirmare la {{email}}. Accesați linkul pentru a confirma înregistrarea.",
+      "notSent": "Nu am putut trimite emailul la {{email}}. Încercați să îl retrimiteți.",
+      "resend": "Retrimite emailul",
+      "resendSuccess": "Emailul a fost retrimis"
+    },
+    "confirmEmail": {
+      "title": "Confirmare email",
+      "confirming": "Se confirmă emailul dumneavoastră…",
+      "success": "Email confirmat. Așteptați activarea contului de către administrator.",
+      "invalid": "Linkul de confirmare este invalid sau a expirat.",
+      "resend": "Trimite un link nou",
+      "resendEmailLabel": "Adresă de email",
+      "resendSubmit": "Trimite"
     }
   },
   "profile": {

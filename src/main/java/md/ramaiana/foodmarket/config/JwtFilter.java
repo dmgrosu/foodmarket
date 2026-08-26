@@ -118,6 +118,8 @@ public class JwtFilter extends OncePerRequestFilter {
 
     // Skip JWT filter for public endpoints
     return path.startsWith("/auth/register") ||
+        path.startsWith("/auth/confirmEmail") ||
+        path.startsWith("/auth/resendConfirmation") ||
         path.startsWith("/auth/login") ||
         path.startsWith("/client/findByIdno");
   }

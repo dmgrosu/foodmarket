@@ -160,6 +160,22 @@
       "submit": "Sign up",
       "haveAccount": "Already have an account? Sign in",
       "clientFound": "Found client: {{name}}, with IDNO: {{idno}}"
+    },
+    "checkEmail": {
+      "title": "Check your email",
+      "sent": "We sent a confirmation link to {{email}}. Follow the link to confirm your registration.",
+      "notSent": "We could not send the email to {{email}}. Please try resending it.",
+      "resend": "Resend the email",
+      "resendSuccess": "Email resent"
+    },
+    "confirmEmail": {
+      "title": "Email confirmation",
+      "confirming": "Confirming your email…",
+      "success": "Email confirmed. Please wait for an administrator to activate your account.",
+      "invalid": "The confirmation link is invalid or has expired.",
+      "resend": "Send a new link",
+      "resendEmailLabel": "Email address",
+      "resendSubmit": "Send"
     }
   },
   "profile": {
