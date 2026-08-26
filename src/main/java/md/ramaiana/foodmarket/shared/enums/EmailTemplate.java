@@ -16,6 +16,12 @@ public enum EmailTemplate {
         Language.RU, "8297951",
         Language.RO, "8298384",
         Language.EN, "8298386"
+    )),
+
+    ACCOUNT_ACTIVATED(Map.of(
+        Language.RU, "0000000",
+        Language.RO, "0000000",
+        Language.EN, "0000000"
     ));
 
     private final Map<Language, String> idByLanguage;

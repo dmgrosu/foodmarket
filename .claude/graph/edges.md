@@ -12,6 +12,14 @@ Schema: `| from | rel | to | detail |`
 |---|---|---|---|
 | AccessVoter | throws | ForbiddenException | thrown by assertUserIsAdmin() when the user lacks Role.ADMIN |
 | AccessVoter | throws | UnauthorizedException | thrown when principal missing or not AppUserEntity |
+| AccountActivatedMailUseCase | injects | EmailSendUseCase | constructor injection |
+| AccountActivatedMailUseCase | injects | RegistrationProperties | constructor injection |
+| AppUserActivateRequestHandler | injects | AppUserActivateUseCase | constructor injection |
+| AppUserActivateRequestHandler | injects | ClientRepository | constructor injection, resolves the activated user's clientName |
+| AppUserActivateUseCase | injects | AccountActivatedMailUseCase | constructor injection |
+| AppUserActivateUseCase | injects | AppUserFindByIdUseCase | constructor injection |
+| AppUserActivateUseCase | injects | AppUserRepository | constructor injection |
+| AppUserActivateUseCase | throws | BadRequestException | user is not CONFIRMED |
 | AppUserDetailsService | implements | UserDetailsService | Spring Security loadUserByUsername |
 | AppUserDetailsService | injects | AppUserFindByEmailUseCase | constructor injection |
 | AppUserEntity | embeds | UserRoleRef | @MappedCollection(idColumn="user_id") Set<UserRoleRef> |
@@ -22,7 +30,12 @@ Schema: `| from | rel | to | detail |`
 | AppUserFindByEmailUseCase | throws | NotFoundException | user email not found |
 | AppUserFindByIdUseCase | injects | AppUserRepository | constructor injection |
 | AppUserFindByIdUseCase | throws | NotFoundException | user id not found |
+| AppUserRepository | extends | AppUserRepositoryCustom | composed custom repository fragment |
 | AppUserRepository | extends | CrudRepository | CrudRepository<AppUserEntity,Integer> |
+| AppUserRepositoryImpl | implements | AppUserRepositoryCustom | Spring Data JDBC repository composition via <Repo>Impl naming convention |
+| AppUserSearchUseCase | injects | AppUserRepository | constructor injection |
+| AppUserSearchUseCase | injects | ClientRepository | constructor injection, batched client-name resolution |
+| AppUserSearchUseCase | throws | BadRequestException | sort column outside the whitelist |
 | AuthAccessVoter | extends | AccessVoter | base voter class |
 | AuthAccessVoter | guards | AuthController#confirmEmail | assertCanConfirmEmail, public endpoint, no check |
 | AuthAccessVoter | guards | AuthController#login | assertCanLogin, public endpoint, no check |
@@ -58,22 +71,18 @@ Schema: `| from | rel | to | detail |`
 | BrandSearchUseCase | injects | BrandRepository | constructor injection |
 | ClientAccessVoter | extends | AccessVoter | inherits assertUserIsAuthenticated |
 | ClientAccessVoter | guards | ClientController#findByIdno | assertCanFindByIdno |
-| ClientAccessVoter | guards | ClientController#search | assertCanSearch, ADMIN only |
 | ClientAddressEntity | table | client_addresses | @Table("client_addresses") |
 | ClientController | injects | ClientAccessVoter | constructor injection |
-| ClientController | injects | ClientSearchUseCase | constructor injection |
+| ClientController | injects | ClientFindByIdnoUseCase | constructor injection |
 | ClientEntity | embeds | ClientAddressEntity | @MappedCollection(idColumn="client_id") Set<ClientAddressEntity> |
 | ClientEntity | embeds | ClientPhoneEntity | @MappedCollection(idColumn="client_id") Set<ClientPhoneEntity> |
 | ClientEntity | table | client | @Table("client") |
 | ClientFindByIdUseCase | injects | ClientRepository | constructor injection |
 | ClientFindByIdUseCase | throws | NotFoundException | client id not found |
+| ClientFindByIdnoUseCase | injects | ClientRepository | constructor injection |
+| ClientFindByIdnoUseCase | throws | NotFoundException | idno not found |
 | ClientPhoneEntity | table | client_phones | @Table("client_phones") |
-| ClientRepository | extends | ClientRepositoryCustom | composed custom repository fragment |
 | ClientRepository | extends | CrudRepository | CrudRepository<ClientEntity,Integer> |
-| ClientRepositoryImpl | implements | ClientRepositoryCustom | Spring Data JDBC repository composition via <Repo>Impl naming convention |
-| ClientSearchUseCase | injects | ClientRepository | constructor injection |
-| ClientSearchUseCase | throws | BadRequestException | sort column outside the whitelist |
-| ClientSearchUseCase | throws | NotFoundException | executeByIdno found no live client |
 | EmailSendUseCase | injects | MailjetAdapter | constructor injection |
 | ImportBalancesUseCase | injects | BalancesUpdateUseCase | CROSS-LAYER shared->product constructor injection |
 | ImportClientsUseCase | calls | ClientAddressEntity | CROSS-LAYER shared->client new ClientAddressEntity(...) |
@@ -205,6 +214,12 @@ Schema: `| from | rel | to | detail |`
 | StorageRepository | extends | CrudRepository | CrudRepository<StorageEntity,Integer> |
 | StorageSearchUseCase | injects | StorageRepository | constructor injection |
 | StorageSearchUseCase | throws | NotFoundException | storage erp code not found |
+| UserAccessVoter | extends | AccessVoter | inherits assertUserIsAuthenticated |
+| UserAccessVoter | guards | UserController#activate | assertCanActivate, ADMIN only |
+| UserAccessVoter | guards | UserController#search | assertCanSearch, ADMIN only |
+| UserController | injects | AppUserActivateRequestHandler | constructor injection |
+| UserController | injects | AppUserSearchUseCase | constructor injection |
+| UserController | injects | UserAccessVoter | constructor injection |
 | UserRoleRef | table | app_user_role | @Table("app_user_role") |
 
 ## Deliberately excluded

@@ -4,7 +4,7 @@ import {makeStyles} from "@material-ui/styles";
 import {connect} from "react-redux";
 import {Redirect} from "react-router-dom";
 import {useTranslation} from "react-i18next";
-import AdminClients from "./AdminClients";
+import AdminUsers from "./AdminUsers";
 import {isAdmin} from "../../store/selectors/authSelectors";
 
 const useStyles = makeStyles(theme => ({
@@ -31,7 +31,7 @@ const AdminDashboard = (props) => {
     return (
         <Container maxWidth="lg" className={classes.root}>
             <Typography variant="h5" className={classes.title}>{t('admin.title')}</Typography>
-            <AdminClients/>
+            <AdminUsers/>
         </Container>
     );
 };

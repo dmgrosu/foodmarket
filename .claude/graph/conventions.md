@@ -124,7 +124,9 @@ Table naming is inconsistent (singular `product`, `brand`, `order`; plural `pric
 
 ## Repository shape
 
-Interfaces extending `CrudRepository<E,Integer>` with derived query names, or `@Query` (`org.springframework.data.jdbc.repository.query.Query`) with `@Param` for joins. **There are no `*RepositoryImpl` files.** The single hand-written repository is `BalanceRepository`, a `@Repository` class over `JdbcTemplate`.
+Interfaces extending `CrudRepository<E,Integer>` with derived query names, or `@Query` (`org.springframework.data.jdbc.repository.query.Query`) with `@Param` for joins.
+
+Paged search with an optional filter is a **custom fragment**: `<Repo>Custom` declares the method, `<Repo>Impl` implements it over `JdbcAggregateOperations` (`Criteria` + `Query`, paging assembled from `findAll` + `count` via `PageableExecutionUtils.getPage`), and the main repository interface extends both `CrudRepository` and `<Repo>Custom`. Not `@Query`, because Spring Data JDBC rejects `Page` return types there; not a derived finder, because those cannot express an optional filter. `AppUserRepositoryImpl` is the current example. `BalanceRepository` is the other hand-written repository, a `@Repository` class over plain `JdbcTemplate` — reach for that shape only when the query is not a paged search.
 
 ## DTO style — split by age
 
@@ -153,6 +155,17 @@ Throw `shared/exception/http/{BadRequest,Forbidden,NotFound,Unauthorized}Excepti
 ## Schema changes
 
 **Every schema change edits both `src/main/resources/create_db.sql` and `src/test/resources/schema.sql`.** There is no migration tool. They are already out of sync — see `schema.md` Table B before touching either.
+
+## Integration test authentication
+
+`@WithMockUser` does not work against this codebase's authorization: it installs a Spring Security
+`User` as the principal, and every `AccessVoter` does `principal instanceof AppUserEntity` before
+looking at roles — so a mock principal is rejected at `getCurrentUser()` before any real authorization
+logic runs, and a test built on it proves the filter chain exists but nothing about the voter. This is
+why `shared/abstraction/MockedAuthenticationController` exists: `authenticateAs(Role...)` persists a
+real `app_user` row and mints a real JWT via `JwtCreateTokenUseCase`, so `post()`/`get()`/`put()` carry
+an `Authorization` header the voters actually accept. Controller integration tests extend it rather
+than rolling their own `@WithMockUser` setup.
 
 ## Deviations from the above that already exist
 

@@ -41,7 +41,7 @@ class RegistrationTokenIssueUseCaseTest {
     @Test
     void execute_should_expire_prior_tokens_issue_a_new_one_and_build_the_confirmation_url() {
         RegistrationProperties properties = new RegistrationProperties(
-            "https://app.example.com/confirmEmail", 24, 60);
+            "https://app.example.com/confirmEmail", 24, 60, "https://app.example.com/signIn");
         RegistrationTokenIssueUseCase useCase = new RegistrationTokenIssueUseCase(
             registrationTokenRepository, secureTokenGenerator, properties);
         AppUserEntity user = new AppUserEntity(1, "user@example.com", "hash",

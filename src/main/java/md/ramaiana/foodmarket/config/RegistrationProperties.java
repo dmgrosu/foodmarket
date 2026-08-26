@@ -24,7 +24,14 @@ public record RegistrationProperties(
     /**
      * How long a user must wait between two confirmation emails.
      */
-    int resendCooldownSeconds
+    int resendCooldownSeconds,
+
+    /**
+     * Frontend sign-in page, linked from the account-activated email. Sits under this prefix because
+     * activation is the last step of registration; a third frontend URL would be the moment to split
+     * these into a dedicated FrontendProperties record.
+     */
+    @NonNull String loginPageUrl
 ) {
 
     public RegistrationProperties {
@@ -36,6 +43,9 @@ public record RegistrationProperties(
         }
         if (resendCooldownSeconds < 0) {
             throw new IllegalStateException("registration.resend-cooldown-seconds must not be negative");
+        }
+        if (loginPageUrl.isBlank()) {
+            throw new IllegalStateException("registration.login-page-url must be configured");
         }
     }
 }
