@@ -234,7 +234,8 @@
     "email": "Email",
     "state": "Статус",
     "clientName": "Клиент",
-    "createdAt": "Дата регистрации"
+    "createdAt": "Дата регистрации",
+    "actions": "Действия"
    },
    "states": {
     "PENDING_CONFIRMATION": "Ожидает подтверждения почты",

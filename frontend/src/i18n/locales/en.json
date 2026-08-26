@@ -234,7 +234,8 @@
     "email": "Email",
     "state": "State",
     "clientName": "Client",
-    "createdAt": "Registered"
+    "createdAt": "Registered",
+    "actions": "Actions"
    },
    "states": {
     "PENDING_CONFIRMATION": "Awaiting email confirmation",

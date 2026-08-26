@@ -45,7 +45,7 @@ const AdminUsers = () => {
         {id: "createdAt", label: t('admin.users.columns.createdAt'),
             render: row => new Date(row.createdAt).toLocaleDateString()},
         {
-            id: "actions", label: "", sortable: false,
+            id: "actions", label: t('admin.users.columns.actions'), sortable: false,
             render: row => row.state === "CONFIRMED" && (
                 <Tooltip title={t('admin.users.activate.action')}>
                     <IconButton size="small" color="primary" onClick={() => setUserToActivate(row)}>
@@ -71,6 +71,7 @@ const AdminUsers = () => {
                     label={t('admin.users.filterByState')}
                     value={state}
                     onChange={event => setState(event.target.value)}
+                    displayEmpty
                 >
                     <MenuItem value="">{t('common.all')}</MenuItem>
                     {STATE_OPTIONS.map(option => (
