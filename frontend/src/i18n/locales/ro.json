@@ -234,7 +234,8 @@
     "email": "Email",
     "state": "Stare",
     "clientName": "Client",
-    "createdAt": "Data înregistrării"
+    "createdAt": "Data înregistrării",
+    "actions": "Acțiuni"
    },
    "states": {
     "PENDING_CONFIRMATION": "Așteaptă confirmarea e-mailului",
