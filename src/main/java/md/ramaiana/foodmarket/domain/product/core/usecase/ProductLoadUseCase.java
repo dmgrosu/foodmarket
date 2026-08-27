@@ -84,9 +84,8 @@ public class ProductLoadUseCase {
      * A code can be referred to without being declared in the {@code <groups>} block - the ERP export
      * names only the groups it mirrors from products, and leaves the codes those actually hang under
      * undeclared. Such a code is still a real group: it is what {@code product.groupCode} points at, so
-     * dropping it would leave every product in the catalogue ungrouped. Its name is derived from the
-     * products filed under it (see {@link ProductGroupNaming}), falling back to the ERP code; either
-     * way a name the export declares later wins, because the upsert reads the declared one first.
+     * dropping it would leave every product in the catalogue ungrouped. It is created with the ERP code
+     * standing in for the name until an export declares one, at which point the upsert picks it up.
      * <p>
      * A parent that cannot be resolved makes the group a root rather than discarding it.
      */
@@ -101,77 +100,11 @@ public class ProductLoadUseCase {
             }
         }
 
-        Map<String, List<String>> productNamesByGroup = productNamesByGroup(readResult);
-
         Map<String, ProductGroupEntity> updatedGroups = new HashMap<>();
         for (String erpCode : allErpCodes) {
-            upsertGroupTree(erpCode, declaredGroups, erpCodes, productNamesByGroup, updatedGroups,
-                    new LinkedHashSet<>());
+            upsertGroupTree(erpCode, declaredGroups, erpCodes, updatedGroups, new LinkedHashSet<>());
         }
         return updatedGroups;
-    }
-
-    /**
-     * Gives the groups the ERP left at the top level a parent, so the catalogue is a tree rather
-     * than several hundred loose entries.
-     * <p>
-     * The only hierarchy available is the one in the names: products are named category-first, so
-     * groups whose derived names start with the same word belong together — ПОСУДА ЧАШКА, ПОСУДА
-     * СТАКАН and ПОСУДА ТАРЕЛКА under ПОСУДА. A group the ERP did place stays where it put it, and
-     * a declared parent overwrites this on the next import.
-     *
-     * @return how many folders the roots ended up under.
-     */
-    private int bucketRootsIntoDerivedFolders(Map<String, ProductGroupEntity> savedGroups) {
-        Map<String, List<ProductGroupEntity>> rootsByFirstWord = new LinkedHashMap<>();
-        for (ProductGroupEntity group : savedGroups.values()) {
-            if (group.hasParent()) {
-                continue;
-            }
-            String firstWord = firstWordOf(group.getName());
-            if (firstWord != null) {
-                rootsByFirstWord.computeIfAbsent(firstWord, word -> new ArrayList<>()).add(group);
-            }
-        }
-
-        int folders = 0;
-        for (Map.Entry<String, List<ProductGroupEntity>> byWord : rootsByFirstWord.entrySet()) {
-            List<ProductGroupEntity> roots = byWord.getValue();
-            if (roots.size() < MIN_GROUPS_PER_DERIVED_FOLDER) {
-                continue;
-            }
-            ProductGroupEntity folder = upsertGroup(
-                    DERIVED_FOLDER_ERP_PREFIX + byWord.getKey(), byWord.getKey(), null);
-            for (ProductGroupEntity root : roots) {
-                productGroupRepository.save(root.withParentGroupId(folder.getId()));
-            }
-            folders++;
-        }
-        return folders;
-    }
-
-    @Nullable
-    private String firstWordOf(String name) {
-        String[] words = name.trim().split("\\s+");
-        return words.length == 0 || words[0].isBlank() ? null : words[0];
-    }
-
-    /**
-     * The names of the products filed under each group code, which is what an undeclared group's
-     * name is derived from.
-     */
-    private Map<String, List<String>> productNamesByGroup(ProductReadResult readResult) {
-        Map<String, String[]> erpCodes = readResult.getErpCodes();
-        Map<String, List<String>> namesByGroup = new HashMap<>();
-        for (Map.Entry<String, ProductEntity> product : readResult.getProducts().entrySet()) {
-            String[] codes = erpCodes.get(product.getKey());
-            String groupErpCode = codes == null ? null : codes[0];
-            if (hasText(groupErpCode)) {
-                namesByGroup.computeIfAbsent(groupErpCode, key -> new ArrayList<>())
-                        .add(product.getValue().getName());
-            }
-        }
-        return namesByGroup;
     }
 
     /**
@@ -183,7 +116,6 @@ public class ProductLoadUseCase {
     private ProductGroupEntity upsertGroupTree(String erpCode,
                                                Map<String, ProductGroupEntity> declaredGroups,
                                                Map<String, String[]> erpCodes,
-                                               Map<String, List<String>> productNamesByGroup,
                                                Map<String, ProductGroupEntity> updatedGroups,
                                                Set<String> branch) {
         ProductGroupEntity alreadySaved = updatedGroups.get(erpCode);
@@ -198,11 +130,12 @@ public class ProductLoadUseCase {
         String parentErp = codes == null ? null : codes[0];
         Integer parentGroupId = null;
         if (hasText(parentErp) && !parentErp.equals(erpCode)) {
-            ProductGroupEntity parent = upsertGroupTree(parentErp, declaredGroups, erpCodes,
-                    productNamesByGroup, updatedGroups, branch);
+            ProductGroupEntity parent =
+                    upsertGroupTree(parentErp, declaredGroups, erpCodes, updatedGroups, branch);
             parentGroupId = parent == null ? null : parent.getId();
         }
-        String name = nameFor(erpCode, declaredGroups.get(erpCode), productNamesByGroup);
+        ProductGroupEntity declaredGroup = declaredGroups.get(erpCode);
+        String name = declaredGroup == null ? erpCode : declaredGroup.getName();
         ProductGroupEntity savedGroup = upsertGroup(erpCode, name, parentGroupId);
         updatedGroups.put(erpCode, savedGroup);
         branch.remove(erpCode);

@@ -10,6 +10,7 @@ import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.Instant;
 import java.util.Objects;
+import java.util.Objects;
 
 @Getter
 @Table("product_group")
@@ -71,6 +72,19 @@ public class ProductGroupEntity {
                 Instant.now(),
                 this.deletedAt
         );
+    }
+
+    public void addChildIfAbsent(ProductGroupEntity child) {
+        if (child == null) {
+            return;
+        }
+        if (!this.childGroups.contains(child)) {
+            this.childGroups.add(child);
+        }
+    }
+
+    public boolean hasChildren() {
+        return !childGroups.isEmpty();
     }
 
     public boolean hasParent() {
