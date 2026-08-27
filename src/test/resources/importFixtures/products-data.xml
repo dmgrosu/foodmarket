@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="Windows-1251"?>
+<catalog>
+	<groups>
+		<group parentCode="001242" name="ASCANIA СОУС кисло-сладк 200гр 1 30" code="00003715"/>
+		<group parentCode="001242" name="ASCANIA СОУС чесноч 200гр 1 30" code="33216106106"/>
+		<group parentCode="00001842" name="ASCANIA ТОППИНГ карамель 390 гр  1 10" code="00001843"/>
+		<group parentCode="00001842" name="ASCANIA ТОППИНГ шоколад 395 гр 1 10" code="00001844"/>
+		<group parentCode="419183" name="ASCANIA ЧАЙ-КОНЦЕТРАТ 375гр Лайм+бергамот   ТУБ 1 10" code="54135601361"/>
+		<group parentCode="419183" name="ASCANIA ЧАЙ-КОНЦЕТРАТ 385гр Облепиха+имбирь   ТУБ 1 10" code="45103610616"/>
+		<group parentCode="419183" name="ASCANIA ЧАЙ-КОНЦЕТРАТ 390гр Малина + мята   ТУБ 1 10" code="52136016106"/>
+		<group parentCode="419183" name="ASCANIA ЧАЙ-КОНЦЕТРАТ 390гр Смородина+базилик  ТУБ 1 10" code="42510301361"/>
+		<group parentCode="419183" name="ASCANIA ЧАЙ-КОНЦЕТРАТ 400гр Апельсин -мята   ТУБ 1 10" code="42510631056"/>
+		<group parentCode="419183" name="ASCANIA ЧАЙ-КОНЦЕТРАТ 405гр Имбирь+лемонграсс  ТУБ 1 10" code="45103156106"/>
+		<group parentCode="419183" name="ASCANIA ЧАЙ-КОНЦЕТРАТ Ананас-груша  50гр 1*12 САШЕ" code="58136521356"/>
+		<group parentCode="419183" name="ASCANIA ЧАЙ-КОНЦЕТРАТ Апельсин -мята 50гр 1*12 САШЕ" code="419184"/>
+	</groups>
+	<brands>
+		<brand code="BUH-013" name="empty"/>
+		<brand code="R01-039" name="Украина"/>
+		<brand code="R01-016" name="Цариград"/>
+	</brands>
+	<products>
+		<product code="00003715" name="ASCANIA СОУС кисло-сладк 200гр 1 30" brandCode="BUH-013" groupCode="001242" weight="0.2" unit="buc" packSize="30">
+			<codes>
+				<code name="barCode" value="4820283940062"/>
+			</codes>
+			<prices>
+				<price storageCode="2" type="LOCAL" price="11.9"/>
+				<price storageCode="3" type="LOCAL" price="11.9"/>
+				<price storageCode="1" type="LOCAL" price="11.9"/>
+				<price storageCode="5" type="LOCAL" price="11.9"/>
+				<price storageCode="7" type="LOCAL" price="11.9"/>
+				<price storageCode="1" type="RETAIL_ZONE1" price="12.9"/>
+				<price storageCode="7" type="RETAIL_ZONE2" price="12.9"/>
+			</prices>
+		</product>
+		<product code="33216106106" name="ASCANIA СОУС чесноч 200гр 1 30" brandCode="BUH-013" groupCode="001242" weight="0.2" unit="buc" packSize="30">
+			<codes>
+				<code name="barCode" value="4820283940055"/>
+			</codes>
+			<prices>
+				<price storageCode="1" type="LOCAL" price="11.9"/>
+				<price storageCode="2" type="LOCAL" price="11.9"/>
+				<price storageCode="3" type="LOCAL" price="11.9"/>
+				<price storageCode="5" type="LOCAL" price="11.9"/>
+				<price storageCode="7" type="LOCAL" price="11.9"/>
+				<price storageCode="1" type="RETAIL_ZONE1" price="12.9"/>
+				<price storageCode="7" type="RETAIL_ZONE2" price="12.9"/>
+			</prices>
+		</product>
+		<product code="00001843" name="ASCANIA ТОППИНГ карамель 390 гр  1 10" brandCode="R01-016" groupCode="00001842" weight="0.39" unit="buc" packSize="10">
+			<codes>
+				<code name="barCode" value="4820071648286"/>
+			</codes>
+			<prices>
+				<price storageCode="2" type="LOCAL" price="36.9"/>
+				<price storageCode="1" type="LOCAL" price="36.9"/>
+				<price storageCode="5" type="LOCAL" price="36.9"/>
+				<price storageCode="3" type="LOCAL" price="36.9"/>
+				<price storageCode="7" type="LOCAL" price="35.9"/>
+				<price storageCode="9" type="LOCAL" price="35.9"/>
+				<price storageCode="1" type="RETAIL_ZONE1" price="36.9"/>
+				<price storageCode="7" type="RETAIL_ZONE2" price="36.9"/>
+			</prices>
+		</product>
+		<product code="00001844" name="ASCANIA ТОППИНГ шоколад 395 гр 1 10" brandCode="R01-016" groupCode="00001842" weight="0.4" unit="buc" packSize="10">
+			<codes>
+				<code name="barCode" value="4820071648279"/>
+			</codes>
+			<prices>
+				<price storageCode="1" type="LOCAL" price="36.9"/>
+				<price storageCode="2" type="LOCAL" price="36.9"/>
+				<price storageCode="3" type="LOCAL" price="36.9"/>
+				<price storageCode="5" type="LOCAL" price="36.9"/>
+				<price storageCode="7" type="LOCAL" price="35.9"/>
+				<price storageCode="9" type="LOCAL" price="35.9"/>
+				<price storageCode="1" type="RETAIL_ZONE1" price="36.9"/>
+				<price storageCode="7" type="RETAIL_ZONE2" price="36.9"/>
+			</prices>
+		</product>
+		<product code="54135601361" name="ASCANIA ЧАЙ-КОНЦЕТРАТ 375гр Лайм+бергамот   ТУБ 1 10" brandCode="R01-039" groupCode="419183" weight="0.3" unit="buc" packSize="10">
+			<codes>
+				<code name="barCode" value="4820071649511"/>
+			</codes>
+			<prices>
+				<price storageCode="4" type="LOCAL" price="41.9"/>
+				<price storageCode="1" type="LOCAL" price="47.9"/>
+				<price storageCode="2" type="LOCAL" price="47.9"/>
+				<price storageCode="3" type="LOCAL" price="47.9"/>
+				<price storageCode="5" type="LOCAL" price="47.9"/>
+				<price storageCode="7" type="LOCAL" price="47.9"/>
+				<price storageCode="9" type="LOCAL" price="47.9"/>
+				<price storageCode="1" type="RETAIL_ZONE1" price="49.9"/>
+				<price storageCode="7" type="RETAIL_ZONE2" price="49.9"/>
+			</prices>
+		</product>
+		<product code="45103610616" name="ASCANIA ЧАЙ-КОНЦЕТРАТ 385гр Облепиха+имбирь   ТУБ 1 10" brandCode="R01-039" groupCode="419183" weight="0.3" unit="buc" packSize="10">
+			<codes>
+				<code name="barCode" value="4820071649498"/>
+			</codes>
+			<prices>
+				<price storageCode="1" type="LOCAL" price="52.9"/>
+				<price storageCode="2" type="LOCAL" price="52.9"/>
+				<price storageCode="3" type="LOCAL" price="52.9"/>
+				<price storageCode="5" type="LOCAL" price="52.9"/>
+				<price storageCode="7" type="LOCAL" price="52.9"/>
+				<price storageCode="9" type="LOCAL" price="52.9"/>
+				<price storageCode="1" type="RETAIL_ZONE1" price="54.9"/>
+				<price storageCode="7" type="RETAIL_ZONE2" price="54.9"/>
+			</prices>
+		</product>
+		<product code="52136016106" name="ASCANIA ЧАЙ-КОНЦЕТРАТ 390гр Малина + мята   ТУБ 1 10" brandCode="R01-039" groupCode="419183" weight="0.4" unit="buc" packSize="10">
+			<codes>
+				<code name="barCode" value="4820071649481"/>
+			</codes>
+			<prices>
+				<price storageCode="2" type="LOCAL" price="47.9"/>
+				<price storageCode="4" type="LOCAL" price="46.9"/>
+				<price storageCode="1" type="LOCAL" price="47.9"/>
+				<price storageCode="3" type="LOCAL" price="47.9"/>
+				<price storageCode="5" type="LOCAL" price="47.9"/>
+				<price storageCode="7" type="LOCAL" price="47.9"/>
+				<price storageCode="1" type="RETAIL_ZONE1" price="49.9"/>
+				<price storageCode="7" type="RETAIL_ZONE2" price="49.9"/>
+			</prices>
+		</product>
+		<product code="42510301361" name="ASCANIA ЧАЙ-КОНЦЕТРАТ 390гр Смородина+базилик  ТУБ 1 10" brandCode="R01-039" groupCode="419183" weight="0.3" unit="buc" packSize="10">
+			<codes>
+				<code name="barCode" value="4820071649504"/>
+			</codes>
+			<prices>
+				<price storageCode="1" type="LOCAL" price="52.9"/>
+				<price storageCode="2" type="LOCAL" price="52.9"/>
+				<price storageCode="3" type="LOCAL" price="52.9"/>
+				<price storageCode="5" type="LOCAL" price="52.9"/>
+				<price storageCode="7" type="LOCAL" price="52.9"/>
+				<price storageCode="9" type="LOCAL" price="52.9"/>
+				<price storageCode="1" type="RETAIL_ZONE1" price="54.9"/>
+				<price storageCode="7" type="RETAIL_ZONE2" price="54.9"/>
+			</prices>
+		</product>
+		<product code="42510631056" name="ASCANIA ЧАЙ-КОНЦЕТРАТ 400гр Апельсин -мята   ТУБ 1 10" brandCode="R01-039" groupCode="419183" weight="0.4" unit="buc" packSize="10">
+			<codes>
+				<code name="barCode" value="4820071649467"/>
+			</codes>
+			<prices>
+				<price storageCode="1" type="LOCAL" price="47.9"/>
+				<price storageCode="2" type="LOCAL" price="47.9"/>
+				<price storageCode="3" type="LOCAL" price="47.9"/>
+				<price storageCode="5" type="LOCAL" price="47.9"/>
+				<price storageCode="7" type="LOCAL" price="47.9"/>
+				<price storageCode="9" type="LOCAL" price="47.9"/>
+				<price storageCode="1" type="RETAIL_ZONE1" price="49.9"/>
+				<price storageCode="7" type="RETAIL_ZONE2" price="49.9"/>
+			</prices>
+		</product>
+		<product code="45103156106" name="ASCANIA ЧАЙ-КОНЦЕТРАТ 405гр Имбирь+лемонграсс  ТУБ 1 10" brandCode="R01-039" groupCode="419183" weight="0.405" unit="buc" packSize="10">
+			<codes>
+				<code name="barCode" value="4820071649474"/>
+			</codes>
+			<prices>
+				<price storageCode="4" type="LOCAL" price="46"/>
+				<price storageCode="1" type="LOCAL" price="47.9"/>
+				<price storageCode="2" type="LOCAL" price="47.9"/>
+				<price storageCode="3" type="LOCAL" price="47.9"/>
+				<price storageCode="5" type="LOCAL" price="47.9"/>
+				<price storageCode="7" type="LOCAL" price="47.9"/>
+				<price storageCode="9" type="LOCAL" price="47.9"/>
+				<price storageCode="1" type="RETAIL_ZONE1" price="49.9"/>
+				<price storageCode="7" type="RETAIL_ZONE2" price="49.9"/>
+			</prices>
+		</product>
+		<product code="58136521356" name="ASCANIA ЧАЙ-КОНЦЕТРАТ Ананас-груша  50гр 1*12 САШЕ" brandCode="R01-039" groupCode="419183" weight="0.05" unit="buc" packSize="12">
+			<codes>
+				<code name="barCode" value="4820071648354"/>
+			</codes>
+			<prices>
+				<price storageCode="2" type="LOCAL" price="8.9"/>
+				<price storageCode="1" type="LOCAL" price="8.9"/>
+				<price storageCode="3" type="LOCAL" price="8.9"/>
+				<price storageCode="5" type="LOCAL" price="8.9"/>
+				<price storageCode="7" type="LOCAL" price="8.9"/>
+				<price storageCode="9" type="LOCAL" price="8.9"/>
+				<price storageCode="1" type="RETAIL_ZONE1" price="8.9"/>
+				<price storageCode="7" type="RETAIL_ZONE2" price="8.9"/>
+			</prices>
+		</product>
+		<product code="419184" name="ASCANIA ЧАЙ-КОНЦЕТРАТ Апельсин -мята 50гр 1*12 САШЕ" brandCode="R01-039" groupCode="419183" weight="0.05" unit="buc" packSize="12">
+			<codes>
+				<code name="barCode" value="4820071646251"/>
+			</codes>
+			<prices>
+				<price storageCode="1" type="LOCAL" price="8.9"/>
+				<price storageCode="2" type="LOCAL" price="8.9"/>
+				<price storageCode="3" type="LOCAL" price="8.9"/>
+				<price storageCode="5" type="LOCAL" price="8.9"/>
+				<price storageCode="7" type="LOCAL" price="8.9"/>
+				<price storageCode="9" type="LOCAL" price="8.9"/>
+				<price storageCode="1" type="RETAIL_ZONE1" price="8.9"/>
+				<price storageCode="7" type="RETAIL_ZONE2" price="8.9"/>
+			</prices>
+		</product>
+	</products>
+</catalog>

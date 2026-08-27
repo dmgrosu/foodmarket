@@ -7,14 +7,16 @@ Ordered by severity. Re-verify before acting on any row; these were found by rea
 
 | # | where | what |
 |---|---|---|
-| 1 | `domain/product/data/BalanceRepository.java` | `updateBalances` runs a positional `insert into balances values (?,?,?)`. Prod's `balances` has an `id` column first, so the three binds land in `id,storage_id,product_id` and `quantity NOT NULL` is violated on every row. Test schema has exactly 3 columns so the SQL is correct there, and `BalancesUpdateUseCaseTest` mocks the repository — the nightly balance import is broken in prod with zero test signal. |
+| 1 | ~~`domain/product/data/BalanceRepository.java`~~ | **FIXED.** `updateBalances` names its columns, and `src/test/resources/schema.sql` now carries `balances.id`, so `ErpImportFlowTest` runs the statement against the production column list. |
 | 2 | `domain/order/data/OrderEntity.java`, `OrderItemEntity.java` | Both declare a non-transient `UUID uuid` field with **no `uuid` column in either SQL file**. Any write to `order`/`order_product` should fail on an unknown column. No test exercises those tables, so this is entirely uncovered. |
 | 3 | `src/main/resources/create_db.sql` | `app_user.email` has no unique index in prod (the test schema does). `AppUserRepository.findByEmail` returns `Optional` and will throw `IncorrectResultSizeDataAccessException` on the first duplicate registration. |
 | 4 | `create_db.sql` vs `src/test/resources/schema.sql` | Was 49 drifted columns; the auth/client blockers are now fixed — `app_user.state`/`deleted_at`, `app_user_role` (was `app_user_roles`), and `client.created_at`/`email` are all in the test schema, unblocking the auth controller integration tests and `AppUserRepositoryTest`. Roughly 40 columns still drift, mostly `timestamptz`-vs-`TIMESTAMP` and missing constraints/indexes — full table in `schema.md`. |
-| 5 | `shared/dataexchange/core/usecase/ImportProductsUseCase.java` | `toBrands` passes `BrandEntity(name, erpCode)` in swapped argument order. |
-| 6 | `shared/dataexchange/dto/ErpAddressDto.java` | Maps XML attribute `desrc`; fixtures write `descr`. `ImportClientsUseCaseTest` asserts `description` is `null` — the test encodes the bug rather than catching it. |
-| 7 | `shared/dataexchange/dto/ErpPhoneDto.java` | Declares `@XmlRootElement(name = "client")`. Harmless only because it is always a nested element. |
+| 5 | ~~`shared/dataexchange/core/usecase/ImportProductsUseCase.java`~~ | **FIXED.** `toBrands` passed `BrandEntity(name, erpCode)` swapped, so `brand.erp_code` held the brand name and no product ever resolved a brand. Covered by `ErpImportFlowTest`. |
+| 6 | ~~`shared/dataexchange/dto/ErpAddressDto.java`~~ | **FIXED.** Maps `descr`, which is what both the live export and the fixtures write; `ImportClientsUseCaseTest` now asserts the value instead of `null`. |
+| 7 | ~~`shared/dataexchange/dto/ErpPhoneDto.java`~~ | **FIXED.** Declares `@XmlRootElement(name = "phone")`. |
 | 8 | `domain/auth/core/usecase/JwtVerifyTokenUseCase.java` | Returns `null` on verification failure rather than throwing; the caller must remember to null-check. |
+| 8a | `domain/product/core/usecase/ProductLoadUseCase.java` | The per-product `catch` inside the method's own `@Transactional` cannot actually contain a repository failure: the repository's participating transaction is already marked rollback-only, so the run logs `... updated N products` and then dies at commit with `UnexpectedRollbackException`, and the ERP file is not deleted so the scheduler retries it forever. Nothing in the current export triggers it; a single unsaveable product would. |
+| 8b | the ERP `products-data.xml` export | Data-side, not code. Every `<group>` mirrors a product one-for-one (same `code`, same `name`, `parentCode` = the product's `groupCode`), and the 1,231 codes products are actually filed under are never declared with a name. `ProductLoadUseCase` creates them with the ERP code standing in for the name, so the catalogue shows `00016238` rather than a category name. Fixing it means changing what the ERP exports; the upsert picks up real names as soon as they appear. |
 | 28 | `domain/auth/data/AppUserEntity.java` | Never maps `deleted_at`, so `AppUserRepositoryImpl.search` (the admin user listing) cannot filter out soft-deleted users — they show up alongside live ones with no way to tell them apart. The retired `ClientRepositoryImpl.search` did filter `deletedAt is null`; this one does not, because there's nothing to filter on. |
 
 ## Security
@@ -32,14 +34,14 @@ Ordered by severity. Re-verify before acting on any row; these were found by rea
 | # | where | what |
 |---|---|---|
 | 14 | `OrderAddProductUseCase`, `OrderFindByIdUseCase`, `OrderSearchByPeriodUseCase` | `productRepository.findNameById(...)` is called once per order item inside a stream map. In `OrderSearchByPeriodUseCase` that is per item per order across a whole page. |
-| 15 | `ProductGroupSearchUseCase.getGroupsHierarchy` | Re-runs `findAllNonEmpty(storageId)` at every level of the recursion. |
+| 15 | ~~`ProductGroupSearchUseCase.getGroupsHierarchy`~~ | **FIXED.** `findAllNonEmpty(storageId)` is read once in `execute` and passed down. It used to run once per group visited — roughly 10k full-catalogue scans per request against the real ERP data. |
 | 16 | `ProductSearchUseCase.addAllParentsToMap` | One `findById` per ancestor per product. |
 
 ## Test integrity
 
 | # | where | what |
 |---|---|---|
-| 17 | the three `Import*UseCaseTest` classes | Each **writes its own XML fixture** in `@BeforeEach` into `src/test/resources/dataExchange/`, a directory that is not committed. Since the use case deletes the file on success, fixtures regenerate every run. This couples the tests to a relative CWD and makes them order- and state-sensitive. |
+| 17 | the three `Import*UseCaseTest` classes | *(Partly resolved: each now rewrites its fixture unconditionally instead of only when absent, so a run that left a stale file behind no longer poisons the next one, and none of the three boots a Spring context any more — they build the use case directly and are tagged `unit`.)* They still write into `src/test/resources/dataExchange/`, an uncommitted directory, so they remain coupled to a relative CWD. `ErpImportFlowTest` is the counterpart that runs the importers over real repositories, from committed fixtures in `src/test/resources/importFixtures/`. |
 | 18 | `src/test/resources/application.yml` | Scheduling is enabled app-wide, so `@SpringBootTest` runs fire the ERP importer against that folder every 3 seconds. |
 | 19 | `domain/storage/data/StorageRepositoryTest.java` | Cleans up with `delete()` in the test body instead of `@Transactional` rollback; a mid-test failure leaves rows behind. |
 | 20 | `.github/workflows/mavenTest.yml` | `actions/checkout@v2` and `actions/setup-java@v1`; the latter has no `distribution:` input, which modern JDK setup requires. Runs `mvn test` only — no `verify`, no frontend build, no coverage. |

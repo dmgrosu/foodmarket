@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="Windows-1251"?>
+<balance-data>
+	<balances>
+		<balance storageCode="1" productCode="419184" quantity="308"/>
+		<balance storageCode="1" productCode="45103156106" quantity="43"/>
+		<balance storageCode="1" productCode="45103610616" quantity="129"/>
+		<balance storageCode="1" productCode="58136521356" quantity="29"/>
+		<balance storageCode="2" productCode="419184" quantity="27"/>
+		<balance storageCode="2" productCode="45103610616" quantity="20"/>
+		<balance storageCode="2" productCode="58136521356" quantity="53"/>
+		<balance storageCode="3" productCode="419184" quantity="84"/>
+		<balance storageCode="3" productCode="58136521356" quantity="24"/>
+		<balance storageCode="5" productCode="419184" quantity="72"/>
+		<balance storageCode="5" productCode="42510631056" quantity="10"/>
+		<balance storageCode="5" productCode="45103156106" quantity="20"/>
+		<balance storageCode="5" productCode="54135601361" quantity="10"/>
+		<balance storageCode="5" productCode="45103610616" quantity="10"/>
+		<balance storageCode="5" productCode="42510301361" quantity="4"/>
+		<balance storageCode="5" productCode="52136016106" quantity="20"/>
+		<balance storageCode="5" productCode="58136521356" quantity="48"/>
+		<balance storageCode="7" productCode="419184" quantity="132"/>
+		<balance storageCode="7" productCode="42510631056" quantity="3"/>
+		<balance storageCode="7" productCode="45103156106" quantity="17"/>
+	</balances>
+</balance-data>

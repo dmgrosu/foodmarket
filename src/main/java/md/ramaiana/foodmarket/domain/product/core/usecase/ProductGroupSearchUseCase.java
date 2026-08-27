@@ -31,7 +31,8 @@ public class ProductGroupSearchUseCase {
   @NonNull
   @Transactional(readOnly = true)
   public ProductListResponse execute(@Nullable Integer storageId, @Nullable Integer parentGroupId) {
-    List<ProductGroupEntity> groups = getGroupsHierarchy(storageId, parentGroupId);
+    Set<ProductGroupEntity> nonEmptyGroups = productGroupRepository.findAllNonEmpty(storageId);
+    List<ProductGroupEntity> groups = getGroupsHierarchy(parentGroupId, nonEmptyGroups);
     List<ProductGroupResponse> groupResponses = groups.stream()
         .map(ProductGroupResponse::new)
         .collect(Collectors.toList());
@@ -39,19 +40,22 @@ public class ProductGroupSearchUseCase {
     return new ProductListResponse(Collections.emptyList(), groupResponses);
   }
 
+  /**
+   * {@code nonEmptyGroups} is passed down rather than re-read: it does not vary with the level being
+   * walked, and the query behind it scans the whole catalogue once per call.
+   */
   @NonNull
-  private List<ProductGroupEntity> getGroupsHierarchy(@Nullable Integer storageId, @Nullable Integer parentGroupId) {
+  private List<ProductGroupEntity> getGroupsHierarchy(@Nullable Integer parentGroupId,
+                                                      @NonNull Set<ProductGroupEntity> nonEmptyGroups) {
     Sort sort = Sort.by(Sort.Direction.ASC, "name");
     List<ProductGroupEntity> foundGroups = parentGroupId == null
         ? productGroupRepository.findByParentGroupIdIsNullAndDeletedAtIsNull(sort)
         : productGroupRepository.findByParentGroupIdAndDeletedAtIsNull(parentGroupId, sort);
 
-    Set<ProductGroupEntity> nonEmptyGroups = productGroupRepository.findAllNonEmpty(storageId);
-
     // Recursively load child groups and filter empty ones
     List<ProductGroupEntity> result = new ArrayList<>();
     for (ProductGroupEntity foundGroup : foundGroups) {
-      List<ProductGroupEntity> children = getGroupsHierarchy(storageId, foundGroup.getId());
+      List<ProductGroupEntity> children = getGroupsHierarchy(foundGroup.getId(), nonEmptyGroups);
       foundGroup.setChildGroups(children);
       if (!children.isEmpty() || nonEmptyGroups.contains(foundGroup)) {
         result.add(foundGroup);

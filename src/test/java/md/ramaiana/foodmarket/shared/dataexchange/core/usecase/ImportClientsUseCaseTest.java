@@ -5,20 +5,14 @@ import md.ramaiana.foodmarket.domain.client.data.ClientAddressEntity;
 import md.ramaiana.foodmarket.domain.client.data.ClientEntity;
 import md.ramaiana.foodmarket.domain.client.data.ClientRepository;
 import md.ramaiana.foodmarket.shared.enums.AddressType;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -33,64 +27,41 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.Mockito.*;
 
-@Tag("integration")
-@ExtendWith(SpringExtension.class)
+@Tag("unit")
 @ExtendWith(MockitoExtension.class)
-@TestPropertySource(locations = "classpath:application.yml")
 class ImportClientsUseCaseTest {
 
-    @TestConfiguration
-    static class TextConfig {
-        @Value("${dataFolderPath}")
-        private String folderPath;
+    private static final String EXCHANGE_FOLDER = "src/test/resources/dataExchange";
 
-        @Bean
-        public ImportClientsUseCase useCase() {
-            DataExchangeConfig config = new DataExchangeConfig();
-            ImportClientsUseCase useCase = new ImportClientsUseCase(config.unmarshaller(), clientRepository());
-            useCase.setExchangeFolderPath(folderPath);
-            return useCase;
-        }
-
-        @Bean
-        public ClientRepository clientRepository() {
-            return mock(ClientRepository.class);
-        }
-    }
-
-    @Autowired
-    ImportClientsUseCase useCase;
-    @Autowired
+    @Mock
     ClientRepository clientRepository;
     @Captor
     ArgumentCaptor<List<ClientEntity>> clientsCaptor;
-    Path path = Paths.get("src/test/resources/dataExchange/clients-data.xml");
+    ImportClientsUseCase useCase;
+    Path path = Paths.get(EXCHANGE_FOLDER, "clients-data.xml");
 
     @BeforeEach
     void setUp() throws Exception {
-        if (!Files.exists(path)) {
-            Files.createDirectories(path.getParent());
-            String xml = """
-                    <?xml version="1.0" encoding="Windows-1251"?>
-                    <clients-data>
-                        <clients>
-                            <client name="S.R.L Kaufland" idno="111111111111">
-                                <address type="LEGAL" address="Chisinau, Mircea cel Batran 1" descr=""/>
-                                <phone number="022111222" name="Office"/>
-                                <email>test@dot.md</email>
-                            </client>
-                            <client name="IMENSITATE SRL" idno="22222222222">
-                                <email>email1@test.md;email2@test.md</email>
-                            </client>
-                        </clients>
-                    </clients-data>""";
-            Files.writeString(path, xml);
-        }
-    }
+        useCase = new ImportClientsUseCase(new DataExchangeConfig().unmarshaller(), clientRepository);
+        // Deliberately without a trailing separator - the importer must not depend on one.
+        useCase.setExchangeFolderPath(EXCHANGE_FOLDER);
 
-    @AfterEach
-    void tearDown() {
-        reset(clientRepository);
+        Files.createDirectories(path.getParent());
+        String xml = """
+                <?xml version="1.0" encoding="Windows-1251"?>
+                <clients-data>
+                    <clients>
+                        <client name="S.R.L Kaufland" idno="111111111111">
+                            <address type="LEGAL" address="Chisinau, Mircea cel Batran 1" descr="Sediu central"/>
+                            <phone number="022111222" name="Office"/>
+                            <email>test@dot.md</email>
+                        </client>
+                        <client name="IMENSITATE SRL" idno="22222222222">
+                            <email>email1@test.md;email2@test.md</email>
+                        </client>
+                    </clients>
+                </clients-data>""";
+        Files.writeString(path, xml);
     }
 
     @Test
@@ -115,7 +86,7 @@ class ImportClientsUseCaseTest {
                         ClientAddressEntity::getFullAddress,
                         ClientAddressEntity::getDescription)
                 .containsExactly(
-                        tuple(AddressType.LEGAL, "Chisinau, Mircea cel Batran 1", null)
+                        tuple(AddressType.LEGAL, "Chisinau, Mircea cel Batran 1", "Sediu central")
                 );
         assertThat(Files.exists(path)).isFalse();
     }

@@ -18,7 +18,7 @@ public class BalanceRepository {
     public void updateBalances(final List<BalanceEntity> balances) {
         final int batchSize = 100;
         jdbcTemplate.execute("truncate table balances");
-        jdbcTemplate.batchUpdate("insert into balances values (?,?,?)",
+        jdbcTemplate.batchUpdate("insert into balances (storage_id, product_id, quantity) values (?,?,?)",
                 balances,
                 batchSize,
                 (PreparedStatement ps, BalanceEntity balance) -> {

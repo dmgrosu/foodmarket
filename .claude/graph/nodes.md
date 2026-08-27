@@ -85,12 +85,12 @@ Schema: `| id | kind | dir | api | note |` — `dir` omits the prefix `src/main/
 | EmailTemplate | enum | shared/enums | REGISTRATION_CONFIRMATION;getId(Language) | one Mailjet template id per Language; constructor rejects a language with no id at startup; sources in docs/mailjet/ |
 | EmailTemplateTest | enum | src/test/java/md/ramaiana/foodmarket/shared/enums | 3 tests: an id exists per language, ids are numeric, RU points at the imported template | test |
 | EmailTemplateVariables | abstract | domain/email/core/request | template()->EmailTemplate;language()->Language;variables()->Map | sealed interface, permits RegistrationConfirmationVariables |
-| ErpAddressDto | dto | shared/dataexchange/dto | type:AddressType;fullAddress:String;description:String | DEVIATION: description maps XML attribute "desrc" typo |
+| ErpAddressDto | dto | shared/dataexchange/dto | type:AddressType;fullAddress:String;description:String | description maps XML attribute "descr" |
 | ErpBalanceDto | dto | shared/dataexchange/dto | storageCode:String;productCode:String;quantity:float |  |
 | ErpBrandDto | dto | shared/dataexchange/dto | code:String;name:String |  |
 | ErpClientDto | dto | shared/dataexchange/dto | code:String;name:String;idno:String;addresses:List<ErpAddressDto>;phones:List<ErpPhoneDto>;email:String |  |
 | ErpGroupDto | dto | shared/dataexchange/dto | code:String;name:String;parentCode:String |  |
-| ErpPhoneDto | dto | shared/dataexchange/dto | number:String;name:String | DEVIATION: @XmlRootElement(name="client") should be "phone" |
+| ErpPhoneDto | dto | shared/dataexchange/dto | number:String;name:String |  |
 | ErpPriceDto | dto | shared/dataexchange/dto | storageCode:String;type:PriceType;price:float |  |
 | ErpProductCodeDto | dto | shared/dataexchange/dto | name:String;value:String |  |
 | ErpProductDto | dto | shared/dataexchange/dto | code:String;name:String;groupCode:String;brandCode:String;packSize:float;unit:String;weight:float;codes:List<ErpProductCodeDto>;prices:List<ErpPriceDto> |  |
@@ -103,11 +103,12 @@ Schema: `| id | kind | dir | api | note |` — `dir` omits the prefix `src/main/
 | Hero | fe-component | frontend/src/components/home | renders hero banner with CTA buttons |  |
 | Home | fe-component | frontend/src/components/home | composes home page sections | DEVIATION: default export named HomePage, not Home |
 | HowItWorks | fe-component | frontend/src/components/home | renders three-step how-it-works cards |  |
-| ImportBalancesUseCase | usecase | shared/dataexchange/core/usecase | execute()->void | reads balances-data.xml then deletes it |
+| ImportBalancesUseCase | usecase | shared/dataexchange/core/usecase | execute()->void | resolves balances-data.xml under dataFolderPath, then deletes it |
+| ErpImportFlowTest | usecase | src/test/java/md/ramaiana/foodmarket/shared/dataexchange | 8 tests: all three importers over real repositories | test; fixtures cut from the live export live in src/test/resources/importFixtures |
 | ImportBalancesUseCaseTest | usecase | src/test/java/md/ramaiana/foodmarket/shared/dataexchange/core/usecase | should_import_balances() | test; writes its own XML fixture |
-| ImportClientsUseCase | usecase | shared/dataexchange/core/usecase | execute()->void | reads clients-data.xml then deletes it |
+| ImportClientsUseCase | usecase | shared/dataexchange/core/usecase | execute()->void | resolves clients-data.xml under dataFolderPath, then deletes it; drops rows whose idno is blank or over 13 chars and collapses repeats |
 | ImportClientsUseCaseTest | usecase | src/test/java/md/ramaiana/foodmarket/shared/dataexchange/core/usecase | 2 tests: new clients, update existing | test; writes its own XML fixture |
-| ImportProductsUseCase | usecase | shared/dataexchange/core/usecase | execute()->void | DEVIATION: toBrands swaps BrandEntity(name,erpCode) args |
+| ImportProductsUseCase | usecase | shared/dataexchange/core/usecase | execute()->void | resolves products-data.xml under dataFolderPath, then deletes it; drops prices whose storage is unknown |
 | ImportProductsUseCaseTest | usecase | src/test/java/md/ramaiana/foodmarket/shared/dataexchange/core/usecase | should_import_products() | test; writes its own XML fixture |
 | JwtCreateTokenUseCase | usecase | domain/auth/core/usecase | execute(AppUserEntity)->String;getTokenValidityInSeconds()->int | DEVIATION: second public method; returns "Bearer "-prefixed token |
 | JwtFilter | config | config | doFilterInternal;shouldNotFilter | DEVIATION: not a @Component; instantiated manually in SecurityConfig |
@@ -153,10 +154,10 @@ Schema: `| id | kind | dir | api | note |` — `dir` omits the prefix `src/main/
 | ProductController | controller | domain/product/presentation/controller | listGroups(Integer,Integer)->ProductListResponse;listProducts(Integer,Integer,Integer,String)->ProductListResponse;search(Integer,Integer,Integer,String)->ProductListResponse | listProducts and search differ only in groupId being required |
 | ProductEntity | entity | domain/product/data | id:Integer;name:String;unit:String;inPackage:Float;erpCode:String;barCode:String;weight:Float;brandId:Integer;groupId:Integer;createdAt:Instant;deletedAt:Instant;updatedAt:Instant;prices:Set | inPackage maps to column "package"; equals/hashCode on id+erpCode |
 | ProductFindByErpCodeUseCase | usecase | domain/product/core/usecase | execute(String)->ProductEntity | DEVIATION: no @Transactional |
-| ProductGroupEntity | entity | domain/product/data | id:Integer;name:String;parentGroupId:Integer;childGroups:List;erpCode:String;createdAt:Instant;deletedAt:Instant;updatedAt:Instant;withName();withParentGroupId();idDeleted();addChildIfAbsent();hasChildren();hasParent() | DEVIATION: idDeleted() typo for isDeleted; no equals/hashCode despite Set use |
+| ProductGroupEntity | entity | domain/product/data | id:Integer;name:String;parentGroupId:Integer;childGroups:List;erpCode:String;createdAt:Instant;deletedAt:Instant;updatedAt:Instant;withName();withParentGroupId();idDeleted();addChildIfAbsent();hasChildren();hasParent() | DEVIATION: idDeleted() typo for isDeleted; equals/hashCode on id+erpCode |
 | ProductGroupRepository | repo | domain/product/data | findByParentGroupIdAndDeletedAtIsNull;findByParentGroupIdIsNullAndDeletedAtIsNull;existsByParentGroupId;findByErpCode;findAllNonEmpty |  |
 | ProductGroupResponse | response | domain/product/core/response | id:Integer;name:String;children:List<ProductGroupResponse>;products:List<ProductResponse> | products always empty when built from entity |
-| ProductGroupSearchUseCase | usecase | domain/product/core/usecase | execute(Integer,Integer)->ProductListResponse | re-runs findAllNonEmpty at every recursion level |
+| ProductGroupSearchUseCase | usecase | domain/product/core/usecase | execute(Integer,Integer)->ProductListResponse | reads findAllNonEmpty once and passes it down the recursion |
 | ProductListResponse | response | domain/product/core/response | products:List<ProductResponse>;groups:List<ProductGroupResponse> |  |
 | ProductLoadUseCase | usecase | domain/product/core/usecase | execute(ProductReadResult)->void | DEVIATION: bare @Transactional |
 | ProductReadResult | dto | shared/dataexchange/core/data | groups:Map;products:Map;brands:Map;erpCodes:Map | erpCodes value is String[]{parentCode,brandCode} |

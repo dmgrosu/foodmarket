@@ -9,13 +9,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -24,45 +19,29 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-@Tag("integration")
-@ExtendWith(SpringExtension.class)
+@Tag("unit")
 @ExtendWith(MockitoExtension.class)
-@TestPropertySource(locations = "classpath:application.yml")
 class ImportBalancesUseCaseTest {
-    @TestConfiguration
-    static class TextConfig {
-        @Value("${dataFolderPath}")
-        private String folderPath;
 
-        @Bean
-        public ImportBalancesUseCase useCase() {
-            DataExchangeConfig config = new DataExchangeConfig();
-            ImportBalancesUseCase useCase = new ImportBalancesUseCase(balancesUpdateUseCase(), config.unmarshaller());
-            useCase.setExchangeFolderPath(folderPath);
-            return useCase;
-        }
-        @Bean
-        public BalancesUpdateUseCase balancesUpdateUseCase() {
-            return mock(BalancesUpdateUseCase.class);
-        }
-    }
+    private static final String EXCHANGE_FOLDER = "src/test/resources/dataExchange";
 
-    @Autowired
-    ImportBalancesUseCase useCase;
-    @Autowired
+    @Mock
     BalancesUpdateUseCase balancesUpdate;
     @Captor
     ArgumentCaptor<List<ErpBalanceDto>> balancesCaptor;
-    Path path = Paths.get("src/test/resources/dataExchange/balances-data.xml");
+    ImportBalancesUseCase useCase;
+    Path path = Paths.get(EXCHANGE_FOLDER, "balances-data.xml");
 
     @BeforeEach
     void setUp() throws Exception {
-        if (!Files.exists(path)) {
-            Files.createDirectories(path.getParent());
-            String xml = """
+        useCase = new ImportBalancesUseCase(balancesUpdate, new DataExchangeConfig().unmarshaller());
+        // Deliberately without a trailing separator - the importer must not depend on one.
+        useCase.setExchangeFolderPath(EXCHANGE_FOLDER);
+
+        Files.createDirectories(path.getParent());
+        String xml = """
                     <?xml version="1.0" encoding="Windows-1251"?>
                     <balance-data>
                        <balances>
@@ -73,8 +52,7 @@ class ImportBalancesUseCaseTest {
                            <balance storageCode="4" productCode="1c555" quantity="188"/>
                        </balances>
                     </balance-data>""";
-            Files.writeString(path, xml);
-        }
+        Files.writeString(path, xml);
     }
 
     @Test

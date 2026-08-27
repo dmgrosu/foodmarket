@@ -66,23 +66,68 @@ public class ProductLoadUseCase {
         log.info("... data loading finished");
     }
 
+    /**
+     * Persists every group the file refers to, keyed by ERP code.
+     * <p>
+     * A code can be referred to without being declared in the {@code <groups>} block - the ERP export
+     * names only the groups it mirrors from products, and leaves the codes those actually hang under
+     * undeclared. Such a code is still a real group: it is what {@code product.groupCode} points at, so
+     * dropping it would leave every product in the catalogue ungrouped. It is created with the ERP code
+     * standing in for the name until an export declares one, at which point the upsert picks it up.
+     * <p>
+     * A parent that cannot be resolved makes the group a root rather than discarding it.
+     */
     private Map<String, ProductGroupEntity> updateGroups(ProductReadResult readResult) {
-        Map<String, ProductGroupEntity> newGroups = readResult.getGroups();
+        Map<String, ProductGroupEntity> declaredGroups = readResult.getGroups();
         Map<String, String[]> erpCodes = readResult.getErpCodes();
-        Map<String, ProductGroupEntity> updatedGroups = new HashMap<>();
-        for (ProductGroupEntity group : newGroups.values()) {
-            String parentErp = erpCodes.get(group.getErpCode())[0];
-            ProductGroupEntity savedGroup;
-            if (hasText(parentErp)) {
-                savedGroup = upsertGroupWithParent(group, newGroups.get(parentErp));
-            } else {
-                savedGroup = upsertGroupByErpCode(group);
-            }
-            if (savedGroup != null) {
-                updatedGroups.put(savedGroup.getErpCode(), savedGroup);
+
+        Set<String> allErpCodes = new LinkedHashSet<>(declaredGroups.keySet());
+        for (String[] codes : erpCodes.values()) {
+            if (hasText(codes[0])) {
+                allErpCodes.add(codes[0]);
             }
         }
+
+        Map<String, ProductGroupEntity> updatedGroups = new HashMap<>();
+        for (String erpCode : allErpCodes) {
+            upsertGroupTree(erpCode, declaredGroups, erpCodes, updatedGroups, new LinkedHashSet<>());
+        }
         return updatedGroups;
+    }
+
+    /**
+     * Saves {@code erpCode} after its parent, so the parent id is known by the time the child is
+     * written. {@code branch} carries the codes already being resolved further up the same chain and
+     * breaks a cycle in the ERP data by treating the group that closes it as a root.
+     */
+    @Nullable
+    private ProductGroupEntity upsertGroupTree(String erpCode,
+                                               Map<String, ProductGroupEntity> declaredGroups,
+                                               Map<String, String[]> erpCodes,
+                                               Map<String, ProductGroupEntity> updatedGroups,
+                                               Set<String> branch) {
+        ProductGroupEntity alreadySaved = updatedGroups.get(erpCode);
+        if (alreadySaved != null) {
+            return alreadySaved;
+        }
+        if (!branch.add(erpCode)) {
+            log.warn("Group {} is its own ancestor in the ERP data - importing it as a root", erpCode);
+            return null;
+        }
+        String[] codes = erpCodes.get(erpCode);
+        String parentErp = codes == null ? null : codes[0];
+        Integer parentGroupId = null;
+        if (hasText(parentErp) && !parentErp.equals(erpCode)) {
+            ProductGroupEntity parent =
+                    upsertGroupTree(parentErp, declaredGroups, erpCodes, updatedGroups, branch);
+            parentGroupId = parent == null ? null : parent.getId();
+        }
+        ProductGroupEntity declaredGroup = declaredGroups.get(erpCode);
+        String name = declaredGroup == null ? erpCode : declaredGroup.getName();
+        ProductGroupEntity savedGroup = upsertGroup(erpCode, name, parentGroupId);
+        updatedGroups.put(erpCode, savedGroup);
+        branch.remove(erpCode);
+        return savedGroup;
     }
 
     private Map<String, BrandEntity> updateBrands(Map<String, BrandEntity> newBrands) {
@@ -94,12 +139,13 @@ public class ProductLoadUseCase {
             String erpCode = brand.getErpCode();
             BrandEntity newBrand;
             if (existingBrands.containsKey(erpCode)) {
+                BrandEntity existingBrand = existingBrands.get(erpCode);
                 newBrand = new BrandEntity(
-                        existingBrands.get(erpCode).getId(),
+                        existingBrand.getId(),
                         brand.getName(),
                         brand.getErpCode(),
-                        brand.getCreatedAt(),
-                        brand.getDeletedAt()
+                        existingBrand.getCreatedAt(),
+                        existingBrand.getDeletedAt()
                 );
             } else {
                 newBrand = brand;
@@ -112,17 +158,10 @@ public class ProductLoadUseCase {
         return existingBrands;
     }
 
-    @Nullable
-    private ProductGroupEntity upsertGroupWithParent(ProductGroupEntity newGroup, ProductGroupEntity parentGroup) {
-        if (parentGroup == null) return null;
-        ProductGroupEntity savedParent = upsertGroupByErpCode(parentGroup);
-        return upsertGroupByErpCode(newGroup.withParentGroupId(savedParent.getId()));
-    }
-
-    private ProductGroupEntity upsertGroupByErpCode(ProductGroupEntity newGroup) {
-        return productGroupRepository.findByErpCode(newGroup.getErpCode())
-                .map(it -> productGroupRepository.save(it.withName(newGroup.getName())))
-                .orElseGet(() -> productGroupRepository.save(newGroup));
+    private ProductGroupEntity upsertGroup(String erpCode, String name, Integer parentGroupId) {
+        return productGroupRepository.findByErpCode(erpCode)
+                .map(it -> productGroupRepository.save(it.withName(name).withParentGroupId(parentGroupId)))
+                .orElseGet(() -> productGroupRepository.save(new ProductGroupEntity(name, parentGroupId, erpCode)));
     }
 
     private ProductEntity upsertProduct(ProductEntity newProduct) {

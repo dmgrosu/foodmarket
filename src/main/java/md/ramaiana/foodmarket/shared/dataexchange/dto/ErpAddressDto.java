@@ -19,6 +19,6 @@ public class ErpAddressDto {
     private AddressType type;
     @XmlAttribute(name = "address")
     private String fullAddress;
-    @XmlAttribute(name = "desrc")
+    @XmlAttribute(name = "descr")
     private String description;
 }
