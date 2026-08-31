@@ -189,17 +189,23 @@
   },
   "columns": {
    "name": "Denumire",
-   "price": "Preț",
+   "group": "Grupă",
+      "price": "Preț",
    "barCode": "Cod de bare",
    "package": "Ambalaj",
    "unit": "U.M."
   },
   "groups": {
-   "noGroupsFound": "Nu au fost găsite grupe"
-  },
-  "addToCart": {
-   "title": "Adăugare în coș",
-   "prompt": "Indicați cantitatea dorită"
+   "noGroupsFound": "Nu au fost găsite grupe",
+      "loading": "Se încarcă…"
+    },
+    "addToCart": {
+      "title": "Adăugare în coș",
+      "prompt": "Indicați cantitatea dorită"
+    },
+    "table": {
+      "rowsPerPage": "Rânduri pe pagină:",
+      "displayedRows": "{{from}}–{{to}} din {{count}}"
   }
  },
  "cart": {

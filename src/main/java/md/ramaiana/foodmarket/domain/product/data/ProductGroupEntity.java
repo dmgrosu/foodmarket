@@ -3,16 +3,12 @@ package md.ramaiana.foodmarket.domain.product.data;
 import jakarta.annotation.Nullable;
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.PersistenceCreator;
-import org.springframework.data.annotation.Transient;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 @Getter
@@ -26,9 +22,6 @@ public class ProductGroupEntity {
     @Nullable
     @Column("parent_group_id")
     private final Integer parentGroupId;
-    @Transient
-    @Setter
-    private List<ProductGroupEntity> childGroups = new ArrayList<>();
     @Nullable
     private final String erpCode;
     @NonNull
@@ -78,19 +71,6 @@ public class ProductGroupEntity {
                 Instant.now(),
                 this.deletedAt
         );
-    }
-
-    public void addChildIfAbsent(ProductGroupEntity child) {
-        if (child == null) {
-            return;
-        }
-        if (!this.childGroups.contains(child)) {
-            this.childGroups.add(child);
-        }
-    }
-
-    public boolean hasChildren() {
-        return !childGroups.isEmpty();
     }
 
     public boolean hasParent() {

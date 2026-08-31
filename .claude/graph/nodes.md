@@ -151,20 +151,24 @@ Schema: `| id | kind | dir | api | note |` — `dir` omits the prefix `src/main/
 | PriceResponse | response | domain/price/core/response | type:String;price:float |  |
 | PriceType | enum | shared/enums | LOCAL;RETAIL_ZONE1;RETAIL_ZONE2;RETAIL_ZONE3;SALE |  |
 | ProductAccessVoter | voter | domain/product/presentation/voter | assertCanListGroups();assertCanListProducts();assertCanSearch() |  |
-| ProductController | controller | domain/product/presentation/controller | listGroups(Integer,Integer)->ProductListResponse;listProducts(Integer,Integer,Integer,String)->ProductListResponse;search(Integer,Integer,Integer,String)->ProductListResponse | listProducts and search differ only in groupId being required |
+| ProductController | controller | domain/product/presentation/controller | listGroups(Integer,Integer)->List<ProductGroupResponse>;search(Integer,Integer,Integer,String,int,int,String,Sort.Direction)->PagedResponse<ProductResponse> | one paged product endpoint; every filter on it is optional |
 | ProductEntity | entity | domain/product/data | id:Integer;name:String;unit:String;inPackage:Float;erpCode:String;barCode:String;weight:Float;brandId:Integer;groupId:Integer;createdAt:Instant;deletedAt:Instant;updatedAt:Instant;prices:Set | inPackage maps to column "package"; equals/hashCode on id+erpCode |
 | ProductFindByErpCodeUseCase | usecase | domain/product/core/usecase | execute(String)->ProductEntity | DEVIATION: no @Transactional |
 | ProductGroupEntity | entity | domain/product/data | id:Integer;name:String;parentGroupId:Integer;childGroups:List;erpCode:String;createdAt:Instant;deletedAt:Instant;updatedAt:Instant;withName();withParentGroupId();idDeleted();addChildIfAbsent();hasChildren();hasParent() | DEVIATION: idDeleted() typo for isDeleted; equals/hashCode on id+erpCode |
 | ProductGroupRepository | repo | domain/product/data | findByParentGroupIdAndDeletedAtIsNull;findByParentGroupIdIsNullAndDeletedAtIsNull;existsByParentGroupId;findByErpCode;findAllNonEmpty |  |
 | ProductGroupResponse | response | domain/product/core/response | id:Integer;name:String;children:List<ProductGroupResponse>;products:List<ProductResponse> | products always empty when built from entity |
-| ProductGroupSearchUseCase | usecase | domain/product/core/usecase | execute(Integer,Integer)->ProductListResponse | reads findAllNonEmpty once and passes it down the recursion |
-| ProductListResponse | response | domain/product/core/response | products:List<ProductResponse>;groups:List<ProductGroupResponse> |  |
+| ProductGroupNaming | usecase | domain/product/core/usecase | deriveFrom(List<String>)->String | package-private; names an undeclared group from the words its products all start with |
+| ProductGroupNamingTest | usecase | src/test/java/md/ramaiana/foodmarket/domain/product/core/usecase | 6 tests: shared prefix, trailing separator, word cap, nothing derivable | test |
+| ProductGroupSearchUseCase | usecase | domain/product/core/usecase | execute(Integer,Integer)->List<ProductGroupResponse> | returns ONE level; the whole-tree walk was ~10k queries |
 | ProductLoadUseCase | usecase | domain/product/core/usecase | execute(ProductReadResult)->void | DEVIATION: bare @Transactional |
 | ProductReadResult | dto | shared/dataexchange/core/data | groups:Map;products:Map;brands:Map;erpCodes:Map | erpCodes value is String[]{parentCode,brandCode} |
-| ProductRepository | repo | domain/product/data | findByIdAndDeletedAtIsNull;findAllByFiltersHavingPositiveBalance;findNameById;findByErpCode | 2 @Query methods join balances |
+| ProductRepository | repo | domain/product/data | findByIdAndDeletedAtIsNull;findNameById;findByErpCode | paged and grouped lookups come from ProductRepositoryCustom |
+| ProductRepositoryCustom | repo | domain/product/data | searchInStock;findGroupIdsInStock | hand-written fragment; @Query cannot return Page and Criteria cannot reach balances |
+| ProductRepositoryImpl | repo | domain/product/data | searchInStock;findGroupIdsInStock | NamedParameterJdbcTemplate + JdbcAggregateOperations; pages ids then loads aggregates so prices come back |
 | ProductResponse | response | domain/product/core/response | id:Integer;name:String;groupId:Integer;brandId:Integer;inPackage:Float;barCode:String;unit:String;weight:Float;prices:List<PriceResponse> |  |
 | ProductSearchCriteria | request | domain/product/core/usecase | storageId:Integer;groupId:Integer;brandId:Integer;nameLike:String | DEVIATION: request record living in core/usecase, not core/request |
-| ProductSearchUseCase | usecase | domain/product/core/usecase | execute(ProductSearchCriteria)->ProductListResponse | recurses one findById per ancestor per product |
+| ProductSearchUseCase | usecase | domain/product/core/usecase | execute(ProductSearchCriteria)->PagedResponse<ProductResponse> | whitelists sortable properties like ClientSearchUseCase; resolves group names once per page |
+| ProductSearchUseCaseTest | usecase | src/test/java/md/ramaiana/foodmarket/domain/product/core/usecase | 7 tests: paging, stock filter, sort whitelist, prices, group tree | test; fixture written straight through JDBC |
 | Products | fe-component | frontend/src/components/products | Products |  |
 | ProductsList | fe-component | frontend/src/components/products | ProductsList |  |
 | Profile | fe-component | frontend/src/components/auth | Profile | DEVIATION: placeholder stub rendering literal text |

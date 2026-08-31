@@ -128,14 +128,40 @@ class ErpImportFlowTest {
         Map<String, Object> group = jdbc.queryForMap(
                 "SELECT id, name, parent_group_id FROM product_group WHERE erp_code = ?",
                 UNDECLARED_GROUP_ERP_CODE);
-        // No name to take from the file, so the code stands in until an export declares one.
-        assertThat(group.get("NAME")).isEqualTo(UNDECLARED_GROUP_ERP_CODE);
-        assertThat(group.get("PARENT_GROUP_ID")).isNull();
+
+        // The file names no group under this code, so the name is derived from the products filed
+        // under it: the words all of their names start with. Asserted as a relationship rather than
+        // a literal, because the live names are Cyrillic.
+        String derivedName = (String) group.get("NAME");
+        assertThat(derivedName).isNotEqualTo(UNDECLARED_GROUP_ERP_CODE);
+        List<String> productNames = jdbc.queryForList(
+                "SELECT name FROM product WHERE group_id = ?", String.class, group.get("ID"));
+        assertThat(productNames).isNotEmpty().allMatch(name -> name.startsWith(derivedName));
 
         Map<String, Object> product = jdbc.queryForMap(
                 "SELECT group_id, brand_id FROM product WHERE erp_code = ?", PRODUCT_ERP_CODE);
         assertThat(product.get("GROUP_ID")).isEqualTo(group.get("ID"));
         assertThat(product.get("BRAND_ID")).isNotNull();
+    }
+
+    @Test
+    void files_the_groups_the_erp_left_loose_under_a_derived_folder() {
+        importProducts.execute();
+
+        Map<String, Object> folder = jdbc.queryForMap(
+                "SELECT pg.id, pg.name, pg.erp_code FROM product_group pg "
+                        + "JOIN product_group child ON child.parent_group_id = pg.id "
+                        + "WHERE child.erp_code = ?", UNDECLARED_GROUP_ERP_CODE);
+
+        // The folder is named for the word its groups' names share, and carries an ERP code that
+        // cannot collide with a real one.
+        assertThat((String) folder.get("ERP_CODE")).startsWith("derived:");
+        String folderName = (String) folder.get("NAME");
+        assertThat(folderName).isEqualTo(((String) folder.get("ERP_CODE")).substring("derived:".length()));
+
+        List<String> filedUnderIt = jdbc.queryForList(
+                "SELECT name FROM product_group WHERE parent_group_id = ?", String.class, folder.get("ID"));
+        assertThat(filedUnderIt).hasSizeGreaterThan(1).allMatch(name -> name.startsWith(folderName));
     }
 
     @Test
@@ -196,7 +222,7 @@ class ErpImportFlowTest {
         Integer storageId = jdbc.queryForObject(
                 "SELECT id FROM storages WHERE erp_code = '1'", Integer.class);
 
-        List<ProductGroupResponse> roots = groupSearch.execute(storageId, null).groups();
+        List<ProductGroupResponse> roots = groupSearch.execute(storageId, null);
 
         assertThat(roots).isNotEmpty();
     }

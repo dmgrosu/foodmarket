@@ -189,17 +189,23 @@
   },
   "columns": {
    "name": "Название",
-   "price": "Цена",
+   "group": "Группа",
+      "price": "Цена",
    "barCode": "Штрихкод",
    "package": "Упаковка",
    "unit": "Ед."
   },
   "groups": {
-   "noGroupsFound": "Группы не найдены"
-  },
-  "addToCart": {
-   "title": "Добавить в корзину",
-   "prompt": "Укажите желаемое количество"
+   "noGroupsFound": "Группы не найдены",
+      "loading": "Загрузка…"
+    },
+    "addToCart": {
+      "title": "Добавить в корзину",
+      "prompt": "Укажите желаемое количество"
+    },
+    "table": {
+      "rowsPerPage": "Строк на странице:",
+      "displayedRows": "{{from}}–{{to}} из {{count}}"
   }
  },
  "cart": {
