@@ -128,9 +128,15 @@ class ErpImportFlowTest {
         Map<String, Object> group = jdbc.queryForMap(
                 "SELECT id, name, parent_group_id FROM product_group WHERE erp_code = ?",
                 UNDECLARED_GROUP_ERP_CODE);
-        // No name to take from the file, so the code stands in until an export declares one.
-        assertThat(group.get("NAME")).isEqualTo(UNDECLARED_GROUP_ERP_CODE);
-        assertThat(group.get("PARENT_GROUP_ID")).isNull();
+
+        // The file names no group under this code, so the name is derived from the products filed
+        // under it: the words all of their names start with. Asserted as a relationship rather than
+        // a literal, because the live names are Cyrillic.
+        String derivedName = (String) group.get("NAME");
+        assertThat(derivedName).isNotEqualTo(UNDECLARED_GROUP_ERP_CODE);
+        List<String> productNames = jdbc.queryForList(
+                "SELECT name FROM product WHERE group_id = ?", String.class, group.get("ID"));
+        assertThat(productNames).isNotEmpty().allMatch(name -> name.startsWith(derivedName));
 
         // The file names no group under this code, so the name is derived from the products filed
         // under it: the words all of their names start with. Asserted as a relationship rather than
