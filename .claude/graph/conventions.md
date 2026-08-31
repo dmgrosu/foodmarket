@@ -110,6 +110,24 @@ return xUseCase.execute(...);          // or xRequestHandler.handle(...)
 
 Paths are verb-style camelCase (`/getAll`, `/addProduct`, `/getOrdersByPeriod`), not REST-resource style. Follow the existing style rather than "fixing" it piecemeal.
 
+**An endpoint scoped to the caller takes the identity as a method argument**, via Spring's
+`@AuthenticationPrincipal AppUserEntity currentUser`, and passes it to the use case:
+
+```java
+@GetMapping("/profile")
+public ProfileResponse profile(@AuthenticationPrincipal AppUserEntity currentUser) {
+  accessVoter.assertCanGetProfile();
+  return profileFindUseCase.execute(currentUser);
+}
+```
+
+This is the only sanctioned way for a use case to learn who is calling. `AccessVoter#getCurrentUser()`
+is `protected` and every `assertCanX()` returns `void`, so the voter cannot hand the identity over,
+and a use case must not reach into `SecurityContextHolder` itself — no use case does. The principal is
+a real `AppUserEntity` because `JwtGetAuthenticationUseCase` installs one on every request. A use case
+that writes should still reload through `AppUserFindByIdUseCase`: the principal was read by the JWT
+filter, before the transaction opened. See `domain/auth/.../ProfileFindUseCase` and `ProfileUpdateUseCase`.
+
 ## Voter shape
 
 `@Component`, extends `shared/util/abstraction/voter/AccessVoter`, **one `assertCanX()` per controller handler**, names corresponding 1:1. Today every non-auth voter method is an identical `assertUserIsAuthenticated()` delegate — the per-endpoint granularity is scaffolding for logic that does not exist yet. No voter inspects the resource being accessed, and `AccessVoter.getCurrentUser()` returns `void`, so subclasses cannot do owner or role checks through it.
@@ -137,7 +155,9 @@ Newer domains (`brand`, `storage`, `price`, `product`) use **`record`s** with an
 ## Transactional email
 
 Copy is translated by having **one imported Mailjet template per language**, not by branching inside a
-template. `EmailTemplate` holds an id per `Language` and refuses to initialise if one is missing, so a
+template. Adding an `EmailTemplate` constant therefore means importing three templates first — the enum
+refuses to initialise with a language missing, so a placeholder id fails at send time rather than at
+startup, which is the one failure mode the design is meant to prevent. `EmailTemplate` holds an id per `Language` and refuses to initialise if one is missing, so a
 new language fails at startup rather than at send time. The source HTML lives in `docs/mailjet/` as
 `<name>.<lang>.html` — those files are reference copies of what is in the Mailjet console, not loaded
 at runtime; keep them structurally identical and change only the copy between them.

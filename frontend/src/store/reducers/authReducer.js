@@ -2,7 +2,9 @@ import {
     LOGIN_FAIL, LOGIN_START, LOGIN_SUCCESS, LOGOUT,
     SIGNUP_START, SIGNUP_SUCCESS, SIGNUP_FAIL,
     CONFIRM_EMAIL_START, CONFIRM_EMAIL_SUCCESS, CONFIRM_EMAIL_FAIL,
-    RESEND_CONFIRMATION_START, RESEND_CONFIRMATION_SUCCESS, RESEND_CONFIRMATION_FAIL
+    RESEND_CONFIRMATION_START, RESEND_CONFIRMATION_SUCCESS, RESEND_CONFIRMATION_FAIL,
+    FORGOT_PASSWORD_START, FORGOT_PASSWORD_SUCCESS, FORGOT_PASSWORD_FAIL,
+    RESET_PASSWORD_START, RESET_PASSWORD_SUCCESS, RESET_PASSWORD_FAIL
 } from "../actions/authActions";
 
 const initialState = {
@@ -18,7 +20,13 @@ const initialState = {
     confirmationEmailSent: null,
     isConfirming: false,
     confirmed: false,
-    confirmError: null
+    confirmError: null,
+    // Password reset flow — its own flags for the same reason: a reset in flight must not look like
+    // a login in flight.
+    resetRequestedFor: null,
+    isResetting: false,
+    resetDone: false,
+    resetError: null
 };
 
 const authReducer = (state = initialState, action) => {
@@ -97,6 +105,42 @@ const authReducer = (state = initialState, action) => {
                 ...state,
                 isLoading: false,
                 error: action.payload
+            };
+        case FORGOT_PASSWORD_START:
+            return {
+                ...state,
+                isLoading: true,
+                resetRequestedFor: null
+            };
+        case FORGOT_PASSWORD_SUCCESS:
+            return {
+                ...state,
+                isLoading: false,
+                resetRequestedFor: action.payload.email
+            };
+        case FORGOT_PASSWORD_FAIL:
+            return {
+                ...state,
+                isLoading: false,
+                error: action.payload
+            };
+        case RESET_PASSWORD_START:
+            return {
+                ...state,
+                isResetting: true,
+                resetError: null
+            };
+        case RESET_PASSWORD_SUCCESS:
+            return {
+                ...state,
+                isResetting: false,
+                resetDone: true
+            };
+        case RESET_PASSWORD_FAIL:
+            return {
+                ...state,
+                isResetting: false,
+                resetError: action.payload
             };
         case LOGOUT:
             return {

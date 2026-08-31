@@ -25,6 +25,16 @@ public class RegisterRequest {
   @NotBlank(message = "Password is required")
   private String password;
 
+  /**
+   * Optional: the sign-up form does not mark either name required, and users registered before these
+   * columns existed have none.
+   */
+  @Nullable
+  private String firstName;
+
+  @Nullable
+  private String lastName;
+
   @Nullable
   private Integer clientId;
 

@@ -8,6 +8,7 @@ import md.ramaiana.foodmarket.domain.email.core.request.EmailSendRequest;
 import md.ramaiana.foodmarket.domain.email.core.request.RegistrationConfirmationVariables;
 import md.ramaiana.foodmarket.domain.email.core.usecase.EmailSendUseCase;
 import md.ramaiana.foodmarket.shared.abstraction.MockedAuthenticationController;
+import md.ramaiana.foodmarket.shared.enums.UserState;
 import org.junit.jupiter.api.AfterEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
@@ -98,6 +99,18 @@ abstract class AbstractRegistrationEndpointTest extends MockedAuthenticationCont
       return invocation.callRealMethod();
     }).when(emailSendUseCase).execute(any());
     return captured;
+  }
+
+  /**
+   * Move a registered user straight to ACTIVE and authenticate as them. Registration leaves a user
+   * PENDING_CONFIRMATION, which every authenticated endpoint rejects; tests that only care about what
+   * registration stored should not have to replay confirm-then-approve to get at it.
+   */
+  protected AppUserEntity activate(String email) {
+    AppUserEntity user = appUserRepository.findByEmail(email).orElseThrow();
+    AppUserEntity active = appUserRepository.save(user.withState(UserState.ACTIVE));
+    authenticateAs(active);
+    return active;
   }
 
   protected RegistrationTokenEntity latestTokenFor(String email) {

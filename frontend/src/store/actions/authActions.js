@@ -16,6 +16,12 @@ export const CONFIRM_EMAIL_FAIL = "CONFIRM_EMAIL_FAIL";
 export const RESEND_CONFIRMATION_START = "RESEND_CONFIRMATION_START";
 export const RESEND_CONFIRMATION_SUCCESS = "RESEND_CONFIRMATION_SUCCESS";
 export const RESEND_CONFIRMATION_FAIL = "RESEND_CONFIRMATION_FAIL";
+export const FORGOT_PASSWORD_START = "FORGOT_PASSWORD_START";
+export const FORGOT_PASSWORD_SUCCESS = "FORGOT_PASSWORD_SUCCESS";
+export const FORGOT_PASSWORD_FAIL = "FORGOT_PASSWORD_FAIL";
+export const RESET_PASSWORD_START = "RESET_PASSWORD_START";
+export const RESET_PASSWORD_SUCCESS = "RESET_PASSWORD_SUCCESS";
+export const RESET_PASSWORD_FAIL = "RESET_PASSWORD_FAIL";
 
 
 export const loginStart = (email, password) => {
@@ -53,7 +59,7 @@ export const loginSuccess = (token, userId, roles) => {
 // Registration does not log the user in — the account starts PENDING_CONFIRMATION and only
 // becomes usable once the magic-link email is confirmed. SIGNUP_SUCCESS carries the email (for the
 // "check your inbox" page) and whether the confirmation mail actually went out.
-export const signUpStart = (email, password, clientId) => {
+export const signUpStart = (email, password, clientId, firstName, lastName) => {
     return dispatch => {
         dispatch({type: SIGNUP_START});
         // The language is stored on the user, so later emails (a resend an admin triggers, an
@@ -61,6 +67,8 @@ export const signUpStart = (email, password, clientId) => {
         axios.post("/auth/register", {
             email: email,
             password: password,
+            firstName: firstName,
+            lastName: lastName,
             clientId: clientId,
             language: i18n.resolvedLanguage
         })
@@ -126,6 +134,44 @@ export const resendConfirmation = (email) => {
                     payload: err.response ? err.response.data : null
                 });
                 handleError(err);
+            })
+    };
+};
+
+// Requesting a reset always resolves, whether or not the address is registered — the backend
+// deliberately does not say which, so this thunk must not infer it either. The only thing a failure
+// here means is that the request itself did not get through.
+export const forgotPassword = (email) => {
+    return dispatch => {
+        dispatch({type: FORGOT_PASSWORD_START});
+        axios.post("/auth/forgotPassword", {email: email})
+            .then(() => {
+                dispatch({type: FORGOT_PASSWORD_SUCCESS, payload: {email: email}});
+            })
+            .catch(err => {
+                dispatch({
+                    type: FORGOT_PASSWORD_FAIL,
+                    payload: err.response ? err.response.data : null
+                });
+                handleError(err);
+            })
+    };
+};
+
+// A rejected token is reported through resetError rather than a toast: the page turns that into the
+// same single "invalid or expired" panel the backend collapses every token failure into.
+export const resetPassword = (resetToken, newPassword) => {
+    return dispatch => {
+        dispatch({type: RESET_PASSWORD_START});
+        axios.post("/auth/resetPassword", {resetToken: resetToken, newPassword: newPassword})
+            .then(() => {
+                dispatch({type: RESET_PASSWORD_SUCCESS});
+            })
+            .catch(err => {
+                dispatch({
+                    type: RESET_PASSWORD_FAIL,
+                    payload: err.response ? err.response.data : null
+                });
             })
     };
 };

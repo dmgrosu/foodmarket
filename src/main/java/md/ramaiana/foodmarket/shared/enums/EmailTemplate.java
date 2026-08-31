@@ -22,6 +22,12 @@ public enum EmailTemplate {
         Language.RU, "8303532",
         Language.RO, "8303522",
         Language.EN, "8303536"
+    )),
+
+    PASSWORD_RESET(Map.of(
+        Language.RU, "8311262",
+        Language.RO, "8311267",
+        Language.EN, "8311252"
     ));
 
     private final Map<Language, String> idByLanguage;

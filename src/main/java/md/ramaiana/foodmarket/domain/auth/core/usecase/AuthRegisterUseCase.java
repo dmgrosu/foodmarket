@@ -54,6 +54,8 @@ public class AuthRegisterUseCase {
     AppUserEntity user = new AppUserEntity(
         request.getEmail(),
         passwordEncoder.encode(request.getPassword()),
+        request.getFirstName(),
+        request.getLastName(),
         UserState.PENDING_CONFIRMATION,
         Language.fromTag(request.getLanguage())
     );

@@ -6,21 +6,26 @@ Separate CRA React 17 deployable — **not** bundled into the Spring Boot jar (n
 Dev: CRA proxy `"proxy": "http://localhost:8080"` in `frontend/package.json`. Prod: `REACT_APP_API_URL` baked in at build time by `npm run build:prod`, plus backend CORS.
 Client: `frontend/src/axios-instance.js` — `baseURL` from `REACT_APP_API_URL` (default `""` = same origin), request interceptor sets `Authorization` from `localStorage`. **No response interceptor, so no global 401 handling.**
 
-Admin calls go through `frontend/src/api/admin.js`, written against the backend's OpenAPI document. Everything older is still inline in redux thunks and in two components.
+Admin calls go through `frontend/src/api/admin.js` and the profile screen through `frontend/src/api/profile.js`, both written against the backend's OpenAPI document. Everything older is still inline in redux thunks and in two components. The signed-out password-reset screens stay in redux thunks, because they need the same shared `isLoading`/error state as `SignIn` and `ConfirmEmail`.
 
 ## Call sites
 
-Schema: `| caller | http | backend path | params | dispatches |`. 16 rows = every `axios.<verb>` in `frontend/src`.
+Schema: `| caller | http | backend path | params | dispatches |`. 20 rows = every `axios.<verb>` in `frontend/src`.
 
 | caller | http | backend path | params | dispatches |
 |---|---|---|---|---|
 | admin.js#searchUsers | GET | /user/search | email,state,pageNo,pageSize,sortColumn,sortDirection |  |
 | admin.js#activateUser | PUT | /user/activate/{userId} |  |  |
 | authActions.js#loginStart | POST | /auth/login | email,password | LOGIN_START,LOGIN_SUCCESS,LOGIN_FAIL |
-| authActions.js#signUpStart | POST | /auth/register | email,password,clientId,language | SIGNUP_START,SIGNUP_SUCCESS,SIGNUP_FAIL |
+| authActions.js#signUpStart | POST | /auth/register | email,password,firstName,lastName,clientId,language | SIGNUP_START,SIGNUP_SUCCESS,SIGNUP_FAIL |
 | authActions.js#confirmEmail | POST | /auth/confirmEmail | confirmationToken | CONFIRM_EMAIL_START,CONFIRM_EMAIL_SUCCESS,CONFIRM_EMAIL_FAIL,LOGIN_SUCCESS |
 | authActions.js#promotePendingSession | GET | /storage | (Authorization: parked confirm token) | LOGIN_SUCCESS |
 | authActions.js#resendConfirmation | POST | /auth/resendConfirmation | email | RESEND_CONFIRMATION_START,RESEND_CONFIRMATION_SUCCESS,RESEND_CONFIRMATION_FAIL |
+| authActions.js#forgotPassword | POST | /auth/forgotPassword | email | FORGOT_PASSWORD_START,FORGOT_PASSWORD_SUCCESS,FORGOT_PASSWORD_FAIL |
+| authActions.js#resetPassword | POST | /auth/resetPassword | resetToken,newPassword | RESET_PASSWORD_START,RESET_PASSWORD_SUCCESS,RESET_PASSWORD_FAIL |
+| profile.js#getProfile | GET | /auth/profile |  |  |
+| profile.js#updateProfile | PUT | /auth/updateProfile | firstName,lastName,language |  |
+| profile.js#changePassword | PUT | /auth/changePassword | currentPassword,newPassword |  |
 | Products.js#fetchBrands | GET | /brand/getAll |  |  |
 | SignUp.js#findEntity | GET | /client/findByIdno | idno |  |
 | cartActions.js#addProductToCart | POST | /order/addProduct | orderId,productId,quantity | ADD_TO_CART_START,ADD_TO_CART_SUCCESS,ADD_TO_CART_FAIL |
@@ -40,9 +45,11 @@ Schema: `| caller | http | backend path | params | dispatches |`. 16 rows = ever
 | /signIn | SignIn | public; redirects to /products when authed |
 | /signUp | SignUp | public; redirects to /products when authed; swaps in the CheckEmail panel once registered |
 | /confirmEmail | ConfirmEmail | public; reads ?confirmationToken= from the query string |
+| /forgotPassword | ForgotPassword | public; a locked-out user has no session to reach it with |
+| /resetPassword | ResetPassword | public; reads ?resetToken= from the query string |
 | /products | Products | authed; own Redirect to /signIn |
 | /orders | Orders | authed; stub, no own guard |
-| /profile | Profile | authed; stub, no own guard |
+| /profile | Profile | authed; no own guard |
 | /cart | Cart | authed; no own guard |
 
 No catch-all/404 route. When logged out the authed paths are simply absent from the `Switch`, so those URLs render only the Navbar.
@@ -57,6 +64,9 @@ No catch-all/404 route. When logged out the authed paths are simply absent from 
 - `Navbar.js` -> authActions: logout
 - `Products.js` -> cartActions: addProductToCart, selectProduct, changeQuantity; plus 5 direct non-redux GETs; imports handleError from authActions as a plain util. Owns the catalogue tree (`childrenByGroupId`, `expandedGroupIds`, `loadingGroupIds`), fetching one level per expand, and the paging state (`pageNo`, `pageSize`, `totalProducts`), tagging each product request with a sequence number so stale responses are dropped the way `AdminSearchTable` does. Selecting a folder expands it instead of listing products, since a folder holds none. `ProductsList` renders the pager and keeps it mounted while a page loads.
 - `Cart.js` -> cartActions: selectProductToDelete, deleteProductFromCart, cancelDeleteProduct, openPlaceOrderDialog, closePlaceOrderDialog, placeOrder
+- `ForgotPassword.js` -> authActions: forgotPassword
+- `ResetPassword.js` -> authActions: resetPassword
+- `Profile.js` -> not connected to redux; calls `api/profile.js` directly, like the admin screens, and imports handleError from authActions as a plain util
 - `Orders.js` -> not connected to redux
 
 ## Auth

@@ -51,6 +51,8 @@ public class SecurityConfig {
                 "/auth/register",
                 "/auth/confirmEmail",
                 "/auth/resendConfirmation",
+                "/auth/forgotPassword",
+                "/auth/resetPassword",
                 "/auth/login",
                 "/client/findByIdno",
                 "/v3/api-docs/**",

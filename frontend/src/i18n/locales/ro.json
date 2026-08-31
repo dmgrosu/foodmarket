@@ -148,12 +148,14 @@
       "emailInvalid": "Email invalid!",
       "passwordRequired": "Parola este obligatorie!",
       "passwordNotMatch": "Parolele nu coincid!",
-      "passwordNotStrong": "Parola nu este suficient de sigură!"
+      "passwordNotStrong": "Parola nu este suficient de sigură!",
+      "currentPasswordRequired": "Introduceți parola curentă"
     },
     "signIn": {
       "title": "Autentificare",
       "submit": "Intrare",
-      "noAccount": "Nu aveți cont? Înregistrați-vă"
+      "noAccount": "Nu aveți cont? Înregistrați-vă",
+      "forgotPassword": "Ați uitat parola?"
     },
     "signUp": {
       "title": "Înregistrare",
@@ -176,10 +178,43 @@
       "resend": "Trimite un link nou",
       "resendEmailLabel": "Adresă de email",
       "resendSubmit": "Trimite"
+    },
+    "forgotPassword": {
+      "title": "Resetarea parolei",
+      "description": "Introduceți adresa de email și vă trimitem un link pentru a seta o parolă nouă.",
+      "submit": "Trimite linkul",
+      "sent": "Dacă adresa este înregistrată, linkul a fost trimis. Este valabil o oră.",
+      "backToSignIn": "Înapoi la autentificare"
+    },
+    "resetPassword": {
+      "title": "Parolă nouă",
+      "newPassword": "Parolă nouă",
+      "submit": "Salvează parola",
+      "success": "Parola a fost schimbată. Vă puteți autentifica.",
+      "invalid": "Acest link este invalid sau a expirat.",
+      "requestNew": "Solicitați un link nou"
     }
   },
   "profile": {
-    "placeholder": "Secțiunea de profil"
+    "title": "Profil",
+    "save": "Salvează modificările",
+    "saved": "Profil actualizat",
+    "loadFailed": "Profilul nu a putut fi încărcat.",
+    "account": {
+      "title": "Cont",
+      "state": "Status",
+      "company": "Companie"
+    },
+    "language": {
+      "label": "Limba interfeței"
+    },
+    "password": {
+      "title": "Schimbarea parolei",
+      "current": "Parola curentă",
+      "new": "Parolă nouă",
+      "submit": "Schimbă parola",
+      "saved": "Parola a fost schimbată"
+    }
   },
   "products": {
     "filter": {
