@@ -233,16 +233,31 @@
       "noResults": "Ничего не найдено"
     },
     "search": {
-      "byName": "Поиск по названию",
-      "exactMatch": "Точное совпадение"
+      "byEmail": "Поиск по email"
     },
-    "clients": {
+    "users": {
       "columns": {
-        "id": "ID",
-        "name": "Название",
-        "idno": "IDNO"
+        "email": "Email",
+        "state": "Статус",
+        "clientName": "Клиент",
+        "createdAt": "Регистрация",
+        "actions": "Действия"
       },
-      "emptyMessage": "Клиенты не найдены"
+      "states": {
+        "PENDING_CONFIRMATION": "Ожидает подтверждения email",
+        "CONFIRMED": "Email подтверждён",
+        "ACTIVE": "Активен",
+        "INACTIVE": "Неактивен",
+        "SUSPENDED": "Заблокирован"
+      },
+      "filterByState": "Статус",
+      "emptyMessage": "Пользователи не найдены",
+      "activate": {
+        "action": "Активировать",
+        "title": "Активация пользователя",
+        "confirmText": "Активировать пользователя {{email}}? Он сможет войти в систему.",
+        "confirm": "Активировать"
+      }
     }
   }
 }

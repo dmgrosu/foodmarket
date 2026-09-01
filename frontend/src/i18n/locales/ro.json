@@ -233,16 +233,31 @@
       "noResults": "Nu a fost găsit nimic"
     },
     "search": {
-      "byName": "Căutare după denumire",
-      "exactMatch": "Potrivire exactă"
+      "byEmail": "Căutare după email"
     },
-    "clients": {
+    "users": {
       "columns": {
-        "id": "ID",
-        "name": "Denumire",
-        "idno": "IDNO"
+        "email": "Email",
+        "state": "Stare",
+        "clientName": "Client",
+        "createdAt": "Înregistrat",
+        "actions": "Acțiuni"
       },
-      "emptyMessage": "Nu au fost găsiți clienți"
+      "states": {
+        "PENDING_CONFIRMATION": "Așteaptă confirmarea email-ului",
+        "CONFIRMED": "Email confirmat",
+        "ACTIVE": "Activ",
+        "INACTIVE": "Inactiv",
+        "SUSPENDED": "Suspendat"
+      },
+      "filterByState": "Stare",
+      "emptyMessage": "Nu au fost găsiți utilizatori",
+      "activate": {
+        "action": "Activează",
+        "title": "Activare utilizator",
+        "confirmText": "Activați utilizatorul {{email}}? Va putea să se autentifice.",
+        "confirm": "Activează"
+      }
     }
   }
 }
