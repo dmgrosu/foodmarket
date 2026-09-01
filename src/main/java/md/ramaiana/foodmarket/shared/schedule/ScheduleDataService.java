@@ -2,6 +2,7 @@ package md.ramaiana.foodmarket.shared.schedule;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import md.ramaiana.foodmarket.shared.dataexchange.core.usecase.ExportOrdersUseCase;
 import md.ramaiana.foodmarket.shared.dataexchange.core.usecase.ImportBalancesUseCase;
 import md.ramaiana.foodmarket.shared.dataexchange.core.usecase.ImportClientsUseCase;
 import md.ramaiana.foodmarket.shared.dataexchange.core.usecase.ImportProductsUseCase;
@@ -16,6 +17,7 @@ public class ScheduleDataService {
     private final ImportProductsUseCase importProducts;
     private final ImportBalancesUseCase importBalances;
     private final ImportClientsUseCase importClients;
+    private final ExportOrdersUseCase exportOrders;
 
     @Scheduled(fixedDelayString = "${dataLoadingDelay}")
     public void runDataExchange() {
@@ -51,7 +53,11 @@ public class ScheduleDataService {
     }
 
     private void exportOrders() {
-        // TODO
+        try {
+            exportOrders.execute();
+        } catch (Exception e) {
+            log.error("Could not export orders: {}", e.getMessage(), e);
+        }
     }
 
 }

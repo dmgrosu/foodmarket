@@ -3,6 +3,8 @@ package md.ramaiana.foodmarket.domain.product.data;
 import jakarta.annotation.Nullable;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -110,6 +112,26 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
       }
     }
     return ordered;
+  }
+
+  @Override
+  @NonNull
+  public Map<Integer, String> findNamesByIds(@NonNull Collection<Integer> ids) {
+    // An empty IN list is not valid SQL, and there is nothing to ask the database for anyway.
+    if (ids.isEmpty()) {
+      return Map.of();
+    }
+
+    Map<Integer, String> namesById = new HashMap<>();
+    jdbcTemplate.query(
+        "SELECT id, name FROM product WHERE id IN (:ids) AND deleted_at IS NULL",
+        new MapSqlParameterSource("ids", ids),
+        // Statement block, not an expression: a lambda that returns a value matches
+        // ResultSetExtractor as well as RowCallbackHandler, and the call will not compile.
+        row -> {
+          namesById.put(row.getInt("id"), row.getString("name"));
+        });
+    return namesById;
   }
 
   /**

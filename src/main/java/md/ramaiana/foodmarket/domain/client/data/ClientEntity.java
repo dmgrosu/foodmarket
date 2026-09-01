@@ -24,6 +24,8 @@ public class ClientEntity {
     @NonNull
     private final String idno;
     private final String email;
+    /** The ERP's own key for this client. Null until the next clients import fills it in. */
+    private final String erpCode;
     @NonNull
     private final Instant createdAt;
     private final Instant deletedAt;
@@ -36,22 +38,23 @@ public class ClientEntity {
 
     @PersistenceCreator
     public ClientEntity(Integer id, @NonNull String name, @NonNull String idno, String email,
-                        @NonNull Instant createdAt, Instant deletedAt,
+                        String erpCode, @NonNull Instant createdAt, Instant deletedAt,
                         @NonNull Set<ClientAddressEntity> addresses,
                         @NonNull Set<ClientPhoneEntity> phones) {
         this.id = id;
         this.name = name;
         this.idno = idno;
         this.email = email;
+        this.erpCode = erpCode;
         this.createdAt = createdAt;
         this.deletedAt = deletedAt;
         this.addresses = addresses;
         this.phones = phones;
     }
 
-    public ClientEntity(@NonNull String name, @NonNull String idno, String email,
+    public ClientEntity(@NonNull String name, @NonNull String idno, String email, String erpCode,
                         @NonNull Set<ClientAddressEntity> addresses, @NonNull Set<ClientPhoneEntity> phones) {
-        this(null, name, idno, email, Instant.now(), null, addresses, phones);
+        this(null, name, idno, email, erpCode, Instant.now(), null, addresses, phones);
     }
 
 }

@@ -5,14 +5,53 @@ import org.springframework.stereotype.Component;
 
 /**
  * Order Access Voter.
+ * <p>
+ * These assert authentication only. Whether the caller may touch a <em>particular</em> order is not
+ * decidable here — it depends on the order, which the voter never sees — so that check lives in
+ * {@code OrderLoader}, which is the only way an order is fetched for an HTTP caller.
  */
 @Component
 public class OrderAccessVoter extends AccessVoter {
 
   /**
-   * Assert that the current user can add a product to an order.
+   * Assert that the current user can read their cart.
+   */
+  public void assertCanGetCart() {
+    assertUserIsAuthenticated();
+  }
+
+  /**
+   * Assert that the current user can add a product to their cart.
    */
   public void assertCanAddProduct() {
+    assertUserIsAuthenticated();
+  }
+
+  /**
+   * Assert that the current user can change the quantity of a product in their cart.
+   */
+  public void assertCanUpdateProduct() {
+    assertUserIsAuthenticated();
+  }
+
+  /**
+   * Assert that the current user can remove a product from their cart.
+   */
+  public void assertCanDeleteProduct() {
+    assertUserIsAuthenticated();
+  }
+
+  /**
+   * Assert that the current user can empty their cart.
+   */
+  public void assertCanClearCart() {
+    assertUserIsAuthenticated();
+  }
+
+  /**
+   * Assert that the current user can place their cart as an order.
+   */
+  public void assertCanPlaceOrder() {
     assertUserIsAuthenticated();
   }
 
@@ -24,20 +63,6 @@ public class OrderAccessVoter extends AccessVoter {
   }
 
   /**
-   * Assert that the current user can delete an order.
-   */
-  public void assertCanDelete() {
-    assertUserIsAuthenticated();
-  }
-
-  /**
-   * Assert that the current user can delete a product from an order.
-   */
-  public void assertCanDeleteProduct() {
-    assertUserIsAuthenticated();
-  }
-
-  /**
    * Assert that the current user can get orders by period.
    */
   public void assertCanGetOrdersByPeriod() {
@@ -45,16 +70,9 @@ public class OrderAccessVoter extends AccessVoter {
   }
 
   /**
-   * Assert that the current user can update an order.
+   * Assert that the current user can delete an order.
    */
-  public void assertCanUpdate() {
-    assertUserIsAuthenticated();
-  }
-
-  /**
-   * Assert that the current user can place an order.
-   */
-  public void assertCanPlaceOrder() {
+  public void assertCanDelete() {
     assertUserIsAuthenticated();
   }
 }

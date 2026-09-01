@@ -32,7 +32,7 @@ class ClientFindByIdnoUseCaseTest {
   @Test
   void execute_should_return_the_matching_client() {
     ClientEntity entity = new ClientEntity(3, "Linella", "1003600011111", "info@linella.md",
-        Instant.now(), null, Set.of(), Set.of());
+        "00000003", Instant.now(), null, Set.of(), Set.of());
     when(clientRepository.findByIdnoAndDeletedAtIsNull("1003600011111")).thenReturn(Optional.of(entity));
 
     ClientResponse response = useCase.execute("1003600011111");

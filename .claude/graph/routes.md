@@ -18,19 +18,25 @@ Empty `voter` = **no authorization check**. Empty `frontend` = no consumer. `!` 
 | PUT | /auth/updateProfile | AuthController#updateProfile | AuthAccessVoter#assertCanUpdateProfile | ProfileUpdateUseCase#execute | ProfileUpdateRequest | ProfileResponse | AppUserRepository,ClientRepository | profile.js#updateProfile |
 | PUT | /auth/changePassword | AuthController#changePassword | AuthAccessVoter#assertCanChangePassword | PasswordChangeUseCase#execute | PasswordChangeRequest | void | AppUserRepository | profile.js#changePassword |
 | GET | /brand/getAll | BrandController#getAll | BrandAccessVoter#assertCanGetAll | BrandSearchUseCase#execute |  | List<BrandResponse> | BrandRepository | Products.js#fetchBrands |
+| DELETE | /order/clearCart | OrderController#clearCart | OrderAccessVoter#assertCanClearCart | OrderCartClearUseCase#execute |  | void | OrderRepository | cartActions.js#clearCart |
 | GET | /client/findByIdno | ClientController#findByIdno | ClientAccessVoter#assertCanFindByIdno | ClientFindByIdnoUseCase#execute | idno:String! | ClientResponse | ClientRepository | SignUp.js#findEntity |
+| GET | /order/getCart | OrderController#getCart | OrderAccessVoter#assertCanGetCart | OrderCartFindUseCase#execute |  | OrderResponse | OrderRepository,ProductRepository | cartActions.js#fetchCart |
 | GET | /user/search | UserController#search | UserAccessVoter#assertCanSearch | AppUserSearchUseCase#execute | email:String,state:UserState,pageNo:int,pageSize:int,sortColumn:String,sortDirection:Sort.Direction | PagedResponse<AppUserResponse> | AppUserRepository,ClientRepository | admin.js#searchUsers |
+| POST | /order/addProduct | OrderController#addProduct | OrderAccessVoter#assertCanAddProduct | OrderAddProductUseCase#execute | AddProductToOrderRequest | OrderResponse | OrderRepository,ProductRepository | cartActions.js#addProductToCart |
+| PUT | /order/updateProduct | OrderController#updateProduct | OrderAccessVoter#assertCanUpdateProduct | OrderUpdateProductUseCase#execute | UpdateOrderProductRequest | OrderResponse | OrderRepository,ProductRepository | cartActions.js#updateCartProduct |
 | PUT | /user/activate/{userId} | UserController#activate | UserAccessVoter#assertCanActivate |  |  | AppUserResponse | AppUserRepository,ClientRepository | admin.js#activateUser |
-| POST | /order/addProduct | OrderController#addProduct | OrderAccessVoter#assertCanAddProduct | OrderAddProductUseCase#execute | AddProductToOrderRequest | OrderResponse | OrderRepository,ProductRepository,ClientRepository | cartActions.js#addProductToCart |
 | DELETE | /order/deleteById/{orderId} | OrderController#deleteById | OrderAccessVoter#assertCanDelete | OrderDeleteUseCase#execute |  | void | OrderRepository |  |
-| DELETE | /order/deleteProduct/{orderId}/{itemId} | OrderController#deleteProduct | OrderAccessVoter#assertCanDeleteProduct | OrderDeleteProductUseCase#execute |  | void | OrderRepository | cartActions.js#deleteProductFromCart |
+| DELETE | /order/deleteProduct/{productId} | OrderController#deleteProduct | OrderAccessVoter#assertCanDeleteProduct | OrderDeleteProductUseCase#execute |  | OrderResponse | OrderRepository,ProductRepository | cartActions.js#deleteProductFromCart |
 | GET | /order/getById/{orderId} | OrderController#getById | OrderAccessVoter#assertCanGetById | OrderFindByIdUseCase#execute |  | OrderResponse | OrderRepository,ProductRepository |  |
-| POST | /order/getOrdersByPeriod | OrderController#getOrdersByPeriod | OrderAccessVoter#assertCanGetOrdersByPeriod | OrderSearchByPeriodUseCase#execute | OrderListRequest | OrderListResponse | OrderRepository,ProductRepository,ClientRepository |  |
-| PUT | /order/placeOrder/{orderId} | OrderController#placeOrder | OrderAccessVoter#assertCanPlaceOrder | OrderPlaceUseCase#execute |  | void | OrderRepository | cartActions.js#placeOrder |
-| PUT | /order/update | OrderController#update | OrderAccessVoter#assertCanUpdate | OrderUpdateUseCase#execute | UpdateOrderRequest | void | OrderRepository,ProductRepository |  |
+| POST | /order/getOrdersByPeriod | OrderController#getOrdersByPeriod | OrderAccessVoter#assertCanGetOrdersByPeriod | OrderSearchByPeriodUseCase#execute | OrderListRequest | OrderListResponse | OrderRepository,ProductRepository | Orders.js#loadPage |
+| PUT | /order/placeOrder | OrderController#placeOrder | OrderAccessVoter#assertCanPlaceOrder | OrderPlaceUseCase#execute |  | OrderResponse | OrderRepository,ProductRepository | cartActions.js#placeOrder |
 | GET | /product/listGroups | ProductController#listGroups | ProductAccessVoter#assertCanListGroups | ProductGroupSearchUseCase#execute | storageId:Integer,parentGroupId:Integer | List<ProductGroupResponse> | ProductGroupRepository | Products.js#fetchGroups |
 | GET | /product/search | ProductController#search | ProductAccessVoter#assertCanSearch | ProductSearchUseCase#execute | storageId:Integer,groupId:Integer,brandId:Integer,name:String,pageNo:int,pageSize:int,sortColumn:String,sortDirection:Sort.Direction | PagedResponse<ProductResponse> | ProductRepository,ProductGroupRepository | Products.js#loadProducts |
 | GET | /storage | StorageController#findAll |  | StorageSearchUseCase#findAll |  | List<StorageResponse> | StorageRepository | Products.js#fetchStorages |
+
+## Cart endpoints
+
+The six cart endpoints (`getCart`, `addProduct`, `updateProduct`, `deleteProduct`, `clearCart`, `placeOrder`) take no order id: a client has at most one open `NEW` order and the server resolves it from the token. `deleteProduct` addresses a line by **productId**, not by `order_product.id`, which Spring Data JDBC regenerates on every save. Every mutation answers with the whole `OrderResponse`, so the client re-renders from server truth.
 
 ## Request handlers
 
@@ -39,12 +45,11 @@ Empty `voter` = **no authorization check**. Empty `frontend` = no consumer. `!` 
 ## Anonymous access (SecurityConfig.securityFilterChain + JwtFilter.shouldNotFilter)
 
 `permitAll`: `/auth/register`, `/auth/confirmEmail`, `/auth/resendConfirmation`, `/auth/forgotPassword`, `/auth/resetPassword`, `/auth/login`, `/client/findByIdno`, `/v3/api-docs/**`, `/swagger-ui/**`, `/swagger-ui.html`. Everything else `authenticated()`.
-No voter inspects the *resource* being accessed (e.g. order ownership) — only the coarse authenticated/admin distinction is enforced.
+No voter inspects the *resource* being accessed — only the coarse authenticated/admin distinction. For orders that gap is closed one layer down: every order reaches an HTTP caller through `OrderLoader`, which resolves it against the authenticated user's client and reports a foreign order as 404. The cart endpoints take no order id at all, so there is nothing to tamper with.
 
 ## No frontend consumer
 
-`GET /order/getById/{orderId}`, `DELETE /order/deleteById/{orderId}`, `POST /order/getOrdersByPeriod`, `PUT /order/update`.
-`getOrdersByPeriod` is the missing piece for the `/orders` stub component.
+`GET /order/getById/{orderId}`, `DELETE /order/deleteById/{orderId}`.
 
 ## No voter
 

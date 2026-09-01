@@ -67,12 +67,22 @@ create table if not exists rama_fm.client
     name       text                     not null,
     idno       char(13)                 not null,
     email      text,
+    erp_code   text,
     created_at timestamp with time zone not null default now(),
     deleted_at timestamp with time zone
 );
 
 create unique index if not exists client_idno_uindex
     on rama_fm.client (idno);
+
+create table if not exists rama_fm."storages"
+(
+    id       serial
+        constraint storages_pk
+            primary key,
+    name     text not null,
+    erp_code text not null
+);
 
 create table if not exists rama_fm."order"
 (
@@ -82,13 +92,27 @@ create table if not exists rama_fm."order"
     client_id         integer
         constraint order_client_id_fk
             references rama_fm.client (id),
+    -- The storage the order ships from, and the tier it was priced at. prices is keyed by
+    -- (product, storage, type), so a line has no meaning without both.
+    storage_id        integer
+        constraint order_storage_id_fk
+            references rama_fm.storages (id),
+    price_type        text,
     total_sum         numeric default 0 not null,
     created_at        timestamp         not null default now(),
+    placed_at         timestamp,
     deleted_at        timestamp,
     processed_at      timestamp,
     processing_result text,
+    exported_at       timestamp,
     status            text    default 'NEW'::text not null
 );
+
+create index if not exists order_status_index
+    on rama_fm."order" (status);
+
+create index if not exists order_client_id_index
+    on rama_fm."order" (client_id);
 
 create table if not exists rama_fm.order_product
 (
@@ -175,15 +199,6 @@ create unique index if not exists password_reset_token_token_hash_uindex
     on rama_fm.password_reset_token (token_hash);
 create index if not exists password_reset_token_user_id_index
     on rama_fm.password_reset_token (user_id);
-
-create table if not exists rama_fm."storages"
-(
-    id       serial
-        constraint storages_pk
-            primary key,
-    name     text not null,
-    erp_code text not null
-);
 
 create table if not exists rama_fm.prices
 (

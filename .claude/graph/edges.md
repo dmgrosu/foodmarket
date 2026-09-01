@@ -10,6 +10,7 @@ Schema: `| from | rel | to | detail |`
 
 | from | rel | to | detail |
 |---|---|---|---|
+| AccessVoter | calls | CurrentUser | require() |
 | AccessVoter | throws | ForbiddenException | thrown by assertUserIsAdmin() when the user lacks Role.ADMIN |
 | AccessVoter | throws | UnauthorizedException | thrown when principal missing or not AppUserEntity |
 | AccountActivatedMailUseCase | injects | EmailSendUseCase | constructor injection |
@@ -89,6 +90,7 @@ Schema: `| from | rel | to | detail |`
 | ClientPhoneEntity | table | client_phones | @Table("client_phones") |
 | ClientRepository | extends | CrudRepository | CrudRepository<ClientEntity,Integer> |
 | EmailSendUseCase | injects | MailjetAdapter | constructor injection |
+| ExportOrdersUseCase | injects | OrderExportRepository | CROSS-DOMAIN dataexchange->order constructor injection |
 | ImportBalancesUseCase | injects | BalancesUpdateUseCase | CROSS-LAYER shared->product constructor injection |
 | ImportClientsUseCase | calls | ClientAddressEntity | CROSS-LAYER shared->client new ClientAddressEntity(...) |
 | ImportClientsUseCase | calls | ClientEntity | CROSS-LAYER shared->client new ClientEntity(...) |
@@ -117,46 +119,68 @@ Schema: `| from | rel | to | detail |`
 | OrderAccessVoter | guards | OrderController#getOrdersByPeriod | assertCanGetOrdersByPeriod |
 | OrderAccessVoter | guards | OrderController#placeOrder | assertCanPlaceOrder |
 | OrderAccessVoter | guards | OrderController#update | assertCanUpdate |
-| OrderAddProductUseCase | injects | ClientRepository | CROSS-DOMAIN order->client constructor injection |
+| OrderAddProductUseCase | injects | OrderLoader | constructor injection |
 | OrderAddProductUseCase | injects | OrderRepository | constructor injection |
+| OrderAddProductUseCase | injects | OrderResponseAssembler | constructor injection |
 | OrderAddProductUseCase | injects | ProductRepository | CROSS-DOMAIN order->product constructor injection |
-| OrderAddProductUseCase | throws | BadRequestException | order already placed or processed |
-| OrderAddProductUseCase | throws | NotFoundException | client, product or order not found |
+| OrderAddProductUseCase | throws | BadRequestException | product has no price on the cart's storage and tier, or the cart is on another storage/tier |
+| OrderAddProductUseCase | throws | NotFoundException | product not found |
+| OrderCartClearUseCase | injects | OrderLoader | constructor injection |
+| OrderCartClearUseCase | injects | OrderRepository | constructor injection |
+| OrderCartFindUseCase | injects | OrderLoader | constructor injection |
+| OrderCartFindUseCase | injects | OrderResponseAssembler | constructor injection |
 | OrderController | injects | OrderAccessVoter | constructor injection |
 | OrderController | injects | OrderAddProductUseCase | constructor injection |
+| OrderController | injects | OrderCartClearUseCase | constructor injection |
+| OrderController | injects | OrderCartFindUseCase | constructor injection |
 | OrderController | injects | OrderDeleteProductUseCase | constructor injection |
 | OrderController | injects | OrderDeleteUseCase | constructor injection |
 | OrderController | injects | OrderFindByIdUseCase | constructor injection |
 | OrderController | injects | OrderPlaceUseCase | constructor injection |
 | OrderController | injects | OrderSearchByPeriodUseCase | constructor injection |
-| OrderController | injects | OrderUpdateUseCase | constructor injection |
+| OrderController | injects | OrderUpdateProductUseCase | constructor injection |
+| OrderDeleteProductUseCase | injects | OrderLoader | constructor injection |
 | OrderDeleteProductUseCase | injects | OrderRepository | constructor injection |
+| OrderDeleteProductUseCase | injects | OrderResponseAssembler | constructor injection |
 | OrderDeleteProductUseCase | throws | BadRequestException | order item id is zero |
-| OrderDeleteProductUseCase | throws | NotFoundException | order or order item not found |
+| OrderDeleteProductUseCase | throws | NotFoundException | no open cart, or it holds no line for that product |
+| OrderDeleteUseCase | injects | OrderLoader | constructor injection |
 | OrderDeleteUseCase | injects | OrderRepository | constructor injection |
+| OrderDeleteUseCase | throws | BadRequestException | order has been placed |
 | OrderDeleteUseCase | throws | NotFoundException | order not found |
 | OrderEntity | embeds | OrderItemEntity | @MappedCollection(idColumn="order_id") Set<OrderItemEntity> |
 | OrderEntity | fk | ClientEntity | CROSS-DOMAIN order->client plain Integer clientId |
+| OrderEntity | fk | StorageEntity | CROSS-DOMAIN order->storage plain Integer storageId |
 | OrderEntity | table | order | @Table("order") reserved word |
-| OrderFindByIdUseCase | injects | OrderRepository | constructor injection |
-| OrderFindByIdUseCase | injects | ProductRepository | CROSS-DOMAIN order->product constructor injection |
+| OrderExportRepository | table | order | hand-written SQL over "order", client and storages |
+| OrderFindByIdUseCase | injects | OrderLoader | constructor injection |
+| OrderFindByIdUseCase | injects | OrderResponseAssembler | constructor injection |
 | OrderFindByIdUseCase | throws | BadRequestException | order id is zero |
 | OrderFindByIdUseCase | throws | NotFoundException | order not found |
 | OrderItemEntity | fk | ProductEntity | CROSS-DOMAIN order->product plain Integer productId |
 | OrderItemEntity | table | order_product | @Table("order_product") |
+| OrderLoader | injects | CurrentUserProvider | CROSS-LAYER order->shared constructor injection |
+| OrderLoader | injects | OrderRepository | constructor injection |
+| OrderLoader | throws | NotFoundException | no open cart, or the order belongs to another client |
+| OrderPlaceUseCase | injects | OrderLoader | constructor injection |
 | OrderPlaceUseCase | injects | OrderRepository | constructor injection |
-| OrderPlaceUseCase | throws | BadRequestException | order id is zero |
+| OrderPlaceUseCase | injects | OrderResponseAssembler | constructor injection |
+| OrderPlaceUseCase | throws | BadRequestException | cart is empty |
 | OrderPlaceUseCase | throws | NotFoundException | order not found |
 | OrderRepository | extends | CrudRepository | CrudRepository<OrderEntity,Integer> |
 | OrderRepository | extends | PagingAndSortingRepository | PagingAndSortingRepository<OrderEntity,Integer> |
-| OrderSearchByPeriodUseCase | injects | ClientRepository | CROSS-DOMAIN order->client constructor injection |
+| OrderResponseAssembler | injects | ProductRepository | CROSS-DOMAIN order->product constructor injection |
+| OrderSearchByPeriodUseCase | injects | OrderLoader | constructor injection |
 | OrderSearchByPeriodUseCase | injects | OrderRepository | constructor injection |
-| OrderSearchByPeriodUseCase | injects | ProductRepository | CROSS-DOMAIN order->product constructor injection |
+| OrderSearchByPeriodUseCase | injects | OrderResponseAssembler | constructor injection |
 | OrderSearchByPeriodUseCase | throws | BadRequestException | clientId missing in request |
+| OrderSearchByPeriodUseCase | throws | BadRequestException | unknown sort column, or dateFrom after dateTo |
 | OrderSearchByPeriodUseCase | throws | NotFoundException | client not found |
-| OrderUpdateUseCase | injects | OrderRepository | constructor injection |
-| OrderUpdateUseCase | injects | ProductRepository | CROSS-DOMAIN order->product constructor injection |
-| OrderUpdateUseCase | throws | NotFoundException | order, order item or product not found |
+| OrderUpdateProductUseCase | injects | OrderLoader | constructor injection |
+| OrderUpdateProductUseCase | injects | OrderRepository | constructor injection |
+| OrderUpdateProductUseCase | injects | OrderResponseAssembler | constructor injection |
+| OrderUpdateProductUseCase | injects | ProductRepository | CROSS-DOMAIN order->product constructor injection |
+| OrderUpdateProductUseCase | throws | NotFoundException | no open cart, product not found, or the cart holds no line for it |
 | PasswordChangeUseCase | injects | AppUserFindByIdUseCase | constructor injection |
 | PasswordChangeUseCase | injects | AppUserRepository | constructor injection |
 | PasswordChangeUseCase | throws | BadRequestException | wrong current password, or reusing the current one |
@@ -231,9 +255,11 @@ Schema: `| from | rel | to | detail |`
 | RegistrationTokenIssueUseCase | injects | RegistrationTokenRepository | constructor injection |
 | RegistrationTokenIssueUseCase | injects | SecureTokenGenerator | constructor injection |
 | RegistrationTokenRepository | extends | CrudRepository | CrudRepository<RegistrationTokenEntity,Integer> |
+| ScheduleDataService | injects | ExportOrdersUseCase | constructor injection |
 | ScheduleDataService | injects | ImportBalancesUseCase | constructor injection |
 | ScheduleDataService | injects | ImportClientsUseCase | constructor injection |
 | ScheduleDataService | injects | ImportProductsUseCase | constructor injection |
+| ScheduleDataService | scheduled | ExportOrdersUseCase | @Scheduled(fixedDelayString="${dataLoadingDelay}") runDataExchange |
 | ScheduleDataService | scheduled | ImportBalancesUseCase | @Scheduled(fixedDelayString="${dataLoadingDelay}") |
 | ScheduleDataService | scheduled | ImportClientsUseCase | @Scheduled(fixedDelayString="${dataLoadingDelay}") |
 | ScheduleDataService | scheduled | ImportProductsUseCase | @Scheduled(fixedDelayString="${dataLoadingDelay}") |
@@ -255,7 +281,7 @@ Schema: `| from | rel | to | detail |`
 
 ## Deliberately excluded
 
-Framework-type injections (`Unmarshaller`, `AuthenticationManager`, `PasswordEncoder`, `JdbcTemplate`) — real `private final` fields, but the target is not a node.
+Framework-type injections (`Unmarshaller`, `Marshaller`, `AuthenticationManager`, `PasswordEncoder`, `JdbcTemplate`, `NamedParameterJdbcTemplate`) — real `private final` fields, but the target is not a node.
 Intra-domain response construction (e.g. `BrandSearchUseCase` -> `BrandResponse`) — otherwise `calls` would outnumber `injects` and drown the signal.
 `ControllerAdviceConfig` -> the four `shared/exception/http` types: `@ExceptionHandler(X.class)` is a type reference, no closed-set `rel` fits.
 `ProductGroupEntity.parentGroupId` self-FK: same-file, not a cross-file dependency.

@@ -12,6 +12,7 @@ import md.ramaiana.foodmarket.domain.auth.data.AppUserRepository;
 import md.ramaiana.foodmarket.shared.enums.Language;
 import md.ramaiana.foodmarket.shared.enums.Role;
 import md.ramaiana.foodmarket.shared.enums.UserState;
+import org.springframework.data.jdbc.core.mapping.AggregateReference;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,6 +84,19 @@ public abstract class MockedAuthenticationController {
    * @return the persisted user, for tests that need its id or email.
    */
   protected AppUserEntity authenticateAs(Role... roles) {
+    return authenticateAs(null, roles);
+  }
+
+  /**
+   * As {@link #authenticateAs(Role...)}, but with a client attached to the identity.
+   * <p>
+   * Registration always attaches one, and every customer-facing endpoint orders on behalf of the
+   * authenticated user's client, so a test of one of those needs an identity shaped the way a real
+   * one is. The plain overload leaves it null, which is what an administrator looks like.
+   *
+   * @param clientId the {@code client} row to attach, or null for an identity with no client.
+   */
+  protected AppUserEntity authenticateAs(Integer clientId, Role... roles) {
     AppUserEntity user = new AppUserEntity(
         "auth-" + UUID.randomUUID() + "@example.com",
         passwordEncoder.encode(TEST_PASSWORD),
@@ -93,6 +107,9 @@ public abstract class MockedAuthenticationController {
     );
     for (Role role : roles) {
       user.addRole(role);
+    }
+    if (clientId != null) {
+      user = user.withClient(AggregateReference.to(clientId));
     }
 
     AppUserEntity savedUser = appUserRepository.save(user);
@@ -146,6 +163,13 @@ public abstract class MockedAuthenticationController {
    */
   protected ResultActions get(String url) throws Exception {
     return get(url, Map.of());
+  }
+
+  /**
+   * DELETE the given url.
+   */
+  protected ResultActions delete(String url) throws Exception {
+    return mockMvc.perform(authorize(MockMvcRequestBuilders.delete(url)));
   }
 
   /**

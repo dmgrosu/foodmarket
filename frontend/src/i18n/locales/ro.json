@@ -236,7 +236,10 @@
     },
     "addToCart": {
       "title": "Adăugare în coș",
-      "prompt": "Indicați cantitatea dorită"
+      "prompt": "Indicați cantitatea dorită",
+      "selectStorage": "Selectați un depozit înainte de a adăuga în coș.",
+      "storageLocked": "Coșul este pentru alt depozit. Goliți-l sau reveniți la depozitul precedent.",
+      "quantityTooSmall": "Cantitatea trebuie să fie cel puțin 1."
     },
     "table": {
       "rowsPerPage": "Rânduri pe pagină:",
@@ -255,10 +258,30 @@
     "total": "Total",
     "placeOrder": "Plasează comanda",
     "confirmRemove": "Eliminați produsul selectat din coș?",
-    "confirmPlaceOrder": "Sunteți pe cale să plasați o comandă nouă. Vă rugăm să confirmați!"
+    "confirmPlaceOrder": "Sunteți pe cale să plasați o comandă nouă. Vă rugăm să confirmați!",
+    "empty": "Coșul este gol",
+    "clear": "Golește coșul"
   },
   "orders": {
-    "placeholder": "Secțiunea de comenzi"
+    "title": "Comenzile mele",
+    "dateFrom": "De la",
+    "dateTo": "Până la",
+    "empty": "Nicio comandă în această perioadă",
+    "columns": {
+      "number": "Nr.",
+      "date": "Data",
+      "state": "Statut",
+      "positions": "Poziții",
+      "weight": "Greutate",
+      "total": "Total"
+    },
+    "states": {
+      "NEW": "Coș",
+      "PLACED": "Plasată",
+      "EXPORTED": "Trimisă",
+      "PROCESSED": "Procesată",
+      "NOT_PROCESSED": "Respinsă"
+    }
   },
   "admin": {
     "title": "Panou de administrare",

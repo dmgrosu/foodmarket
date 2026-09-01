@@ -22,4 +22,10 @@ public class OrderListResponse {
   private int pageSize;
 
   private int totalPages;
+
+  /**
+   * Total matching orders, not just those on this page. A pager cannot render "1-10 of 43" from a
+   * page count alone.
+   */
+  private long totalElements;
 }

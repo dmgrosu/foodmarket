@@ -2,35 +2,38 @@ package md.ramaiana.foodmarket.domain.order.core.usecase;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Set;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import md.ramaiana.foodmarket.domain.client.data.ClientRepository;
 import md.ramaiana.foodmarket.domain.order.core.request.OrderListRequest;
-import md.ramaiana.foodmarket.domain.order.core.response.OrderItemResponse;
 import md.ramaiana.foodmarket.domain.order.core.response.OrderListResponse;
 import md.ramaiana.foodmarket.domain.order.core.response.OrderResponse;
 import md.ramaiana.foodmarket.domain.order.data.OrderEntity;
 import md.ramaiana.foodmarket.domain.order.data.OrderRepository;
-import md.ramaiana.foodmarket.domain.product.data.ProductRepository;
 import md.ramaiana.foodmarket.shared.annotation.UseCase;
 import md.ramaiana.foodmarket.shared.exception.http.BadRequestException;
-import md.ramaiana.foodmarket.shared.exception.http.NotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Use case for searching orders by period.
+ * Use case for listing the caller's orders over a period.
  */
 @UseCase
 @RequiredArgsConstructor
 public class OrderSearchByPeriodUseCase {
 
+  /**
+   * Sort is a free-text request field, so it is constrained to an explicit set of entity properties
+   * rather than passed straight to the persistence layer.
+   */
+  private static final Set<String> SORTABLE_PROPERTIES =
+      Set.of("id", "createdAt", "placedAt", "totalSum", "state");
+
   private final OrderRepository orderRepository;
-  private final ProductRepository productRepository;
-  private final ClientRepository clientRepository;
+  private final OrderLoader orderLoader;
+  private final OrderResponseAssembler responseAssembler;
 
   /**
    * Execute the use case.
@@ -38,44 +41,31 @@ public class OrderSearchByPeriodUseCase {
   @NonNull
   @Transactional(readOnly = true)
   public OrderListResponse execute(@NonNull OrderListRequest request) {
-    if (request.getClientId() == null) {
-      throw new BadRequestException("ClientId is required");
+    if (!SORTABLE_PROPERTIES.contains(request.getSortColumn())) {
+      throw new BadRequestException(String.format("Unknown sort column '%s'", request.getSortColumn()));
+    }
+    if (request.getDateFrom() > request.getDateTo()) {
+      throw new BadRequestException("dateFrom must not be after dateTo");
     }
 
-    // Validate client
-    clientRepository.findById(request.getClientId())
-        .orElseThrow(() -> new NotFoundException(String.format("Client with ID [%s] not found", request.getClientId())));
-
-    Instant dateFrom = Instant.ofEpochMilli(request.getDateFrom());
-    Instant dateTo = Instant.ofEpochMilli(request.getDateTo());
-
     PageRequest pageable = PageRequest.of(request.getPageNo(), request.getPageSize(),
-        Sort.Direction.valueOf(request.getSortDirection().toString()), request.getSortColumn());
+        Sort.by(request.getSortDirection(), request.getSortColumn()));
 
     Page<OrderEntity> ordersPage = orderRepository.findByClientIdAndDeletedAtIsNullAndCreatedAtBetween(
-        request.getClientId(),
-        dateFrom,
-        dateTo,
+        orderLoader.getCurrentClientId(),
+        Instant.ofEpochMilli(request.getDateFrom()),
+        Instant.ofEpochMilli(request.getDateTo()),
         pageable
     );
 
-    List<OrderResponse> orders = ordersPage.stream()
-        .map(order -> {
-          List<OrderItemResponse> items = order.getItems().stream()
-              .map(item -> new OrderItemResponse(
-                  item,
-                  productRepository.findNameById(item.getProductId())
-              ))
-              .collect(Collectors.toList());
-          return new OrderResponse(order, items);
-        })
-        .collect(Collectors.toList());
+    List<OrderResponse> orders = responseAssembler.assembleAll(ordersPage.getContent());
 
     return new OrderListResponse(
         orders,
         ordersPage.getNumber(),
         ordersPage.getSize(),
-        ordersPage.getTotalPages()
+        ordersPage.getTotalPages(),
+        ordersPage.getTotalElements()
     );
   }
 }

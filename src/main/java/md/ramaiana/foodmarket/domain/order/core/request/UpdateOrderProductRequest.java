@@ -7,15 +7,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Request to update order product quantity.
+ * Request to set the quantity of a line in the caller's cart outright, in contrast to
+ * {@link AddProductToOrderRequest} which adds to it.
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UpdateOrderRequest {
-
-  @NotNull
-  private Integer orderId;
+public class UpdateOrderProductRequest {
 
   @NotNull
   private Integer productId;

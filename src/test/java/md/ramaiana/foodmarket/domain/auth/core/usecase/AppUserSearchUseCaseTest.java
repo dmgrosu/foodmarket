@@ -74,7 +74,7 @@ class AppUserSearchUseCaseTest {
     when(appUserRepository.search(eq("example"), eq(UserState.CONFIRMED), any(Pageable.class)))
         .thenReturn(new PageImpl<>(List.of(withClient, withoutClient), PageRequest.of(0, 25), 2));
     when(clientRepository.findAllById(anyIterable()))
-        .thenReturn(List.of(new ClientEntity(42, "Acme", "1000000000001", null, Instant.now(), null, Set.of(), Set.of())));
+        .thenReturn(List.of(new ClientEntity(42, "Acme", "1000000000001", null, "00000042", Instant.now(), null, Set.of(), Set.of())));
 
     PagedResponse<AppUserResponse> response = useCase.execute(
         new AppUserSearchCriteria("example", UserState.CONFIRMED, 0, 25, "email", Sort.Direction.ASC));
