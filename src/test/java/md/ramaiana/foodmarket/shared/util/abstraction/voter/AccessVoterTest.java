@@ -65,7 +65,7 @@ class AccessVoterTest {
   }
 
   private void authenticateAs(Set<Role> roles) {
-    AppUserEntity user = new AppUserEntity(1, "user@example.com", "hash", Instant.now(), UserState.ACTIVE, Language.RU,
+    AppUserEntity user = new AppUserEntity(1, "user@example.com", "hash", null, null, Instant.now(), UserState.ACTIVE, Language.RU,
         roles.stream().map(UserRoleRef::new).collect(java.util.stream.Collectors.toSet()), null);
 
     SecurityContextHolder.getContext().setAuthentication(

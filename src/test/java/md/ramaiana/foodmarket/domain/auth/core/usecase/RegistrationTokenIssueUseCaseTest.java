@@ -44,7 +44,7 @@ class RegistrationTokenIssueUseCaseTest {
             "https://app.example.com/confirmEmail", 24, 60, "https://app.example.com/signIn");
         RegistrationTokenIssueUseCase useCase = new RegistrationTokenIssueUseCase(
             registrationTokenRepository, secureTokenGenerator, properties);
-        AppUserEntity user = new AppUserEntity(1, "user@example.com", "hash",
+        AppUserEntity user = new AppUserEntity(1, "user@example.com", "hash", null, null,
             java.time.Instant.now(), UserState.PENDING_CONFIRMATION, Language.RU, new java.util.HashSet<>(), null);
         when(registrationTokenRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 

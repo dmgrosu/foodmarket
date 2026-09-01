@@ -42,7 +42,7 @@ class AccountActivatedMailUseCaseTest {
   }
 
   private static AppUserEntity user(Language language) {
-    return new AppUserEntity(1, "user@example.com", "hash",
+    return new AppUserEntity(1, "user@example.com", "hash", null, null,
         Instant.now(), UserState.ACTIVE, language, new HashSet<>(), null);
   }
 

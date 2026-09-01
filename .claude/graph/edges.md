@@ -46,6 +46,11 @@ Schema: `| from | rel | to | detail |`
 | AuthController | injects | AuthRegisterRequestHandler | constructor injection |
 | AuthController | injects | RegistrationConfirmUseCase |  |
 | AuthController | injects | RegistrationConfirmationResendRequestHandler | constructor injection |
+| AuthController | injects | PasswordChangeUseCase | constructor injection |
+| AuthController | injects | PasswordResetCompleteUseCase | constructor injection |
+| AuthController | injects | PasswordResetInitiateRequestHandler | constructor injection |
+| AuthController | injects | ProfileFindUseCase | constructor injection |
+| AuthController | injects | ProfileUpdateUseCase | constructor injection |
 | AuthLoginUseCase | calls | ClientResponse | CROSS-DOMAIN auth->client new ClientResponse(client) |
 | AuthLoginUseCase | injects | ClientFindByIdUseCase | CROSS-DOMAIN auth->client constructor injection |
 | AuthLoginUseCase | injects | JwtCreateTokenUseCase | constructor injection |
@@ -152,6 +157,28 @@ Schema: `| from | rel | to | detail |`
 | OrderUpdateUseCase | injects | OrderRepository | constructor injection |
 | OrderUpdateUseCase | injects | ProductRepository | CROSS-DOMAIN order->product constructor injection |
 | OrderUpdateUseCase | throws | NotFoundException | order, order item or product not found |
+| PasswordChangeUseCase | injects | AppUserFindByIdUseCase | constructor injection |
+| PasswordChangeUseCase | injects | AppUserRepository | constructor injection |
+| PasswordChangeUseCase | throws | BadRequestException | wrong current password, or reusing the current one |
+| PasswordResetCompleteUseCase | injects | AppUserFindByIdUseCase | constructor injection |
+| PasswordResetCompleteUseCase | injects | AppUserRepository | constructor injection |
+| PasswordResetCompleteUseCase | injects | PasswordResetTokenRepository | constructor injection |
+| PasswordResetCompleteUseCase | injects | SecureTokenGenerator | constructor injection |
+| PasswordResetCompleteUseCase | throws | BadRequestException | unknown, spent and expired tokens all collapse to one message |
+| PasswordResetInitiateRequestHandler | injects | PasswordResetInitiateUseCase | constructor injection |
+| PasswordResetInitiateUseCase | injects | AppUserRepository | constructor injection |
+| PasswordResetInitiateUseCase | injects | PasswordResetMailUseCase | constructor injection |
+| PasswordResetInitiateUseCase | injects | PasswordResetProperties | @EnableConfigurationProperties(PasswordResetProperties.class) |
+| PasswordResetInitiateUseCase | injects | PasswordResetTokenIssueUseCase | constructor injection |
+| PasswordResetInitiateUseCase | injects | PasswordResetTokenRepository | constructor injection |
+| PasswordResetMailUseCase | injects | EmailSendUseCase | CROSS-DOMAIN: auth -> email |
+| PasswordResetTokenEntity | fk | AppUserEntity | AggregateReference<AppUserEntity,Integer> user |
+| PasswordResetTokenEntity | table | password_reset_token | @Table("password_reset_token") |
+| PasswordResetTokenIssueUseCase | injects | PasswordResetProperties | @EnableConfigurationProperties(PasswordResetProperties.class) |
+| PasswordResetTokenIssueUseCase | injects | PasswordResetTokenRepository | constructor injection |
+| PasswordResetTokenIssueUseCase | injects | SecureTokenGenerator | constructor injection |
+| PasswordResetTokenRepository | extends | CrudRepository | CrudRepository<PasswordResetTokenEntity,Integer> |
+| PasswordResetVariables | implements | EmailTemplateVariables | sealed interface permits it |
 | PriceEntity | fk | StorageEntity | CROSS-DOMAIN price->storage AggregateReference<StorageEntity,Integer> |
 | PriceEntity | table | prices | @Table("prices") |
 | ProductAccessVoter | extends | AccessVoter | inherits assertUserIsAuthenticated |
@@ -180,12 +207,10 @@ Schema: `| from | rel | to | detail |`
 | ProductResponse | calls | PriceResponse | CROSS-DOMAIN product->price PriceResponse::new mapping |
 | ProductSearchUseCase | injects | ProductGroupRepository | constructor injection |
 | ProductSearchUseCase | injects | ProductRepository | constructor injection |
-| RegistrationConfirmUseCase | injects | AppUserFindByIdUseCase | constructor injection |
-| RegistrationConfirmUseCase | injects | AppUserRepository | constructor injection |
-| RegistrationConfirmUseCase | injects | JwtCreateTokenUseCase | constructor injection |
-| RegistrationConfirmUseCase | injects | RegistrationTokenRepository | constructor injection |
-| RegistrationConfirmUseCase | injects | SecureTokenGenerator | constructor injection |
-| RegistrationConfirmUseCase | throws | BadRequestException | unknown, expired, or already-confirmed-while-pending token |
+| ProfileFindUseCase | injects | ClientFindByIdUseCase | CROSS-DOMAIN: auth -> client |
+| ProfileUpdateUseCase | injects | AppUserFindByIdUseCase | constructor injection |
+| ProfileUpdateUseCase | injects | AppUserRepository | constructor injection |
+| ProfileUpdateUseCase | injects | ClientFindByIdUseCase | CROSS-DOMAIN: auth -> client |
 | RegistrationConfirmationMailUseCase | injects | EmailSendUseCase | constructor injection |
 | RegistrationConfirmationResendRequestHandler | injects | RegistrationConfirmationResendUseCase | constructor injection |
 | RegistrationConfirmationResendUseCase | injects | AppUserFindByEmailUseCase | constructor injection |
@@ -194,6 +219,12 @@ Schema: `| from | rel | to | detail |`
 | RegistrationConfirmationResendUseCase | injects | RegistrationTokenIssueUseCase | constructor injection |
 | RegistrationConfirmationResendUseCase | injects | RegistrationTokenRepository | constructor injection |
 | RegistrationConfirmationResendUseCase | throws | BadRequestException | not pending confirmation, or inside the resend cooldown |
+| RegistrationConfirmUseCase | injects | AppUserFindByIdUseCase | constructor injection |
+| RegistrationConfirmUseCase | injects | AppUserRepository | constructor injection |
+| RegistrationConfirmUseCase | injects | JwtCreateTokenUseCase | constructor injection |
+| RegistrationConfirmUseCase | injects | RegistrationTokenRepository | constructor injection |
+| RegistrationConfirmUseCase | injects | SecureTokenGenerator | constructor injection |
+| RegistrationConfirmUseCase | throws | BadRequestException | unknown, expired, or already-confirmed-while-pending token |
 | RegistrationTokenEntity | fk | AppUserEntity | AggregateReference<AppUserEntity,Integer> user |
 | RegistrationTokenEntity | table | registration_token | @Table("registration_token") |
 | RegistrationTokenIssueUseCase | injects | RegistrationProperties | @EnableConfigurationProperties(RegistrationProperties.class) |

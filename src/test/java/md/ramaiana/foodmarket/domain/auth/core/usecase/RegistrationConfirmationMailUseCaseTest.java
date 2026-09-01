@@ -39,12 +39,12 @@ class RegistrationConfirmationMailUseCaseTest {
     ArgumentCaptor<EmailSendRequest> requestCaptor;
 
     private static AppUserEntity user(Language language) {
-        return new AppUserEntity(1, "user@example.com", "hash",
+        return new AppUserEntity(1, "user@example.com", "hash", null, null,
             Instant.now(), UserState.PENDING_CONFIRMATION, language, new HashSet<>(), null);
     }
 
     private static AppUserEntity user() {
-        return new AppUserEntity(1, "user@example.com", "hash",
+        return new AppUserEntity(1, "user@example.com", "hash", null, null,
             Instant.now(), UserState.PENDING_CONFIRMATION, Language.RU, new HashSet<>(), null);
     }
 

@@ -52,7 +52,8 @@ class AppUserSearchUseCaseTest {
   private static AppUserEntity user(Integer id, String email, UserState state, Integer clientId) {
     AggregateReference<ClientEntity, Integer> client =
         clientId == null ? null : AggregateReference.to(clientId);
-    return new AppUserEntity(id, email, "hash", Instant.now(), state, Language.RU, new HashSet<>(), client);
+    return new AppUserEntity(id, email, "hash", null, null,
+        Instant.now(), state, Language.RU, new HashSet<>(), client);
   }
 
   @Test

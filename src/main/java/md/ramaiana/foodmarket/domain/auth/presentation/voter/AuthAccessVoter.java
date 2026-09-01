@@ -40,4 +40,41 @@ public class AuthAccessVoter extends AccessVoter {
   public void assertCanResendConfirmation() {
     // Public endpoint - no authentication required
   }
+
+  /**
+   * Assert that the user can request a password reset link.
+   * Requesting a reset is public — a locked-out user has no token to present.
+   */
+  public void assertCanRequestPasswordReset() {
+    // Public endpoint - no authentication required
+  }
+
+  /**
+   * Assert that the user can complete a password reset.
+   * The reset token itself is the credential, so no authentication is required.
+   */
+  public void assertCanResetPassword() {
+    // Public endpoint - no authentication required
+  }
+
+  /**
+   * Assert that the user can read their own profile.
+   */
+  public void assertCanGetProfile() {
+    assertUserIsAuthenticated();
+  }
+
+  /**
+   * Assert that the user can update their own profile.
+   */
+  public void assertCanUpdateProfile() {
+    assertUserIsAuthenticated();
+  }
+
+  /**
+   * Assert that the user can change their own password.
+   */
+  public void assertCanChangePassword() {
+    assertUserIsAuthenticated();
+  }
 }

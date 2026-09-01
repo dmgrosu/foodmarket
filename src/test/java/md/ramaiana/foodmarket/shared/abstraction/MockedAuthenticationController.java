@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import lombok.NonNull;
 import md.ramaiana.foodmarket.domain.auth.core.usecase.JwtCreateTokenUseCase;
 import md.ramaiana.foodmarket.domain.auth.data.AppUserEntity;
 import md.ramaiana.foodmarket.domain.auth.data.AppUserRepository;
@@ -85,6 +86,8 @@ public abstract class MockedAuthenticationController {
     AppUserEntity user = new AppUserEntity(
         "auth-" + UUID.randomUUID() + "@example.com",
         passwordEncoder.encode(TEST_PASSWORD),
+        null,
+        null,
         UserState.ACTIVE,
         Language.RU
     );
@@ -99,6 +102,14 @@ public abstract class MockedAuthenticationController {
   }
 
   /**
+   * Authenticate every subsequent request as an already-persisted user, rather than the fresh one
+   * {@link #authenticateAs(Role...)} creates. The caller owns that user's lifecycle and cleanup.
+   */
+  protected void authenticateAs(@NonNull AppUserEntity user) {
+    authorizationHeader = jwtCreateTokenUseCase.execute(user);
+  }
+
+  /**
    * Drop the current identity, so subsequent requests are sent anonymously.
    */
   protected void authenticateAsAnonymous() {
@@ -110,6 +121,15 @@ public abstract class MockedAuthenticationController {
    */
   protected ResultActions post(String url, Object body) throws Exception {
     return mockMvc.perform(authorize(MockMvcRequestBuilders.post(url)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(body))));
+  }
+
+  /**
+   * PUT a JSON body to the given url.
+   */
+  protected ResultActions put(String url, Object body) throws Exception {
+    return mockMvc.perform(authorize(MockMvcRequestBuilders.put(url)
         .contentType(MediaType.APPLICATION_JSON)
         .content(objectMapper.writeValueAsString(body))));
   }

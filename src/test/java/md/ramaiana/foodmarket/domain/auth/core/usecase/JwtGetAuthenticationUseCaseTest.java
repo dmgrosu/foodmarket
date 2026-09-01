@@ -39,7 +39,7 @@ class JwtGetAuthenticationUseCaseTest {
     JwtGetAuthenticationUseCase useCase;
 
     private static AppUserEntity user(UserState state) {
-        AppUserEntity user = new AppUserEntity(1, "user@example.com", "hash",
+        AppUserEntity user = new AppUserEntity(1, "user@example.com", "hash", null, null,
             Instant.now(), state, Language.RU, new HashSet<>(), null);
         user.addRole(Role.USER);
         return user;

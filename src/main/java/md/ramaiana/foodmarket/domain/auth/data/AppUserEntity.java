@@ -32,6 +32,8 @@ public class AppUserEntity implements UserDetails {
   private final String email;
   @NonNull
   private final String passwd;
+  private final String firstName;
+  private final String lastName;
   @NonNull
   private final Instant createdAt;
   @NonNull
@@ -44,13 +46,16 @@ public class AppUserEntity implements UserDetails {
   private final AggregateReference<ClientEntity, Integer> client;
 
   @PersistenceCreator
-  public AppUserEntity(Integer id, @NonNull String email, @NonNull String passwd, @NonNull Instant createdAt,
+  public AppUserEntity(Integer id, @NonNull String email, @NonNull String passwd, String firstName, String lastName,
+                       @NonNull Instant createdAt,
                        @NonNull UserState state, @NonNull Language language,
                        @NonNull Set<UserRoleRef> userRoles,
                        AggregateReference<ClientEntity, Integer> client) {
     this.id = id;
     this.email = email;
     this.passwd = passwd;
+    this.firstName = firstName;
+    this.lastName = lastName;
     this.createdAt = createdAt;
     this.state = state;
     this.language = language;
@@ -58,9 +63,9 @@ public class AppUserEntity implements UserDetails {
     this.client = client;
   }
 
-  public AppUserEntity(@NonNull String email, @NonNull String passwd, @NonNull UserState state,
-                       @NonNull Language language) {
-    this(null, email, passwd, Instant.now(), state, language, new HashSet<>(), null);
+  public AppUserEntity(@NonNull String email, @NonNull String passwd, String firstName, String lastName,
+                       @NonNull UserState state, @NonNull Language language) {
+    this(null, email, passwd, firstName, lastName, Instant.now(), state, language, new HashSet<>(), null);
   }
 
   public void addRole(@NonNull Role role) {
@@ -80,7 +85,7 @@ public class AppUserEntity implements UserDetails {
    */
   @NonNull
   public AppUserEntity withState(@NonNull UserState newState) {
-    return new AppUserEntity(id, email, passwd, createdAt, newState, language, userRoles, client);
+    return new AppUserEntity(id, email, passwd, firstName, lastName, createdAt, newState, language, userRoles, client);
   }
 
   /**
@@ -88,7 +93,25 @@ public class AppUserEntity implements UserDetails {
    */
   @NonNull
   public AppUserEntity withClient(@NonNull AggregateReference<ClientEntity, Integer> newClient) {
-    return new AppUserEntity(id, email, passwd, createdAt, state, language, userRoles, newClient);
+    return new AppUserEntity(id, email, passwd, firstName, lastName, createdAt, state, language, userRoles, newClient);
+  }
+
+  /**
+   * Copy of this user with a new password hash. Never pass a raw password here — the caller encodes.
+   */
+  @NonNull
+  public AppUserEntity withPassword(@NonNull String newPasswd) {
+    return new AppUserEntity(id, email, newPasswd, firstName, lastName, createdAt, state, language, userRoles, client);
+  }
+
+  /**
+   * Copy of this user with the fields the user edits on their own profile. One copy rather than three
+   * chained withX calls, because /auth/updateProfile changes all three together.
+   */
+  @NonNull
+  public AppUserEntity withProfile(String newFirstName, String newLastName, @NonNull Language newLanguage) {
+    return new AppUserEntity(id, email, passwd, newFirstName, newLastName, createdAt, state, newLanguage,
+        userRoles, client);
   }
 
   @Override

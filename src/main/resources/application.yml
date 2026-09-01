@@ -40,3 +40,8 @@ registration:
   confirmation-link-validity-hours: 24
   resend-cooldown-seconds: 60
   login-page-url: ${REGISTRATION_LOGIN_PAGE_URL:http://localhost:3000/signIn}
+
+password-reset:
+  reset-page-url: ${PASSWORD_RESET_PAGE_URL:http://localhost:3000/resetPassword}
+  link-validity-hours: 1
+  request-cooldown-seconds: 60

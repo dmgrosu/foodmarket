@@ -8,6 +8,7 @@ Schema: `| id | kind | dir | api | note |` — `dir` omits the prefix `src/main/
 | id | kind | dir | api | note |
 |---|---|---|---|---|
 | About | fe-component | frontend/src/components/home | renders company description text |  |
+| AbstractPasswordResetEndpointTest | service | src/test/java/md/ramaiana/foodmarket/domain/auth/presentation/controller | userInState(UserState);activeUser();requestResetAndCaptureToken(String);latestResetTokenFor(AppUserEntity);overwriteResetToken() | test; shared fixture for the two password-reset endpoints, spies EmailSendUseCase to capture the emailed token and to assert nothing was sent |
 | AbstractRegistrationEndpointTest | service | src/test/java/md/ramaiana/foodmarket/domain/auth/presentation/controller | uniqueEmail();registerAndCaptureToken(String);captureEmailedToken();latestTokenFor(String);overwriteToken() | test; shared fixture for the three registration endpoints, spies EmailSendUseCase to capture the emailed token |
 | AccessVoter | abstract | shared/util/abstraction/voter | getCurrentUser()->AppUserEntity;assertUserIsAuthenticated();assertUserIsAdmin() | assertUserIsAdmin() checks Role.ADMIN membership, throws ForbiddenException |
 | AccessVoterTest | abstract | src/test/java/md/ramaiana/foodmarket/shared/util/abstraction/voter | 5 tests: assertUserIsAdmin (admin-pass, non-admin-reject, anonymous-reject, no-auth-reject), assertUserIsAuthenticated (pass) | test |
@@ -37,16 +38,23 @@ Schema: `| id | kind | dir | api | note |` — `dir` omits the prefix `src/main/
 | AppUserSearchUseCase | usecase | domain/auth/core/usecase | execute(AppUserSearchCriteria)->PagedResponse<AppUserResponse> | resolves every linked client's name in one findAllById call |
 | AppUserSearchUseCaseTest | usecase | src/test/java/md/ramaiana/foodmarket/domain/auth/core/usecase | 3 tests: rejects an unknown sort column, resolves client names in one batched call, skips the lookup when no row has a client | test |
 | AuthAccessVoter | voter | domain/auth/presentation/voter | assertCanLogin();assertCanRegister();assertCanConfirmEmail();assertCanResendConfirmation() | DEVIATION: all four asserts are empty no-ops |
+| authActions | fe-action | frontend/src/store/actions | LOGIN_START;LOGIN_SUCCESS;LOGIN_FAIL;LOGOUT;loginStart;loginSuccess;signUpStart;checkAuthTimeout;authCheckState;logout;handleError |  |
+| AuthChangePasswordTest | controller | src/test/java/md/ramaiana/foodmarket/domain/auth/presentation/controller | 5 tests: changes password (proved by logging in), wrong current password, reusing current password, blank new password, anonymous rejected | test |
 | AuthConfirmEmailTest | controller | src/test/java/md/ramaiana/foodmarket/domain/auth/presentation/controller | 7 tests: confirms pending, idempotent replay, unknown token, expired token, blank token, missing token, no-auth-required | test |
 | AuthController | controller | domain/auth/presentation/controller | login(LoginRequest)->AuthResponse;register(RegisterRequest)->RegistrationResponse;confirmEmail(RegistrationConfirmRequest)->RegistrationConfirmResponse;resendConfirmation(RegistrationConfirmationResendRequest)->RegistrationResponse | register/resendConfirmation delegate to request handlers; login and confirmEmail call their use cases directly (neither has an external-call side effect) |
+| AuthForgotPasswordTest | controller | src/test/java/md/ramaiana/foodmarket/domain/auth/presentation/controller | 9 tests: emails an active user, stores only a hash, unknown address answers identically and sends nothing, pending user, suspended user, cooldown, retires previous link, invalid email, no-auth-required | test; the enumeration guard is the point |
 | AuthLoginTest | controller | src/test/java/md/ramaiana/foodmarket/domain/auth/presentation/controller | 5 tests: token for active user, forbidden while pending, forbidden while awaiting approval, wrong password, invalid email | test |
 | AuthLoginUseCase | usecase | domain/auth/core/usecase | execute(LoginRequest)->AuthResponse |  |
+| AuthProfileTest | controller | src/test/java/md/ramaiana/foodmarket/domain/auth/presentation/controller | 9 tests: reads own account, anonymous rejected, persists language, unknown tag falls back to ru, persists names, blank name stored as null, name captured at registration, anonymous update, blank language | test |
+| authReducer | fe-reducer | frontend/src/store/reducers | token;userId;clientId;isLoading;error |  |
 | AuthRegisterRequestHandler | service | domain/auth/core/handler | handle(RegisterRequest)->RegistrationResponse;persist(RegisterRequest)->TransactionalEffectResult | persist() commits before handle() triggers the confirmation email |
 | AuthRegisterUseCase | usecase | domain/auth/core/usecase | preExecute(RegisterRequest);executeTransactionalEffect(RegisterRequest)->PendingRegistration;executeSideEffects(PendingRegistration)->boolean | three-phase, sequenced by AuthRegisterRequestHandler |
 | AuthRegisterUseCaseTest | usecase | src/test/java/md/ramaiana/foodmarket/domain/auth/core/usecase | 6 tests: preExecute duplicate/free email, transactional effect (no/zero/positive clientId), side effects delegate | test |
 | AuthRegistrationTest | controller | src/test/java/md/ramaiana/foodmarket/domain/auth/presentation/controller | 8 tests: registers pending user, stores only a token hash, commits before emailing, keeps user when mail fails, duplicate email, invalid email, blank password, no-auth-required | test |
 | AuthResendConfirmationTest | controller | src/test/java/md/ramaiana/foodmarket/domain/auth/presentation/controller | 6 tests: reissues and kills the old link, cooldown, already-confirmed user, unknown email, invalid email, no-auth-required | test |
+| AuthResetPasswordTest | controller | src/test/java/md/ramaiana/foodmarket/domain/auth/presentation/controller | 7 tests: sets new password (proved by logging in), token single-use, expired token, unknown token, blank password, blank token, no-auth-required | test |
 | AuthResponse | response | domain/auth/core/response | user:UserResponse;token:String;tokenTtl:int | nested static UserResponse{id,email,client} has no own file |
+| axios-instance | fe-util | frontend/src | instance | baseURL from REACT_APP_API_URL; request interceptor adds Authorization |
 | BadRequestException | exception | shared/exception/http |  |  |
 | BalanceDataDto | dto | shared/dataexchange/dto | prices:List<ErpPriceDto>;balances:List<ErpBalanceDto> |  |
 | BalanceEntity | entity | domain/product/data | storage:AggregateReference;product:AggregateReference;quantity:Float | DEVIATION: no @Id; written only via BalanceRepository JDBC |
@@ -60,6 +68,8 @@ Schema: `| id | kind | dir | api | note |` — `dir` omits the prefix `src/main/
 | BrandResponse | response | domain/brand/core/response | id:Integer;name:String |  |
 | BrandSearchUseCase | usecase | domain/brand/core/usecase | execute()->List<BrandResponse> |  |
 | Cart | fe-component | frontend/src/components/orders | Cart |  |
+| cartActions | fe-action | frontend/src/store/actions | ADD_TO_CART_START;ADD_TO_CART_SUCCESS;ADD_TO_CART_FAIL;SELECT_GOOD;CHANGE_QUANTITY;DELETE_FROM_CART_START;DELETE_FROM_CART_CANCELLED;DELETE_FROM_CART_END;SELECT_GOOD_TO_DELETE;PLACE_ORDER_START;PLACE_ORDER_SUCCESS;PLACE_ORDER_FAIL;OPEN_PLACE_ORDER_DIALOG;CLOSE_PLACE_ORDER_DIALOG;addProductToCart;deleteProductFromCart;placeOrder;selectProduct;changeQuantity;selectProductToDelete;cancelDeleteProduct;openPlaceOrderDialog;closePlaceOrderDialog | DEVIATION: addProductToCart omits required clientId/storageId/priceType |
+| cartReducer | fe-reducer | frontend/src/store/reducers | orderId;products;isAdding;isDeleting;isPlacing;placeOrderDialogOpen;error;selectedProduct;deleteProductId | cart state is not persisted across reload |
 | CatalogDto | dto | shared/dataexchange/dto | groups:List<ErpGroupDto>;brands:List<ErpBrandDto>;products:List<ErpProductDto> |  |
 | ClientAccessVoter | voter | domain/client/presentation/voter | assertCanFindByIdno() | DEVIATION: asserts auth but SecurityConfig permits endpoint anonymously |
 | ClientAddressEntity | entity | domain/client/data | type:AddressType;fullAddress:String;description:String | DEVIATION: no @Id; embedded child of ClientEntity |
@@ -102,6 +112,7 @@ Schema: `| id | kind | dir | api | note |` — `dir` omits the prefix `src/main/
 | Groups | fe-component | frontend/src/components/products | Groups |  |
 | Hero | fe-component | frontend/src/components/home | renders hero banner with CTA buttons |  |
 | Home | fe-component | frontend/src/components/home | composes home page sections | DEVIATION: default export named HomePage, not Home |
+| homepageContent | fe-util | frontend/src/data | audience;howItWorks;advantages;partners;about;contacts | static RU copy; no i18n library |
 | HowItWorks | fe-component | frontend/src/components/home | renders three-step how-it-works cards |  |
 | ImportBalancesUseCase | usecase | shared/dataexchange/core/usecase | execute()->void | resolves balances-data.xml under dataFolderPath, then deletes it |
 | ErpImportFlowTest | usecase | src/test/java/md/ramaiana/foodmarket/shared/dataexchange | 8 tests: all three importers over real repositories | test; fixtures cut from the live export live in src/test/resources/importFixtures |
@@ -110,6 +121,7 @@ Schema: `| id | kind | dir | api | note |` — `dir` omits the prefix `src/main/
 | ImportClientsUseCaseTest | usecase | src/test/java/md/ramaiana/foodmarket/shared/dataexchange/core/usecase | 2 tests: new clients, update existing | test; writes its own XML fixture |
 | ImportProductsUseCase | usecase | shared/dataexchange/core/usecase | execute()->void | resolves products-data.xml under dataFolderPath, then deletes it; drops prices whose storage is unknown |
 | ImportProductsUseCaseTest | usecase | src/test/java/md/ramaiana/foodmarket/shared/dataexchange/core/usecase | should_import_products() | test; writes its own XML fixture |
+| index | fe-component | frontend/src |  | creates redux store with thunk, mounts BrowserRouter |
 | JwtCreateTokenUseCase | usecase | domain/auth/core/usecase | execute(AppUserEntity)->String;getTokenValidityInSeconds()->int | DEVIATION: second public method; returns "Bearer "-prefixed token |
 | JwtFilter | config | config | doFilterInternal;shouldNotFilter | DEVIATION: not a @Component; instantiated manually in SecurityConfig |
 | JwtGetAuthenticationUseCase | usecase | domain/auth/core/usecase | execute(String)->Authentication | re-checks UserState on every request, so suspension and pending approval take effect immediately rather than at token expiry |
@@ -141,12 +153,26 @@ Schema: `| id | kind | dir | api | note |` — `dir` omits the prefix `src/main/
 | OrderPlaceUseCase | usecase | domain/order/core/usecase | execute(int)->void |  |
 | OrderRepository | repo | domain/order/data | findByIdAndDeletedAtIsNull;findByClientIdAndDeletedAtIsNullAndCreatedAtBetween |  |
 | OrderResponse | response | domain/order/core/response | id:Integer;totalSum:float;clientId:Integer;state:OrderState;createdAt:long;totalWeight:float;items:List<OrderItemResponse> |  |
+| Orders | fe-component | frontend/src/components/orders | Orders | DEVIATION: placeholder stub rendering literal text |
 | OrderSearchByPeriodUseCase | usecase | domain/order/core/usecase | execute(OrderListRequest)->OrderListResponse | N+1: findNameById per item per order across the page |
 | OrderState | enum | shared/enums | NEW;PLACED;PROCESSED;NOT_PROCESSED |  |
 | OrderUpdateUseCase | usecase | domain/order/core/usecase | execute(UpdateOrderRequest)->void |  |
-| Orders | fe-component | frontend/src/components/orders | Orders | DEVIATION: placeholder stub rendering literal text |
 | PagedResponse | response | shared/response | items:List<T>;currentPage:int;pageSize:int;totalPages:int;totalElements:long | generic paging envelope shared by all /admin/*/search endpoints |
 | Partners | fe-component | frontend/src/components/home | renders partner logos grid |  |
+| PasswordChangeRequest | request | domain/auth/core/request | currentPassword:String;newPassword:String | record; no strength constraint, matching RegisterRequest |
+| PasswordChangeUseCase | usecase | domain/auth/core/usecase | execute(AppUserEntity,PasswordChangeRequest)->void | verifies the current password before rewriting the hash; issued JWTs stay valid |
+| PasswordResetCompleteRequest | request | domain/auth/core/request | resetToken:String;newPassword:String | record |
+| PasswordResetCompleteUseCase | usecase | domain/auth/core/usecase | execute(PasswordResetCompleteRequest)->void | self-transactional: no side effects, so no handler; unknown/spent/expired all collapse to one BadRequestException |
+| PasswordResetInitiateRequest | request | domain/auth/core/request | email:String | record |
+| PasswordResetInitiateRequestHandler | service | domain/auth/core/handler | handle(PasswordResetInitiateRequest)->PasswordResetInitiateResponse;persist(PasswordResetInitiateRequest)->Optional<TransactionalEffectResult> | same thisProxy split as AuthRegisterRequestHandler; skips the email when persist returns empty |
+| PasswordResetInitiateResponse | response | domain/auth/core/response | email:String;resetEmailSent:boolean | resetEmailSent is true even when nothing was sent — otherwise the field is an account-existence oracle |
+| PasswordResetInitiateUseCase | usecase | domain/auth/core/usecase | executeTransactionalEffect(PasswordResetInitiateRequest)->Optional<TransactionalEffectResult>;executeSideEffects(TransactionalEffectResult)->boolean | three-phase; returns empty rather than throwing for unknown email / non-ACTIVE user / cooldown, so the endpoint never leaks whether an address is registered |
+| PasswordResetMailUseCase | usecase | domain/auth/core/usecase | execute(TransactionalEffectResult)->boolean | Propagation.NEVER; swallows MailException and reports false rather than propagating |
+| PasswordResetProperties | config | config | resetPageUrl:String;linkValidityHours:int;requestCooldownSeconds:int | validity is 1 hour, not registration's 24 — this link changes a credential |
+| PasswordResetTokenEntity | entity | domain/auth/data | id:Integer;user:AggregateReference;tokenHash:String;expiresAt:Instant;usedAt:Instant;createdAt:Instant;withUsedAt();isUsed();isExpired() | only a SHA-256 hash of the token is persisted, table password_reset_token |
+| PasswordResetTokenIssueUseCase | usecase | domain/auth/core/usecase | execute(AppUserEntity)->TransactionalEffectResult | Propagation.MANDATORY; the database half of issuing a reset link |
+| PasswordResetTokenRepository | repo | domain/auth/data | findByTokenHash;expireLiveTokensForUser;findLatestForUser;findAllForUser |  |
+| PasswordResetVariables | request | domain/email/core/request | resetUrl:String;expiresInHours:int;language:Language | language selects the template id, so it is not part of the variables payload |
 | PriceEntity | entity | domain/price/data | type:PriceType;storage:AggregateReference;price:Float | DEVIATION: no @Id; embedded child of ProductEntity |
 | PriceResponse | response | domain/price/core/response | type:String;price:float |  |
 | PriceType | enum | shared/enums | LOCAL;RETAIL_ZONE1;RETAIL_ZONE2;RETAIL_ZONE3;SALE |  |
@@ -166,17 +192,17 @@ Schema: `| id | kind | dir | api | note |` — `dir` omits the prefix `src/main/
 | ProductRepositoryCustom | repo | domain/product/data | searchInStock;findGroupIdsInStock | hand-written fragment; @Query cannot return Page and Criteria cannot reach balances |
 | ProductRepositoryImpl | repo | domain/product/data | searchInStock;findGroupIdsInStock | NamedParameterJdbcTemplate + JdbcAggregateOperations; pages ids then loads aggregates so prices come back |
 | ProductResponse | response | domain/product/core/response | id:Integer;name:String;groupId:Integer;brandId:Integer;inPackage:Float;barCode:String;unit:String;weight:Float;prices:List<PriceResponse> |  |
+| Products | fe-component | frontend/src/components/products | Products |  |
 | ProductSearchCriteria | request | domain/product/core/usecase | storageId:Integer;groupId:Integer;brandId:Integer;nameLike:String | DEVIATION: request record living in core/usecase, not core/request |
 | ProductSearchUseCase | usecase | domain/product/core/usecase | execute(ProductSearchCriteria)->PagedResponse<ProductResponse> | whitelists sortable properties like ClientSearchUseCase; resolves group names once per page |
 | ProductSearchUseCaseTest | usecase | src/test/java/md/ramaiana/foodmarket/domain/product/core/usecase | 7 tests: paging, stock filter, sort whitelist, prices, group tree | test; fixture written straight through JDBC |
-| Products | fe-component | frontend/src/components/products | Products |  |
 | ProductsList | fe-component | frontend/src/components/products | ProductsList |  |
 | Profile | fe-component | frontend/src/components/auth | Profile | DEVIATION: placeholder stub rendering literal text |
+| ProfileFindUseCase | usecase | domain/auth/core/usecase | execute(AppUserEntity)->ProfileResponse | the caller comes from @AuthenticationPrincipal, already re-read per request by JwtGetAuthenticationUseCase |
+| ProfileResponse | response | domain/auth/core/response | id:Integer;email:String;firstName:String;lastName:String;state:UserState;roles:Set;language:String;createdAt:Instant;client:ClientResponse | record; language is the i18next tag, not the enum name |
+| ProfileUpdateRequest | request | domain/auth/core/request | firstName:String;lastName:String;language:String | record; names optional, blank normalised to null |
+| ProfileUpdateUseCase | usecase | domain/auth/core/usecase | execute(AppUserEntity,ProfileUpdateRequest)->ProfileResponse | reloads inside the transaction; unknown language tags fall back to RU |
 | RegisterRequest | request | domain/auth/core/request | email:String;password:String;clientId:Integer;language:String | clientId>0 is resolved via ClientFindByIdUseCase; language is an i18next tag, unknown values fall back to RU |
-| RegistrationConfirmRequest | request | domain/auth/core/request | confirmationToken:String |  |
-| RegistrationConfirmResponse | response | domain/auth/core/response | email:String;state:UserState;token:String;tokenTtl:int | field names mirror AuthResponse |
-| RegistrationConfirmUseCase | usecase | domain/auth/core/usecase | execute(RegistrationConfirmRequest)->RegistrationConfirmResponse | self-transactional: no side effects, so no handler; idempotent for an already-confirmed user |
-| RegistrationConfirmUseCaseTest | usecase | src/test/java/md/ramaiana/foodmarket/domain/auth/core/usecase | 5 tests: confirm pending, idempotent confirmed, idempotent active, unknown token, expired token | test |
 | RegistrationConfirmationMailUseCase | usecase | domain/auth/core/usecase | execute(PendingRegistration)->boolean | Propagation.NEVER; swallows MailException and reports false rather than propagating |
 | RegistrationConfirmationMailUseCaseTest | usecase | src/test/java/md/ramaiana/foodmarket/domain/auth/core/usecase | 2 tests: sends correct template and variables, swallows MailException | test |
 | RegistrationConfirmationResendRequest | request | domain/auth/core/request | email:String |  |
@@ -184,19 +210,26 @@ Schema: `| id | kind | dir | api | note |` — `dir` omits the prefix `src/main/
 | RegistrationConfirmationResendUseCase | usecase | domain/auth/core/usecase | executeTransactionalEffect(RegistrationConfirmationResendRequest)->PendingRegistration;executeSideEffects(PendingRegistration)->boolean | enforces registration.resend-cooldown-seconds via RegistrationTokenRepository.findLatestForUser |
 | RegistrationConfirmationResendUseCaseTest | usecase | src/test/java/md/ramaiana/foodmarket/domain/auth/core/usecase | 6 tests: reissue no prior token, reissue after cooldown, reject inside cooldown, reject non-pending, propagate not-found, side effects delegate | test |
 | RegistrationConfirmationVariables | request | domain/email/core/request | confirmationUrl:String;expiresInHours:int;language:Language | language selects the template id, so it is not part of the variables payload |
+| RegistrationConfirmRequest | request | domain/auth/core/request | confirmationToken:String |  |
+| RegistrationConfirmResponse | response | domain/auth/core/response | email:String;state:UserState;token:String;tokenTtl:int | field names mirror AuthResponse |
+| RegistrationConfirmUseCase | usecase | domain/auth/core/usecase | execute(RegistrationConfirmRequest)->RegistrationConfirmResponse | self-transactional: no side effects, so no handler; idempotent for an already-confirmed user |
+| RegistrationConfirmUseCaseTest | usecase | src/test/java/md/ramaiana/foodmarket/domain/auth/core/usecase | 5 tests: confirm pending, idempotent confirmed, idempotent active, unknown token, expired token | test |
 | RegistrationProperties | config | config | confirmationPageUrl:String;confirmationLinkValidityHours:int;resendCooldownSeconds:int |  |
 | RegistrationResponse | response | domain/auth/core/response | email:String;state:UserState;confirmationEmailSent:boolean |  |
 | RegistrationTokenEntity | entity | domain/auth/data | id:Integer;user:AggregateReference;tokenHash:String;expiresAt:Instant;confirmedAt:Instant;createdAt:Instant;withConfirmedAt();isConfirmed();isExpired() | only a SHA-256 hash of the token is persisted, table registration_token |
 | RegistrationTokenIssueUseCase | usecase | domain/auth/core/usecase | execute(AppUserEntity)->PendingRegistration | Propagation.MANDATORY; the database half of issuing a confirmation link |
 | RegistrationTokenIssueUseCaseTest | usecase | src/test/java/md/ramaiana/foodmarket/domain/auth/core/usecase | 1 test: expires prior tokens, persists a hash distinct from the raw token, builds the url | test |
 | RegistrationTokenRepository | repo | domain/auth/data | findByTokenHash;expireLiveTokensForUser;findLatestForUser;findAllForUser |  |
+| reportWebVitals | fe-util | frontend/src | reportWebVitals | CRA boilerplate |
 | RequestHandler | annotation | shared/annotation |  | @Component meta-annotation marking request-handler beans; owns the transaction boundary around a use case's external call |
 | RightMenu | fe-component | frontend/src/components/navigation | RightMenu |  |
 | Role | enum | shared/enums | ADMIN;USER | carries lowercase dbValue (still unread); checked by AccessVoter.assertUserIsAdmin() |
+| rootReducer | fe-reducer | frontend/src/store/reducers | combineReducers({authReducer,cartReducer}) | file is index.js |
 | ScheduleDataService | service | shared/schedule | runDataExchange()->void | exportOrders() is an empty TODO stub |
 | SecureTokenGenerator | util | shared/util | generate()->String;hash(String)->String | only the hash is ever persisted; raw token exists only in memory and in the emailed link |
 | SecureTokenGeneratorTest | util | src/test/java/md/ramaiana/foodmarket/shared/util | 5 tests: url-safe length, uniqueness, hash stable, hash differs from input, hash differs per input | test |
 | SecurityConfig | config | config | securityFilterChain;authenticationManager;passwordEncoder;authenticationProvider;corsConfigurationSource |  |
+| setupTests | fe-util | frontend/src |  | CRA boilerplate, imports jest-dom |
 | SignIn | fe-component | frontend/src/components/auth | SignIn |  |
 | SignUp | fe-component | frontend/src/components/auth | SignUp |  |
 | Stats | fe-component | frontend/src/components/home | renders stat counters grid | DEVIATION: never imported anywhere; dead code |
@@ -214,13 +247,3 @@ Schema: `| id | kind | dir | api | note |` — `dir` omits the prefix `src/main/
 | UserController | controller | domain/auth/presentation/controller | search(...)->PagedResponse<AppUserResponse>;activate(Integer)->AppUserResponse | admin-only |
 | UserRoleRef | entity | domain/auth/data | role:Role | DEVIATION: no @Id |
 | UserState | enum | shared/enums | PENDING_CONFIRMATION;CONFIRMED;ACTIVE;INACTIVE;SUSPENDED |  |
-| authActions | fe-action | frontend/src/store/actions | LOGIN_START;LOGIN_SUCCESS;LOGIN_FAIL;LOGOUT;loginStart;loginSuccess;signUpStart;checkAuthTimeout;authCheckState;logout;handleError |  |
-| authReducer | fe-reducer | frontend/src/store/reducers | token;userId;clientId;isLoading;error |  |
-| axios-instance | fe-util | frontend/src | instance | baseURL from REACT_APP_API_URL; request interceptor adds Authorization |
-| cartActions | fe-action | frontend/src/store/actions | ADD_TO_CART_START;ADD_TO_CART_SUCCESS;ADD_TO_CART_FAIL;SELECT_GOOD;CHANGE_QUANTITY;DELETE_FROM_CART_START;DELETE_FROM_CART_CANCELLED;DELETE_FROM_CART_END;SELECT_GOOD_TO_DELETE;PLACE_ORDER_START;PLACE_ORDER_SUCCESS;PLACE_ORDER_FAIL;OPEN_PLACE_ORDER_DIALOG;CLOSE_PLACE_ORDER_DIALOG;addProductToCart;deleteProductFromCart;placeOrder;selectProduct;changeQuantity;selectProductToDelete;cancelDeleteProduct;openPlaceOrderDialog;closePlaceOrderDialog | DEVIATION: addProductToCart omits required clientId/storageId/priceType |
-| cartReducer | fe-reducer | frontend/src/store/reducers | orderId;products;isAdding;isDeleting;isPlacing;placeOrderDialogOpen;error;selectedProduct;deleteProductId | cart state is not persisted across reload |
-| homepageContent | fe-util | frontend/src/data | audience;howItWorks;advantages;partners;about;contacts | static RU copy; no i18n library |
-| index | fe-component | frontend/src |  | creates redux store with thunk, mounts BrowserRouter |
-| reportWebVitals | fe-util | frontend/src | reportWebVitals | CRA boilerplate |
-| rootReducer | fe-reducer | frontend/src/store/reducers | combineReducers({authReducer,cartReducer}) | file is index.js |
-| setupTests | fe-util | frontend/src |  | CRA boilerplate, imports jest-dom |

@@ -39,7 +39,7 @@ class AppUserActivateUseCaseTest {
   AppUserActivateUseCase useCase;
 
   private static AppUserEntity user(UserState state) {
-    return new AppUserEntity(1, "user@example.com", "hash",
+    return new AppUserEntity(1, "user@example.com", "hash", null, null,
         Instant.now(), state, Language.RU, new HashSet<>(), null);
   }
 

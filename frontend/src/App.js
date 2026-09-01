@@ -5,6 +5,8 @@ import {Route, Switch, withRouter} from "react-router-dom";
 import SignIn from "./components/auth/SignIn";
 import SignUp from "./components/auth/SignUp";
 import ConfirmEmail from "./components/auth/ConfirmEmail";
+import ForgotPassword from "./components/auth/ForgotPassword";
+import ResetPassword from "./components/auth/ResetPassword";
 import Home from "./components/home/Home";
 import {ToastContainer} from "material-react-toastify";
 import 'material-react-toastify/dist/ReactToastify.min.css';
@@ -50,6 +52,9 @@ const App = (props) => {
         <Route path='/signUp' component={SignUp} key={2}/>,
         <Route exact path='/' component={Home} key={3}/>,
         <Route path='/confirmEmail' component={ConfirmEmail} key={9}/>,
+        // Public on purpose: a user who has forgotten their password has no session to reach these with.
+        <Route path='/forgotPassword' component={ForgotPassword} key={10}/>,
+        <Route path='/resetPassword' component={ResetPassword} key={11}/>,
     ];
 
     if (isAuthenticated) {

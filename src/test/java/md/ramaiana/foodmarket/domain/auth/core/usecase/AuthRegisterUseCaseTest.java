@@ -24,7 +24,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -55,7 +54,7 @@ class AuthRegisterUseCaseTest {
     }
 
     private static RegisterRequest request(Integer clientId, String language) {
-        return new RegisterRequest("user@example.com", "raw-password", clientId, language);
+        return new RegisterRequest("user@example.com", "raw-password", null, null, clientId, language);
     }
 
     @Test
@@ -161,7 +160,7 @@ class AuthRegisterUseCaseTest {
     }
 
     private static AppUserEntity mockExistingUser() {
-        return new AppUserEntity(1, "user@example.com", "hash",
+        return new AppUserEntity(1, "user@example.com", "hash", null, null,
             Instant.now(), UserState.PENDING_CONFIRMATION, Language.RU, new HashSet<>(), null);
     }
 }

@@ -59,10 +59,10 @@ class SignUp extends Component {
     }
 
     signUp = () => {
-        const {email, password, entityFound} = this.state;
+        const {email, password, entityFound, firstName, lastName} = this.state;
         const clientId = entityFound && !entityFound.code ? entityFound.id : 0;
         if (this.validateInput()) {
-            this.props.signUpStart(email, password, clientId);
+            this.props.signUpStart(email, password, clientId, firstName, lastName);
         }
     }
 
