@@ -18,8 +18,9 @@ Empty `voter` = **no authorization check**. Empty `frontend` = no consumer. `!` 
 | PUT | /auth/updateProfile | AuthController#updateProfile | AuthAccessVoter#assertCanUpdateProfile | ProfileUpdateUseCase#execute | ProfileUpdateRequest | ProfileResponse | AppUserRepository,ClientRepository | profile.js#updateProfile |
 | PUT | /auth/changePassword | AuthController#changePassword | AuthAccessVoter#assertCanChangePassword | PasswordChangeUseCase#execute | PasswordChangeRequest | void | AppUserRepository | profile.js#changePassword |
 | GET | /brand/getAll | BrandController#getAll | BrandAccessVoter#assertCanGetAll | BrandSearchUseCase#execute |  | List<BrandResponse> | BrandRepository | Products.js#fetchBrands |
-| GET | /client/findByIdno | ClientController#findByIdno | ClientAccessVoter#assertCanFindByIdno | ClientSearchUseCase#executeByIdno | idno:String! | ClientResponse | ClientRepository | SignUp.js#findEntity |
-| GET | /client/search | ClientController#search | ClientAccessVoter#assertCanSearch | ClientSearchUseCase#execute | name:String,idno:String,pageNo:int,pageSize:int,sortColumn:String,sortDirection:Sort.Direction | PagedResponse<ClientResponse> | ClientRepository | admin.js#searchClients |
+| GET | /client/findByIdno | ClientController#findByIdno | ClientAccessVoter#assertCanFindByIdno | ClientFindByIdnoUseCase#execute | idno:String! | ClientResponse | ClientRepository | SignUp.js#findEntity |
+| GET | /user/search | UserController#search | UserAccessVoter#assertCanSearch | AppUserSearchUseCase#execute | email:String,state:UserState,pageNo:int,pageSize:int,sortColumn:String,sortDirection:Sort.Direction | PagedResponse<AppUserResponse> | AppUserRepository,ClientRepository | admin.js#searchUsers |
+| PUT | /user/activate/{userId} | UserController#activate | UserAccessVoter#assertCanActivate |  |  | AppUserResponse | AppUserRepository,ClientRepository | admin.js#activateUser |
 | POST | /order/addProduct | OrderController#addProduct | OrderAccessVoter#assertCanAddProduct | OrderAddProductUseCase#execute | AddProductToOrderRequest | OrderResponse | OrderRepository,ProductRepository,ClientRepository | cartActions.js#addProductToCart |
 | DELETE | /order/deleteById/{orderId} | OrderController#deleteById | OrderAccessVoter#assertCanDelete | OrderDeleteUseCase#execute |  | void | OrderRepository |  |
 | DELETE | /order/deleteProduct/{orderId}/{itemId} | OrderController#deleteProduct | OrderAccessVoter#assertCanDeleteProduct | OrderDeleteProductUseCase#execute |  | void | OrderRepository | cartActions.js#deleteProductFromCart |
@@ -33,7 +34,7 @@ Empty `voter` = **no authorization check**. Empty `frontend` = no consumer. `!` 
 
 ## Request handlers
 
-`/auth/register`, `/auth/confirmEmail`, `/auth/resendConfirmation`, `/auth/forgotPassword` show an empty `usecase` column — they delegate to a `domain/auth/core/handler/*RequestHandler` instead of calling a use case directly. The handler owns the transaction boundary: it runs the use case's database write in its own transaction, then triggers the Mailjet call only after that write has committed. See `conventions.md`.
+`/auth/register`, `/auth/confirmEmail`, `/auth/resendConfirmation`, `/auth/forgotPassword`, `/user/activate/{userId}` show an empty `usecase` column — they delegate to a `domain/auth/core/handler/*RequestHandler` instead of calling a use case directly. The handler owns the transaction boundary: it runs the use case's database write in its own transaction, then triggers the Mailjet call only after that write has committed. See `conventions.md`.
 
 ## Anonymous access (SecurityConfig.securityFilterChain + JwtFilter.shouldNotFilter)
 
@@ -54,4 +55,4 @@ No voter inspects the *resource* being accessed (e.g. order ownership) — only 
 
 ## Admin-only (Role.ADMIN)
 
-`GET /client/search` is the only admin endpoint. There is **no path-based rule** for it in `SecurityConfig` — enforcement is solely `ClientAccessVoter#assertCanSearch` -> `AccessVoter.assertUserIsAdmin()`, so a forgotten assert would leave it open to any authenticated user.
+`GET /user/search` and `PUT /user/activate/{userId}` are the admin endpoints. There is **no path-based rule** for either in `SecurityConfig` — enforcement is solely `UserAccessVoter#assertCanSearch` / `#assertCanActivate` -> `AccessVoter.assertUserIsAdmin()`, so a forgotten assert would leave one open to any authenticated user.

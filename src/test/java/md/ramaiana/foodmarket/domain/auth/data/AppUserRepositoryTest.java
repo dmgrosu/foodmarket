@@ -34,9 +34,9 @@ class AppUserRepositoryTest {
 
   @Test
   void should_page_and_sort_users() {
-    repository.save(new AppUserEntity(email("cola"), "hash", UserState.PENDING_CONFIRMATION, Language.RU));
-    repository.save(new AppUserEntity(email("bread"), "hash", UserState.PENDING_CONFIRMATION, Language.RU));
-    repository.save(new AppUserEntity(email("apple"), "hash", UserState.PENDING_CONFIRMATION, Language.RU));
+    repository.save(new AppUserEntity(email("cola"), "hash", null, null, UserState.PENDING_CONFIRMATION, Language.RU));
+    repository.save(new AppUserEntity(email("bread"), "hash", null, null, UserState.PENDING_CONFIRMATION, Language.RU));
+    repository.save(new AppUserEntity(email("apple"), "hash", null, null, UserState.PENDING_CONFIRMATION, Language.RU));
 
     Page<AppUserEntity> firstPage = repository.search(null, null,
         PageRequest.of(0, 2, Sort.by(Sort.Direction.ASC, "email")));
@@ -49,8 +49,8 @@ class AppUserRepositoryTest {
   void should_filter_users_by_email_and_state() {
     String confirmed = email("confirmed-user");
     String pending = email("pending-user");
-    repository.save(new AppUserEntity(confirmed, "hash", UserState.CONFIRMED, Language.RU));
-    repository.save(new AppUserEntity(pending, "hash", UserState.PENDING_CONFIRMATION, Language.RU));
+    repository.save(new AppUserEntity(confirmed, "hash", null, null, UserState.CONFIRMED, Language.RU));
+    repository.save(new AppUserEntity(pending, "hash", null, null, UserState.PENDING_CONFIRMATION, Language.RU));
 
     Page<AppUserEntity> byEmail = repository.search("confirmed-user", null,
         PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "email")));
@@ -66,7 +66,7 @@ class AppUserRepositoryTest {
     // The paged search goes through JdbcAggregateOperations, so @MappedCollection children
     // (userRoles) are loaded as part of the aggregate rather than left empty.
     String withRole = email("with-role");
-    AppUserEntity user = new AppUserEntity(withRole, "hash", UserState.ACTIVE, Language.RU);
+    AppUserEntity user = new AppUserEntity(withRole, "hash", null, null, UserState.ACTIVE, Language.RU);
     user.addRole(Role.USER);
     repository.save(user);
 
