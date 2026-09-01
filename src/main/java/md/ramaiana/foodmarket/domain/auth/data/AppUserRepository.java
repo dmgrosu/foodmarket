@@ -6,7 +6,7 @@ import org.springframework.data.repository.CrudRepository;
 /**
  * AppUser Repository.
  */
-public interface AppUserRepository extends CrudRepository<AppUserEntity, Integer> {
+public interface AppUserRepository extends CrudRepository<AppUserEntity, Integer>, AppUserRepositoryCustom {
 
   Optional<AppUserEntity> findByEmail(String email);
 }

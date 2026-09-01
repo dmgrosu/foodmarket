@@ -1,13 +1,13 @@
 {
   "_comment": "Provenance for .claude/graph. 'generated' files are reconciled against source by build_graph.py --check. 'handwritten' files are prose; the watched hashes below flag when the code they describe has changed. A hash mismatch is a prompt to re-read, not a build failure.",
   "counts": {
-    "edges": 158,
-    "frontend_calls": 11,
-    "frontend_js": 37,
-    "java_main": 106,
-    "java_test": 6,
-    "nodes": 149,
-    "routes": 15,
+    "edges": 211,
+    "frontend_calls": 16,
+    "frontend_js": 50,
+    "java_main": 144,
+    "java_test": 31,
+    "nodes": 212,
+    "routes": 19,
     "tables": 13
   },
   "generated": [

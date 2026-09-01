@@ -10,11 +10,12 @@ Admin calls go through `frontend/src/api/admin.js`, written against the backend'
 
 ## Call sites
 
-Schema: `| caller | http | backend path | params | dispatches |`. 15 rows = every `axios.<verb>` in `frontend/src`.
+Schema: `| caller | http | backend path | params | dispatches |`. 16 rows = every `axios.<verb>` in `frontend/src`.
 
 | caller | http | backend path | params | dispatches |
 |---|---|---|---|---|
-| admin.js#searchClients | GET | /client/search | name,idno,pageNo,pageSize,sortColumn,sortDirection |  |
+| admin.js#searchUsers | GET | /user/search | email,state,pageNo,pageSize,sortColumn,sortDirection |  |
+| admin.js#activateUser | PUT | /user/activate/{userId} |  |  |
 | authActions.js#loginStart | POST | /auth/login | email,password | LOGIN_START,LOGIN_SUCCESS,LOGIN_FAIL |
 | authActions.js#signUpStart | POST | /auth/register | email,password,clientId,language | SIGNUP_START,SIGNUP_SUCCESS,SIGNUP_FAIL |
 | authActions.js#confirmEmail | POST | /auth/confirmEmail | confirmationToken | CONFIRM_EMAIL_START,CONFIRM_EMAIL_SUCCESS,CONFIRM_EMAIL_FAIL,LOGIN_SUCCESS |
@@ -35,7 +36,7 @@ Schema: `| caller | http | backend path | params | dispatches |`. 15 rows = ever
 | path | component | guard |
 |---|---|---|
 | / | Home | public |
-| /admin | AdminDashboard | authed **and** roles contains ADMIN; nested /admin/{products,brands,clients} |
+| /admin | AdminDashboard | authed **and** roles contains ADMIN |
 | /signIn | SignIn | public; redirects to /products when authed |
 | /signUp | SignUp | public; redirects to /products when authed; swaps in the CheckEmail panel once registered |
 | /confirmEmail | ConfirmEmail | public; reads ?confirmationToken= from the query string |
@@ -68,12 +69,18 @@ No catch-all/404 route. When logged out the authed paths are simply absent from 
 
 ## Admin dashboard
 
-`/admin` renders `components/admin/AdminDashboard`, a single clients table — brands and products are
-customer-facing only and have no admin screen. `AdminSearchTable` owns paging, sorting, debounced search
-and the loading/empty states, and calls `api/admin.js#searchClients`. It tags each request with a sequence
-number and drops stale responses, because two filters debouncing a moment apart put two requests in flight
-and they can resolve out of order. A column is only marked sortable when `ClientSearchUseCase` whitelists
-that property — the backend answers 400 otherwise.
+`/admin` renders `components/admin/AdminDashboard` -> `components/admin/AdminUsers`, the approval queue
+for registered users — brands, products and clients are customer-facing only (or, for clients, no
+longer searchable at all) and have no admin screen. `AdminSearchTable` owns paging, sorting, debounced
+search and the loading/empty states, and calls `api/admin.js#searchUsers`. It tags each request with a
+sequence number and drops stale responses, because two filters debouncing a moment apart put two
+requests in flight and they can resolve out of order. A column is only marked sortable when
+`AppUserSearchUseCase` whitelists that property — the backend answers 400 otherwise. The state filter
+defaults to `CONFIRMED`, since that is the reason the screen exists.
+
+Each `CONFIRMED` row gets an "activate" button opening `components/admin/ActivateUserDialog` — a
+Material-UI `Dialog`, not `window.confirm` — which calls `api/admin.js#activateUser` and, on success,
+bumps a `refreshToken` filter to force `AdminSearchTable` to refetch the current page.
 
 Role gating is display-only: `store/selectors/authSelectors#isAdmin` hides the menu entry and the route.
-Enforcement is server-side in `ClientAccessVoter#assertCanSearch`.
+Enforcement is server-side in `UserAccessVoter#assertCanSearch` / `#assertCanActivate`.

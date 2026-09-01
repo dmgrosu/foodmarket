@@ -9,7 +9,7 @@ import java.util.Map;
  * Sealed interface for template-specific variables.
  * Ensures type safety: a template can only be sent with the correct variable set.
  */
-public sealed interface EmailTemplateVariables permits RegistrationConfirmationVariables {
+public sealed interface EmailTemplateVariables permits RegistrationConfirmationVariables, AccountActivatedVariables {
     /**
      * Which template these variables belong to.
      */

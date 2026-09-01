@@ -115,6 +115,13 @@ public abstract class MockedAuthenticationController {
   }
 
   /**
+   * PUT to the given url with no body.
+   */
+  protected ResultActions put(String url) throws Exception {
+    return mockMvc.perform(authorize(MockMvcRequestBuilders.put(url)));
+  }
+
+  /**
    * GET the given url.
    */
   protected ResultActions get(String url) throws Exception {

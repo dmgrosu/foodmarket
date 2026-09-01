@@ -45,7 +45,7 @@ class RegistrationConfirmationResendUseCaseTest {
 
     private RegistrationConfirmationResendUseCase useCase(int cooldownSeconds) {
         RegistrationProperties properties = new RegistrationProperties(
-            "https://app.example.com/confirmEmail", 24, cooldownSeconds);
+            "https://app.example.com/confirmEmail", 24, cooldownSeconds, "https://app.example.com/signIn");
         return new RegistrationConfirmationResendUseCase(
             appUserFindByEmailUseCase, registrationTokenRepository,
             registrationTokenIssueUseCase, registrationConfirmationMailUseCase, properties);
