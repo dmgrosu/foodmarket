@@ -11,7 +11,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-@XmlRootElement(name = "client")
+@XmlRootElement(name = "phone")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class ErpPhoneDto {
     @XmlAttribute

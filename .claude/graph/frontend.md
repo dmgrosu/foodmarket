@@ -27,8 +27,8 @@ Schema: `| caller | http | backend path | params | dispatches |`. 16 rows = ever
 | cartActions.js#deleteProductFromCart | DELETE | /order/deleteProduct/{orderId}/{itemId} |  | DELETE_FROM_CART_START,DELETE_FROM_CART_END |
 | cartActions.js#placeOrder | PUT | /order/placeOrder/{orderId} |  | PLACE_ORDER_START,PLACE_ORDER_SUCCESS |
 | Products.js#fetchGroups | GET | /product/listGroups |  |  |
-| Products.js#fetchProducts | GET | /product/listProducts | storageId,groupId,brandId,name |  |
-| Products.js#performSearch | GET | /product/search | brandId,name |  |
+| Products.js#loadChildGroups | GET | /product/listGroups | parentGroupId |  |
+| Products.js#loadProducts | GET | /product/search | storageId,groupId,brandId,name,pageNo,pageSize |  |
 | Products.js#fetchStorages | GET | /storage |  |  |
 
 ## Routes (App.js, built conditionally on auth.token)
@@ -55,7 +55,7 @@ No catch-all/404 route. When logged out the authed paths are simply absent from 
 - `CheckEmail.js` -> authActions: resendConfirmation (not a route; rendered by SignUp.js in place of the form)
 - `ConfirmEmail.js` -> authActions: confirmEmail, resendConfirmation
 - `Navbar.js` -> authActions: logout
-- `Products.js` -> cartActions: addProductToCart, selectProduct, changeQuantity; plus 5 direct non-redux GETs; imports handleError from authActions as a plain util
+- `Products.js` -> cartActions: addProductToCart, selectProduct, changeQuantity; plus 5 direct non-redux GETs; imports handleError from authActions as a plain util. Owns the catalogue tree (`childrenByGroupId`, `expandedGroupIds`, `loadingGroupIds`), fetching one level per expand, and the paging state (`pageNo`, `pageSize`, `totalProducts`), tagging each product request with a sequence number so stale responses are dropped the way `AdminSearchTable` does. Selecting a folder expands it instead of listing products, since a folder holds none. `ProductsList` renders the pager and keeps it mounted while a page loads.
 - `Cart.js` -> cartActions: selectProductToDelete, deleteProductFromCart, cancelDeleteProduct, openPlaceOrderDialog, closePlaceOrderDialog, placeOrder
 - `Orders.js` -> not connected to redux
 

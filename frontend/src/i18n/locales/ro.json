@@ -1,257 +1,263 @@
 {
- "common": {
-  "ok": "OK",
-  "cancel": "Anulare",
-  "all": "Toate",
-  "unknownError": "Eroare necunoscută",
-  "copyright": "Copyright ©"
- },
- "language": {
-  "ru": "Русский",
-  "ro": "Română",
-  "en": "English"
- },
- "nav": {
-  "home": "Acasă",
-  "catalogue": "Catalog",
-  "orders": "Comenzi",
-  "admin": "Administrare",
-  "profile": "Profil",
-  "logout": "Ieșire din cont",
-  "signIn": "Autentificare",
-  "signUp": "Înregistrare",
-  "logoutConfirm": "Doriți să ieșiți din cont?"
- },
- "home": {
-  "hero": {
-   "title": "Platforma de achiziții angro de produse alimentare",
-   "description": "Ramaiana On-line — un sistem convenabil pentru afaceri, care permite plasarea rapidă a comenzilor angro de la furnizori verificați.",
-   "login": "Autentificare",
-   "register": "Înregistrare"
+  "common": {
+    "ok": "OK",
+    "cancel": "Anulare",
+    "all": "Toate",
+    "unknownError": "Eroare necunoscută",
+    "copyright": "Copyright ©"
   },
-  "stats": {
-   "title": "Statistica noastră",
-   "labels": {
-    "products": "produse",
-    "clients": "clienți",
-    "suppliers": "furnizori",
-    "years": "ani pe piață"
-   }
+  "language": {
+    "ru": "Русский",
+    "ro": "Română",
+    "en": "English"
   },
-  "audience": {
-   "title": "Pentru cine este potrivită platforma",
-   "cards": {
-    "retail": {
-     "title": "Magazine cu amănuntul",
-     "text": "Aprovizionări regulate cu produse alimentare"
+  "nav": {
+    "home": "Acasă",
+    "catalogue": "Catalog",
+    "orders": "Comenzi",
+    "admin": "Administrare",
+    "profile": "Profil",
+    "logout": "Ieșire din cont",
+    "signIn": "Autentificare",
+    "signUp": "Înregistrare",
+    "logoutConfirm": "Doriți să ieșiți din cont?"
+  },
+  "home": {
+    "hero": {
+      "title": "Platforma de achiziții angro de produse alimentare",
+      "description": "Ramaiana On-line — un sistem convenabil pentru afaceri, care permite plasarea rapidă a comenzilor angro de la furnizori verificați.",
+      "login": "Autentificare",
+      "register": "Înregistrare"
     },
-    "restaurants": {
-     "title": "Restaurante și cafenele",
-     "text": "Achiziții pentru HoReCa"
+    "stats": {
+      "title": "Statistica noastră",
+      "labels": {
+        "products": "produse",
+        "clients": "clienți",
+        "suppliers": "furnizori",
+        "years": "ani pe piață"
+      }
     },
-    "hotels": {
-     "title": "Hoteluri și catering",
-     "text": "Aprovizionare completă cu produse"
+    "audience": {
+      "title": "Pentru cine este potrivită platforma",
+      "cards": {
+        "retail": {
+          "title": "Magazine cu amănuntul",
+          "text": "Aprovizionări regulate cu produse alimentare"
+        },
+        "restaurants": {
+          "title": "Restaurante și cafenele",
+          "text": "Achiziții pentru HoReCa"
+        },
+        "hotels": {
+          "title": "Hoteluri și catering",
+          "text": "Aprovizionare completă cu produse"
+        },
+        "wholesale": {
+          "title": "Cumpărători angro",
+          "text": "Loturi mari de mărfuri"
+        }
+      }
     },
-    "wholesale": {
-     "title": "Cumpărători angro",
-     "text": "Loturi mari de mărfuri"
+    "howItWorks": {
+      "title": "Cum funcționează platforma",
+      "steps": {
+        "registration": {
+          "title": "Înregistrare",
+          "text": "Creați un cont al companiei"
+        },
+        "catalogAccess": {
+          "title": "Acces la catalog",
+          "text": "Vizualizați sortimentul și prețurile"
+        },
+        "orderPlacement": {
+          "title": "Plasarea comenzilor",
+          "text": "Formați rapid achizițiile"
+        }
+      }
+    },
+    "advantages": {
+      "title": "Avantajele platformei",
+      "cards": {
+        "supply": "Aprovizionări stabile",
+        "assortment": "Sortiment vast: peste 4000 de produse",
+        "prices": "Prețuri angro",
+        "management": "Gestionare comodă a comenzilor",
+        "suppliers": "Furnizori verificați",
+        "manager": "Manager personal"
+      }
+    },
+    "partners": {
+      "title": "Furnizorii noștri",
+      "subTitle": "Colaborăm cu producători de top de produse alimentare"
+    },
+    "about": {
+      "title": "Despre platformă",
+      "paragraphs": {
+        "p1": "Ramaiana On-line este o platformă digitală modernă pentru achiziții angro de produse alimentare. Reunim furnizorii și întreprinderile comerciale, oferind un instrument comod pentru gestionarea achizițiilor.",
+        "p2": "Platforma permite accesul rapid la sortimentul actual de produse, formarea comenzilor și controlul livrărilor.",
+        "p3": "Serviciul nostru este orientat spre magazine, restaurante, cafenele, hoteluri și alți parteneri pentru care contează aprovizionările stabile și condițiile transparente de colaborare."
+      }
+    },
+    "contacts": {
+      "title": "Contacte",
+      "labels": {
+        "phone": "Telefon:",
+        "email": "Email:",
+        "address": "Adresă:"
+      },
+      "warehouseTitle": "Depozitul {{n}}",
+      "warehouses": {
+        "w1": {
+          "address": "str. Petricani 21/2, Chișinău, Moldova"
+        },
+        "w2": {
+          "address": "str. Petricani 21/4, Chișinău, Moldova"
+        },
+        "w3": {
+          "address": "str. Petricani 21, Chișinău, Moldova"
+        },
+        "w4": {
+          "address": "str. Uzinelor 7, Chișinău, Moldova"
+        },
+        "w5": {
+          "address": "str. Ștefan cel Mare 115, Bălți, Moldova"
+        }
+      },
+      "getAccess": {
+        "title": "Obțineți acces",
+        "text": "Pentru acces la catalog și prețuri este necesar să vă înregistrați în sistem.",
+        "button": "Înregistrare"
+      }
+    },
+    "footer": {
+      "subTitle": "Platforma de achiziții angro de produse alimentare"
     }
-   }
   },
-  "howItWorks": {
-   "title": "Cum funcționează platforma",
-   "steps": {
-    "registration": {
-     "title": "Înregistrare",
-     "text": "Creați un cont al companiei"
+  "auth": {
+    "fields": {
+      "email": "Adresă de email",
+      "password": "Parolă",
+      "confirmPassword": "Confirmați parola",
+      "idno": "IDNO",
+      "firstName": "Prenume",
+      "lastName": "Nume"
     },
-    "catalogAccess": {
-     "title": "Acces la catalog",
-     "text": "Vizualizați sortimentul și prețurile"
+    "validation": {
+      "emailRequired": "Email-ul este obligatoriu!",
+      "emailInvalid": "Email invalid!",
+      "passwordRequired": "Parola este obligatorie!",
+      "passwordNotMatch": "Parolele nu coincid!",
+      "passwordNotStrong": "Parola nu este suficient de sigură!"
     },
-    "orderPlacement": {
-     "title": "Plasarea comenzilor",
-     "text": "Formați rapid achizițiile"
+    "signIn": {
+      "title": "Autentificare",
+      "submit": "Intrare",
+      "noAccount": "Nu aveți cont? Înregistrați-vă"
+    },
+    "signUp": {
+      "title": "Înregistrare",
+      "submit": "Înregistrare",
+      "haveAccount": "Aveți deja un cont? Autentificați-vă",
+      "clientFound": "Client găsit: {{name}}, IDNO: {{idno}}"
+    },
+    "checkEmail": {
+      "title": "Verificați emailul",
+      "sent": "Am trimis un email cu un link de confirmare la {{email}}. Accesați linkul pentru a confirma înregistrarea.",
+      "notSent": "Nu am putut trimite emailul la {{email}}. Încercați să îl retrimiteți.",
+      "resend": "Retrimite emailul",
+      "resendSuccess": "Emailul a fost retrimis"
+    },
+    "confirmEmail": {
+      "title": "Confirmare email",
+      "confirming": "Se confirmă emailul dumneavoastră…",
+      "success": "Email confirmat. Așteptați activarea contului de către administrator.",
+      "invalid": "Linkul de confirmare este invalid sau a expirat.",
+      "resend": "Trimite un link nou",
+      "resendEmailLabel": "Adresă de email",
+      "resendSubmit": "Trimite"
     }
-   }
   },
-  "advantages": {
-   "title": "Avantajele platformei",
-   "cards": {
-    "supply": "Aprovizionări stabile",
-    "assortment": "Sortiment vast: peste 4000 de produse",
-    "prices": "Prețuri angro",
-    "management": "Gestionare comodă a comenzilor",
-    "suppliers": "Furnizori verificați",
-    "manager": "Manager personal"
-   }
+  "profile": {
+    "placeholder": "Secțiunea de profil"
   },
-  "partners": {
-   "title": "Furnizorii noștri",
-   "subTitle": "Colaborăm cu producători de top de produse alimentare"
-  },
-  "about": {
-   "title": "Despre platformă",
-   "paragraphs": {
-    "p1": "Ramaiana On-line este o platformă digitală modernă pentru achiziții angro de produse alimentare. Reunim furnizorii și întreprinderile comerciale, oferind un instrument comod pentru gestionarea achizițiilor.",
-    "p2": "Platforma permite accesul rapid la sortimentul actual de produse, formarea comenzilor și controlul livrărilor.",
-    "p3": "Serviciul nostru este orientat spre magazine, restaurante, cafenele, hoteluri și alți parteneri pentru care contează aprovizionările stabile și condițiile transparente de colaborare."
-   }
-  },
-  "contacts": {
-   "title": "Contacte",
-   "labels": {
-    "phone": "Telefon:",
-    "email": "Email:",
-    "address": "Adresă:"
-   },
-   "warehouseTitle": "Depozitul {{n}}",
-   "warehouses": {
-    "w1": {
-     "address": "str. Petricani 21/2, Chișinău, Moldova"
+  "products": {
+    "filter": {
+      "storage": "Depozit",
+      "brand": "Brand",
+      "name": "Denumire"
     },
-    "w2": {
-     "address": "str. Petricani 21/4, Chișinău, Moldova"
+    "columns": {
+      "name": "Denumire",
+      "group": "Grupă",
+      "price": "Preț",
+      "barCode": "Cod de bare",
+      "package": "Ambalaj",
+      "unit": "U.M."
     },
-    "w3": {
-     "address": "str. Petricani 21, Chișinău, Moldova"
+    "groups": {
+      "noGroupsFound": "Nu au fost găsite grupe",
+      "loading": "Se încarcă…"
     },
-    "w4": {
-     "address": "str. Uzinelor 7, Chișinău, Moldova"
+    "addToCart": {
+      "title": "Adăugare în coș",
+      "prompt": "Indicați cantitatea dorită"
     },
-    "w5": {
-     "address": "str. Ștefan cel Mare 115, Bălți, Moldova"
+    "table": {
+      "rowsPerPage": "Rânduri pe pagină:",
+      "displayedRows": "{{from}}–{{to}} din {{count}}"
     }
-   },
-   "getAccess": {
-    "title": "Obțineți acces",
-    "text": "Pentru acces la catalog și prețuri este necesar să vă înregistrați în sistem.",
-    "button": "Înregistrare"
-   }
   },
-  "footer": {
-   "subTitle": "Platforma de achiziții angro de produse alimentare"
+  "cart": {
+    "title": "Coș de cumpărături",
+    "backToCatalogue": "Înapoi la catalog",
+    "columns": {
+      "name": "Denumire",
+      "price": "Preț",
+      "quantity": "Cantitate",
+      "sum": "Sumă"
+    },
+    "total": "Total",
+    "placeOrder": "Plasează comanda",
+    "confirmRemove": "Eliminați produsul selectat din coș?",
+    "confirmPlaceOrder": "Sunteți pe cale să plasați o comandă nouă. Vă rugăm să confirmați!"
+  },
+  "orders": {
+    "placeholder": "Secțiunea de comenzi"
+  },
+  "admin": {
+    "title": "Panou de administrare",
+    "table": {
+      "rowsPerPage": "Rânduri pe pagină:",
+      "displayedRows": "{{from}}–{{to}} din {{count}}",
+      "noResults": "Nu a fost găsit nimic"
+    },
+    "search": {
+      "byEmail": "Căutare după email"
+    },
+    "users": {
+      "columns": {
+        "email": "Email",
+        "state": "Stare",
+        "clientName": "Client",
+        "createdAt": "Înregistrat",
+        "actions": "Acțiuni"
+      },
+      "states": {
+        "PENDING_CONFIRMATION": "Așteaptă confirmarea email-ului",
+        "CONFIRMED": "Email confirmat",
+        "ACTIVE": "Activ",
+        "INACTIVE": "Inactiv",
+        "SUSPENDED": "Suspendat"
+      },
+      "filterByState": "Stare",
+      "emptyMessage": "Nu au fost găsiți utilizatori",
+      "activate": {
+        "action": "Activează",
+        "title": "Activare utilizator",
+        "confirmText": "Activați utilizatorul {{email}}? Va putea să se autentifice.",
+        "confirm": "Activează"
+      }
+    }
   }
- },
- "auth": {
-  "fields": {
-   "email": "Adresă de email",
-   "password": "Parolă",
-   "confirmPassword": "Confirmați parola",
-   "idno": "IDNO",
-   "firstName": "Prenume",
-   "lastName": "Nume"
-  },
-  "validation": {
-   "emailRequired": "Email-ul este obligatoriu!",
-   "emailInvalid": "Email invalid!",
-   "passwordRequired": "Parola este obligatorie!",
-   "passwordNotMatch": "Parolele nu coincid!",
-   "passwordNotStrong": "Parola nu este suficient de sigură!"
-  },
-  "signIn": {
-   "title": "Autentificare",
-   "submit": "Intrare",
-   "noAccount": "Nu aveți cont? Înregistrați-vă"
-  },
-  "signUp": {
-   "title": "Înregistrare",
-   "submit": "Înregistrare",
-   "haveAccount": "Aveți deja un cont? Autentificați-vă",
-   "clientFound": "Client găsit: {{name}}, IDNO: {{idno}}"
-  },
-  "checkEmail": {
-   "title": "Verificați emailul",
-   "sent": "Am trimis un email cu un link de confirmare la {{email}}. Accesați linkul pentru a confirma înregistrarea.",
-   "notSent": "Nu am putut trimite emailul la {{email}}. Încercați să îl retrimiteți.",
-   "resend": "Retrimite emailul",
-   "resendSuccess": "Emailul a fost retrimis"
-  },
-  "confirmEmail": {
-   "title": "Confirmare email",
-   "confirming": "Se confirmă emailul dumneavoastră…",
-   "success": "Email confirmat. Așteptați activarea contului de către administrator.",
-   "invalid": "Linkul de confirmare este invalid sau a expirat.",
-   "resend": "Trimite un link nou",
-   "resendEmailLabel": "Adresă de email",
-   "resendSubmit": "Trimite"
-  }
- },
- "profile": {
-  "placeholder": "Secțiunea de profil"
- },
- "products": {
-  "filter": {
-   "storage": "Depozit",
-   "brand": "Brand",
-   "name": "Denumire"
-  },
-  "columns": {
-   "name": "Denumire",
-   "price": "Preț",
-   "barCode": "Cod de bare",
-   "package": "Ambalaj",
-   "unit": "U.M."
-  },
-  "groups": {
-   "noGroupsFound": "Nu au fost găsite grupe"
-  },
-  "addToCart": {
-   "title": "Adăugare în coș",
-   "prompt": "Indicați cantitatea dorită"
-  }
- },
- "cart": {
-  "title": "Coș de cumpărături",
-  "backToCatalogue": "Înapoi la catalog",
-  "columns": {
-   "name": "Denumire",
-   "price": "Preț",
-   "quantity": "Cantitate",
-   "sum": "Sumă"
-  },
-  "total": "Total",
-  "placeOrder": "Plasează comanda",
-  "confirmRemove": "Eliminați produsul selectat din coș?",
-  "confirmPlaceOrder": "Sunteți pe cale să plasați o comandă nouă. Vă rugăm să confirmați!"
- },
- "orders": {
-  "placeholder": "Secțiunea de comenzi"
- },
- "admin": {
-  "title": "Panou de administrare",
-  "table": {
-   "rowsPerPage": "Rânduri pe pagină:",
-   "displayedRows": "{{from}}–{{to}} din {{count}}",
-   "noResults": "Nu a fost găsit nimic"
-  },
-  "search": {
-   "byEmail": "Căutare după email"
-  },
-  "users": {
-   "columns": {
-    "email": "Email",
-    "state": "Stare",
-    "clientName": "Client",
-    "createdAt": "Data înregistrării",
-    "actions": "Acțiuni"
-   },
-   "states": {
-    "PENDING_CONFIRMATION": "Așteaptă confirmarea e-mailului",
-    "CONFIRMED": "E-mail confirmat",
-    "ACTIVE": "Activ",
-    "INACTIVE": "Inactiv",
-    "SUSPENDED": "Blocat"
-   },
-   "filterByState": "Stare",
-   "emptyMessage": "Niciun utilizator găsit",
-   "activate": {
-    "action": "Activează",
-    "title": "Activează utilizatorul",
-    "confirmText": "Activați utilizatorul {{email}}? Acesta va putea să se autentifice.",
-    "confirm": "Activează"
-   }
-  }
- }
 }

@@ -16,6 +16,8 @@ public record ProductResponse(
         @Nullable
         Integer groupId,
         @Nullable
+        String groupName,
+        @Nullable
         Integer brandId,
         @Nullable
         Float inPackage,
@@ -28,10 +30,15 @@ public record ProductResponse(
         @NotNull
         List<PriceResponse> prices
 ) {
-    public ProductResponse(ProductEntity entity) {
+    /**
+     * @param groupName the name of the product's group, so a result found by searching across the
+     *                  whole catalogue still says which part of it it came from.
+     */
+    public ProductResponse(ProductEntity entity, @Nullable String groupName) {
         this(entity.getId(),
                 entity.getName(),
                 entity.getGroupId(),
+                groupName,
                 entity.getBrandId(),
                 entity.getInPackage(),
                 entity.getBarCode(),

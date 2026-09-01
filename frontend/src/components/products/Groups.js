@@ -23,19 +23,34 @@ const styles = theme => ({
     }
 });
 
-const Groups = ({classes, expanded, selected, handleToggle, handleSelect, groups, isFetching}) => {
+const Groups = ({
+                    classes, expanded, selected, handleToggle, handleSelect, groups,
+                    childrenByGroupId, loadingGroupIds, isFetching
+                }) => {
 
     const {t} = useTranslation();
 
-    const renderTree = (group) => (
-        <TreeItem key={group.id} nodeId={group.id.toString()} label={group.name}>
-            {Array.isArray(group.children) ? group.children.map(group => renderTree(group)) : null}
-        </TreeItem>
-    );
+    // One level is fetched at a time, so a node that says it has children may not have them yet.
+    // MUI only draws the expander when a TreeItem has a child, so an unloaded branch gets a
+    // placeholder to expand onto.
+    const renderTree = (group) => {
+        const nodeId = group.id.toString();
+        const loaded = childrenByGroupId[nodeId];
+        return (
+            <TreeItem key={nodeId} nodeId={nodeId} label={group.name}>
+                {!group.hasChildren ? null
+                    : loaded ? loaded.map(child => renderTree(child))
+                        : <TreeItem nodeId={`${nodeId}-loading`}
+                                    label={loadingGroupIds.includes(nodeId)
+                                        ? t('products.groups.loading')
+                                        : ''}/>}
+            </TreeItem>
+        );
+    };
 
-    const selectGroup = (e, groupId) => {
-        if (groupId !== '0') {
-            handleSelect(e, groupId);
+    const selectGroup = (e, nodeId) => {
+        if (nodeId !== '0' && !nodeId.endsWith('-loading')) {
+            handleSelect(e, nodeId);
         }
     }
 
@@ -57,7 +72,7 @@ const Groups = ({classes, expanded, selected, handleToggle, handleSelect, groups
             onNodeToggle={handleToggle}
             onNodeSelect={selectGroup}
         >
-            {Array.isArray(groups) ?
+            {Array.isArray(groups) && groups.length > 0 ?
                 groups.map(group => renderTree(group)) :
                 <TreeItem nodeId={"0"} label={t('products.groups.noGroupsFound')}/>}
         </TreeView>

@@ -25,11 +25,11 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -49,7 +49,7 @@ public class ImportProductsUseCase {
 
     public void execute() {
         try {
-            String filePath = exchangeFolderPath + PRODUCTS_DATA_FILE;
+            Path filePath = Path.of(exchangeFolderPath).resolve(PRODUCTS_DATA_FILE);
             CatalogDto catalogDto = (CatalogDto) unmarshaller.unmarshal(getSource(filePath));
             productLoadUseCase.execute(mapToReadResult(catalogDto));
             deleteFile(filePath);
@@ -61,14 +61,13 @@ public class ImportProductsUseCase {
     }
 
     @NonNull
-    private StreamSource getSource(String file) throws FileNotFoundException {
-        return new StreamSource(new FileInputStream(file));
+    private StreamSource getSource(Path file) throws FileNotFoundException {
+        return new StreamSource(new FileInputStream(file.toFile()));
     }
 
-    private void deleteFile(String filePath) {
+    private void deleteFile(Path filePath) {
         try {
-            Path path = Paths.get(filePath);
-            Files.deleteIfExists(path);
+            Files.deleteIfExists(filePath);
         } catch (IOException e) {
             log.error("Error while deleting file {}: {}", filePath, e.getMessage());
         }
@@ -84,17 +83,17 @@ public class ImportProductsUseCase {
     }
 
     private Map<String, ProductGroupEntity> toGroups(List<ErpGroupDto> dtoGroups) {
-        return dtoGroups.stream()
+        return nullSafe(dtoGroups).stream()
                 .collect(Collectors.toMap(ErpGroupDto::getCode,
                         dto -> new ProductGroupEntity(dto.getName(), dto.getCode()),
-                        (a, b) -> b));
+                        (_, last) -> last));
     }
 
     private Map<String, ProductEntity> toProducts(List<ErpProductDto> dtoProducts) {
-        return dtoProducts.stream()
+        return nullSafe(dtoProducts).stream()
                 .collect(Collectors.toMap(ErpProductDto::getCode,
                         this::toProduct,
-                        (a, b) -> b));
+                        (_, last) -> last));
     }
 
     private ProductEntity toProduct(ErpProductDto dto) {
@@ -105,10 +104,15 @@ public class ImportProductsUseCase {
                 dto.getCode(),
                 toBarCode(dto.getCodes()),
                 dto.getWeight(),
-                dto.getPrices().stream()
-                        .map(this::toPrice)
-                        .collect(Collectors.toSet())
+                toPrices(dto.getPrices())
         );
+    }
+
+    private Set<PriceEntity> toPrices(List<ErpPriceDto> dtoPrices) {
+        return nullSafe(dtoPrices).stream()
+                .map(this::toPrice)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
     }
 
     @Nullable
@@ -125,36 +129,41 @@ public class ImportProductsUseCase {
     }
 
     private String toBarCode(List<ErpProductCodeDto> dtoCodes) {
-        return dtoCodes.stream()
+        return nullSafe(dtoCodes).stream()
                 .filter(Objects::nonNull)
-                .filter(it -> it.getName().equalsIgnoreCase("barCode"))
+                .filter(it -> "barCode".equalsIgnoreCase(it.getName()))
                 .findFirst()
                 .map(ErpProductCodeDto::getValue)
                 .orElse(null);
     }
 
     private Map<String, BrandEntity> toBrands(List<ErpBrandDto> dtoBrands) {
-        return dtoBrands.stream()
+        return nullSafe(dtoBrands).stream()
                 .collect(Collectors.toMap(ErpBrandDto::getCode,
-                        dto -> new BrandEntity(dto.getCode(), dto.getName()),
-                        (a, b) -> b));
+                        dto -> new BrandEntity(dto.getName(), dto.getCode()),
+                        (_, last) -> last));
     }
 
     private Map<String, String[]> toErpCodes(CatalogDto catalogDto) {
         Map<String, String[]> result = new HashMap<>();
-        for (ErpGroupDto group : catalogDto.getGroups()) {
+        for (ErpGroupDto group : nullSafe(catalogDto.getGroups())) {
             String[] codes = new String[2];
             codes[0] = group.getParentCode();
             codes[1] = null;
             result.put(group.getCode(), codes);
         }
-        for (ErpProductDto product : catalogDto.getProducts()) {
+        for (ErpProductDto product : nullSafe(catalogDto.getProducts())) {
             String[] codes = result.getOrDefault(product.getCode(), new String[2]);
             codes[0] = product.getGroupCode();
             codes[1] = product.getBrandCode();
             result.put(product.getCode(), codes);
         }
         return result;
+    }
+
+    /** A section absent from the file arrives as {@code null} rather than as an empty list. */
+    private <T> List<T> nullSafe(List<T> list) {
+        return list == null ? List.of() : list;
     }
 
 }

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="Windows-1251"?>
+<clients-data>
+	<clients>
+		<client code="00008558" name="S.R.L. 14F-Market" idno="1013600003282">
+			<address type="LEGAL" address="MUN.CHISINAU Liviu Deleanu 3 3 ap 28" descr=""/>
+			<address type="POINT" address="Кишинев: Рышкановка-Чеканы MUN.CHISINAU Florilor 4 3 Florilor 4 3" descr=""/>
+			<address type="POINT" address="Кишинев: Ботаника MUN.CHISINAU Valea Crucii 24 2 str Valea Crucii 24 2" descr=""/>
+		</client>
+		<client code="R01-636" name="SRL 3GS COM" idno="1020600029080">
+			<address type="POINT" address="Яловены-Костешты-Ханска S.COSTESTI   Ialoveni s. Costesti str Alexandru cel bun 50" descr=""/>
+			<address type="POINT" address="Яловены-Костешты-Ханска S.ZIMBRENI   s.Zimbreni" descr=""/>
+			<address type="LEGAL" address="Ialoveni s Costesti str V Alexandri 50" descr=""/>
+		</client>
+		<client code="R01-623" name="4DIMENSIUNI S.R.L" idno="1020603004855">
+			<address type="LEGAL" address="r-l Cahul s. Baurci-Moldoveni" descr=""/>
+		</client>
+		<client code="00000001" name="(R) 47TH PARALLEL SRL" idno="1002600038891">
+			<address type="POINT" address="MUN.CHISINAU Decebal, bd. 139 Chisinau bd Decebal 139" descr=""/>
+			<address type="OFFICE" address="MUN.CHISINAU Stefan cel Mare, bd. 132 Chisinau bd Stefan cel mare 132  примария" descr=""/>
+			<address type="POINT" address="MUN.CHISINAU Stefan cel Mare, bd. 135 Chisinau bd Stefan cel mare 135  пос россии" descr=""/>
+			<address type="POINT" address="MUN.CHISINAU Dacia, bd. 10 Chisinau bul Dacia 10  быв 1001 мел" descr=""/>
+			<address type="POINT" address="MUN.CHISINAU Alecu Russo 15 Chisinau str A Russo 15" descr=""/>
+			<address type="POINT" address="MUN.CHISINAU Calea Esilor 16 6 Chisinau str Calea Iesilor 16 6" descr=""/>
+			<address type="POINT" address="MUN.CHISINAU Igor Vieru 6 3 Chisinau str I Vieru 6 3" descr=""/>
+			<address type="POINT" address="MUN.CHISINAU Lev Tolstoi 24 1 Chisinau str Lev Tolstoi 24 1" descr=""/>
+			<address type="POINT" address="MUN.CHISINAU Mihai Viteazul 14 Chisinau str Mihai Viteazul 14" descr=""/>
+			<address type="POINT" address="MUN.CHISINAU Mircea cel Batrin 24 6 Chisinau str Mircea cel Batrin 24 6" descr=""/>
+			<address type="POINT" address="MUN.CHISINAU N.Zelinski 7 Chisinau str N Zelincki 7" descr=""/>
+			<address type="POINT" address="MUN.CHISINAU N.Milescu-Spataru 65 Chisinau str N.Milescu Spatarul.65" descr=""/>
+			<address type="POINT" address="MUN.CHISINAU A.Puskin 32 Chisinau str Puskin 32" descr=""/>
+			<address type="POINT" address="MUN.CHISINAU A.Sciusev 55 Chisinau str Sciusev 55" descr=""/>
+			<address type="POINT" address="MUN.CHISINAU V.Docuceaev 6 Chisinau str V Docuceav 6" descr=""/>
+			<address type="POINT" address="MUN.CHISINAU N.Testemiteanu 23 Chisinau strN Testemitanu 23" descr=""/>
+			<address type="LEGAL" address="Chisinau bud Stefan cel mare 132" descr=""/>
+			<email>arteom.maslenicov@nr1.md</email>
+		</client>
+		<client code="00000002" name="Intreprinderea MixtaPIATA ANGRO KM 7  SRL" idno="1008600018318">
+			<address type="LEGAL" address="MUN.CHISINAU Uzinelor 21A" descr=""/>
+			<email>info@7km.md</email>
+		</client>
+		<client code="00000003" name="SRL 777" idno="1010602003595">
+			<address type="LEGAL" address="MUN.CHISINAU Grenoble 153 3" descr=""/>
+		</client>
+		<client code="BUH-950100" name="AAV Mari SRL" idno="10206110002124">
+			<address type="POINT" address="or.Ceadir-Lunga str. Lenin 42 4" descr=""/>
+			<address type="LEGAL" address="or.Ceadir-Lunga str. Lenin 42 4" descr=""/>
+		</client>
+		<client code="00000057" name="SRLAgves Prim" idno="1003600073277*">
+			<address type="LEGAL" address="Кишинев Гренобля 153 3 улЩусев 66 10" descr=""/>
+		</client>
+		<client code="BUH-176" name="Autohaus Wilke" idno="">
+			<address type="LEGAL" address="" descr=""/>
+		</client>
+		<client code="00000006" name="Sanseng" idno="">
+			<address type="POINT" address="str Alecu Russo" descr=""/>
+			<address type="POINT" address="str Columna 104" descr=""/>
+			<address type="LEGAL" address="" descr=""/>
+		</client>
+		<client code="R0U-825" name="LLC  3D-COMPANY" idno=".*">
+			<address type="LEGAL" address="" descr=""/>
+		</client>
+	</clients>
+</clients-data>

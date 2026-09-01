@@ -55,10 +55,10 @@ public class ProductEntity {
     private final Set<PriceEntity> prices;
 
     @PersistenceCreator
-    public ProductEntity(Integer id, String name, String unit,
-                         Float inPackage, String erpCode, String barCode,
-                         Float weight, Integer brandId, Integer groupId,
-                         Instant createdAt, Instant updatedAt, Instant deletedAt,
+    public ProductEntity(Integer id, @NonNull String name, @Nullable String unit,
+                         @Nullable Float inPackage, @Nullable String erpCode, @Nullable String barCode,
+                         @Nullable Float weight, @Nullable Integer brandId, @Nullable Integer groupId,
+                         @NonNull Instant createdAt, @Nullable Instant updatedAt, @Nullable Instant deletedAt,
                          Set<PriceEntity> prices) {
         this.id = id;
         this.name = name;
@@ -87,12 +87,17 @@ public class ProductEntity {
                 weight, brandId, groupId, Instant.now(), null, null, new HashSet<>());
     }
 
+    /**
+     * Copies everything the ERP catalogue owns onto this product, keeping only the identity and
+     * creation time of the stored row. Prices come from {@code other} as well - they are part of what
+     * the catalogue refreshes, so keeping the stored ones would freeze prices at their first import.
+     */
     public ProductEntity updateFrom(ProductEntity other) {
         return new ProductEntity(this.id, other.getName(), other.getUnit(),
                 other.getInPackage(), other.getErpCode(), other.getBarCode(),
                 other.getWeight(), other.getBrandId(), other.getGroupId(),
                 this.createdAt, Instant.now(), null,
-                this.prices);
+                other.getPrices());
     }
 
     public ProductEntity withGroupId(Integer groupId) {

@@ -9,15 +9,8 @@ import md.ramaiana.foodmarket.shared.enums.PriceType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
 import org.springframework.data.jdbc.core.mapping.AggregateReference;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -27,52 +20,26 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.groups.Tuple.tuple;
 import static org.mockito.Mockito.*;
 
-@Tag("integration")
-@ExtendWith(SpringExtension.class)
-@TestPropertySource(locations = "classpath:application.yml")
+@Tag("unit")
 class ImportProductsUseCaseTest {
 
-    @TestConfiguration
-    static class TextConfig {
-        @Value("${dataFolderPath}")
-        private String folderPath;
+    private static final String EXCHANGE_FOLDER = "src/test/resources/dataExchange";
 
-        @Bean
-        public ImportProductsUseCase useCase() {
-            DataExchangeConfig config = new DataExchangeConfig();
-            ImportProductsUseCase useCase = new ImportProductsUseCase(
-                    productLoadUseCase(),
-                    storageSearch(),
-                    config.unmarshaller()
-            );
-            useCase.setExchangeFolderPath(folderPath);
-            return useCase;
-        }
-
-        @Bean
-        public ProductLoadUseCase productLoadUseCase() {
-            return mock(ProductLoadUseCase.class);
-        }
-
-        @Bean
-        public StorageSearchUseCase storageSearch() {
-            return mock(StorageSearchUseCase.class);
-        }
-    }
-
-    @Autowired
     ImportProductsUseCase useCase;
-    @Autowired
     ProductLoadUseCase productLoad;
-    @Autowired
     StorageSearchUseCase storageSearch;
-    Path path = Paths.get("src/test/resources/dataExchange/products-data.xml");
+    Path path = Paths.get(EXCHANGE_FOLDER, "products-data.xml");
 
     @BeforeEach
     void setUp() throws Exception {
-        if (!Files.exists(path)) {
-            Files.createDirectories(path.getParent());
-            String xml = """
+        productLoad = mock(ProductLoadUseCase.class);
+        storageSearch = mock(StorageSearchUseCase.class);
+        useCase = new ImportProductsUseCase(productLoad, storageSearch, new DataExchangeConfig().unmarshaller());
+        // Deliberately without a trailing separator - the importer must not depend on one.
+        useCase.setExchangeFolderPath(EXCHANGE_FOLDER);
+
+        Files.createDirectories(path.getParent());
+        String xml = """
                     <?xml version="1.0" encoding="UTF-8"?>
                     <catalog>
                         <groups>
@@ -110,8 +77,7 @@ class ImportProductsUseCaseTest {
                             </product>
                         </products>
                     </catalog>""";
-            Files.writeString(path, xml);
-        }
+        Files.writeString(path, xml);
     }
 
     @Test

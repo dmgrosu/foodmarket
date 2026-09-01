@@ -3,26 +3,18 @@ package md.ramaiana.foodmarket.domain.product.core.response;
 import lombok.NonNull;
 import md.ramaiana.foodmarket.domain.product.data.ProductGroupEntity;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
+/**
+ * One node of the catalogue tree. A level is fetched at a time, so a node carries whether it is
+ * worth expanding rather than the contents of everything below it.
+ */
 public record ProductGroupResponse(
         @NonNull
         Integer id,
         @NonNull
         String name,
-        @NonNull
-        List<ProductGroupResponse> children,
-        @NonNull
-        List<ProductResponse> products
+        boolean hasChildren
 ) {
-    public ProductGroupResponse(@NonNull ProductGroupEntity group) {
-        this(group.getId(), group.getName(),
-                group.hasChildren()
-                        ? group.getChildGroups().stream().map(ProductGroupResponse::new).collect(Collectors.toList())
-                        : new ArrayList<>(),
-                new ArrayList<>()
-        );
+    public ProductGroupResponse(@NonNull ProductGroupEntity group, boolean hasChildren) {
+        this(group.getId(), group.getName(), hasChildren);
     }
 }

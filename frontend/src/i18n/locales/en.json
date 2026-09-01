@@ -1,205 +1,215 @@
 {
- "common": {
-  "ok": "OK",
-  "cancel": "Cancel",
-  "all": "All",
-  "unknownError": "Unknown error",
-  "copyright": "Copyright ©"
- },
- "language": {
-  "ru": "Русский",
-  "ro": "Română",
-  "en": "English"
- },
- "nav": {
-  "home": "Home",
-  "catalogue": "Catalogue",
-  "orders": "Orders",
-  "admin": "Administration",
-  "profile": "Profile",
-  "logout": "Log out",
-  "signIn": "Sign in",
-  "signUp": "Sign up",
-  "logoutConfirm": "Do you want to logout?"
- },
- "home": {
-  "hero": {
-   "title": "Wholesale food procurement platform",
-   "description": "Ramaiana On-line — a convenient system for businesses, letting you quickly place wholesale orders with trusted suppliers.",
-   "login": "Sign in",
-   "register": "Sign up"
+  "common": {
+    "ok": "OK",
+    "cancel": "Cancel",
+    "all": "All",
+    "unknownError": "Unknown error",
+    "copyright": "Copyright ©"
   },
-  "stats": {
-   "title": "Our numbers",
-   "labels": {
-    "products": "products",
-    "clients": "clients",
-    "suppliers": "suppliers",
-    "years": "years on the market"
-   }
+  "language": {
+    "ru": "Русский",
+    "ro": "Română",
+    "en": "English"
   },
-  "audience": {
-   "title": "Who the platform is for",
-   "cards": {
-    "retail": {
-     "title": "Retail stores",
-     "text": "Regular food deliveries"
+  "nav": {
+    "home": "Home",
+    "catalogue": "Catalogue",
+    "orders": "Orders",
+    "admin": "Administration",
+    "profile": "Profile",
+    "logout": "Log out",
+    "signIn": "Sign in",
+    "signUp": "Sign up",
+    "logoutConfirm": "Do you want to logout?"
+  },
+  "home": {
+    "hero": {
+      "title": "Wholesale food procurement platform",
+      "description": "Ramaiana On-line — a convenient system for businesses, letting you quickly place wholesale orders with trusted suppliers.",
+      "login": "Sign in",
+      "register": "Sign up"
     },
-    "restaurants": {
-     "title": "Restaurants and cafes",
-     "text": "Purchasing for HoReCa"
+    "stats": {
+      "title": "Our numbers",
+      "labels": {
+        "products": "products",
+        "clients": "clients",
+        "suppliers": "suppliers",
+        "years": "years on the market"
+      }
     },
-    "hotels": {
-     "title": "Hotels and catering",
-     "text": "Full-scale product supply"
+    "audience": {
+      "title": "Who the platform is for",
+      "cards": {
+        "retail": {
+          "title": "Retail stores",
+          "text": "Regular food deliveries"
+        },
+        "restaurants": {
+          "title": "Restaurants and cafes",
+          "text": "Purchasing for HoReCa"
+        },
+        "hotels": {
+          "title": "Hotels and catering",
+          "text": "Full-scale product supply"
+        },
+        "wholesale": {
+          "title": "Wholesale buyers",
+          "text": "Large batches of goods"
+        }
+      }
     },
-    "wholesale": {
-     "title": "Wholesale buyers",
-     "text": "Large batches of goods"
+    "howItWorks": {
+      "title": "How the platform works",
+      "steps": {
+        "registration": {
+          "title": "Registration",
+          "text": "Create a company account"
+        },
+        "catalogAccess": {
+          "title": "Catalogue access",
+          "text": "Browse the assortment and prices"
+        },
+        "orderPlacement": {
+          "title": "Placing orders",
+          "text": "Build your order quickly"
+        }
+      }
+    },
+    "advantages": {
+      "title": "Platform advantages",
+      "cards": {
+        "supply": "Stable deliveries",
+        "assortment": "Large assortment: 4000+ products",
+        "prices": "Wholesale prices",
+        "management": "Convenient order management",
+        "suppliers": "Vetted suppliers",
+        "manager": "Personal account manager"
+      }
+    },
+    "partners": {
+      "title": "Our suppliers",
+      "subTitle": "We work with leading food manufacturers"
+    },
+    "about": {
+      "title": "About the platform",
+      "paragraphs": {
+        "p1": "Ramaiana On-line is a modern digital platform for wholesale food procurement. We bring together suppliers and retail businesses, providing a convenient tool for managing purchases.",
+        "p2": "The platform lets you quickly access the current product assortment, build orders, and track deliveries.",
+        "p3": "Our service is aimed at stores, restaurants, cafes, hotels, and other partners for whom stable deliveries and transparent terms of cooperation matter."
+      }
+    },
+    "contacts": {
+      "title": "Contacts",
+      "labels": {
+        "phone": "Phone:",
+        "email": "Email:",
+        "address": "Address:"
+      },
+      "warehouseTitle": "Warehouse {{n}}",
+      "warehouses": {
+        "w1": {
+          "address": "21/2 Petricani St., Chisinau, Moldova"
+        },
+        "w2": {
+          "address": "21/4 Petricani St., Chisinau, Moldova"
+        },
+        "w3": {
+          "address": "21 Petricani St., Chisinau, Moldova"
+        },
+        "w4": {
+          "address": "7 Uzinelor St., Chisinau, Moldova"
+        },
+        "w5": {
+          "address": "115 Ștefan cel Mare St., Balti, Moldova"
+        }
+      },
+      "getAccess": {
+        "title": "Get access",
+        "text": "To access the catalogue and prices, you need to register in the system.",
+        "button": "Sign up"
+      }
+    },
+    "footer": {
+      "subTitle": "Wholesale food procurement platform"
     }
-   }
   },
-  "howItWorks": {
-   "title": "How the platform works",
-   "steps": {
-    "registration": {
-     "title": "Registration",
-     "text": "Create a company account"
+  "auth": {
+    "fields": {
+      "email": "Email address",
+      "password": "Password",
+      "confirmPassword": "Confirm password",
+      "idno": "IDNO",
+      "firstName": "First name",
+      "lastName": "Last name"
     },
-    "catalogAccess": {
-     "title": "Catalogue access",
-     "text": "Browse the assortment and prices"
+    "validation": {
+      "emailRequired": "Email required!",
+      "emailInvalid": "Email is invalid!",
+      "passwordRequired": "Password required!",
+      "passwordNotMatch": "Passwords do not match!",
+      "passwordNotStrong": "Password is not strong enough!"
     },
-    "orderPlacement": {
-     "title": "Placing orders",
-     "text": "Build your order quickly"
+    "signIn": {
+      "title": "Sign in",
+      "submit": "Sign in",
+      "noAccount": "Don't have an account? Sign up"
+    },
+    "signUp": {
+      "title": "Sign up",
+      "submit": "Sign up",
+      "haveAccount": "Already have an account? Sign in",
+      "clientFound": "Found client: {{name}}, with IDNO: {{idno}}"
+    },
+    "checkEmail": {
+      "title": "Check your email",
+      "sent": "We sent a confirmation link to {{email}}. Follow the link to confirm your registration.",
+      "notSent": "We could not send the email to {{email}}. Please try resending it.",
+      "resend": "Resend the email",
+      "resendSuccess": "Email resent"
+    },
+    "confirmEmail": {
+      "title": "Email confirmation",
+      "confirming": "Confirming your email…",
+      "success": "Email confirmed. Please wait for an administrator to activate your account.",
+      "invalid": "The confirmation link is invalid or has expired.",
+      "resend": "Send a new link",
+      "resendEmailLabel": "Email address",
+      "resendSubmit": "Send"
     }
-   }
   },
-  "advantages": {
-   "title": "Platform advantages",
-   "cards": {
-    "supply": "Stable deliveries",
-    "assortment": "Large assortment: 4000+ products",
-    "prices": "Wholesale prices",
-    "management": "Convenient order management",
-    "suppliers": "Vetted suppliers",
-    "manager": "Personal account manager"
-   }
+  "profile": {
+    "placeholder": "Profile section"
   },
-  "partners": {
-   "title": "Our suppliers",
-   "subTitle": "We work with leading food manufacturers"
-  },
-  "about": {
-   "title": "About the platform",
-   "paragraphs": {
-    "p1": "Ramaiana On-line is a modern digital platform for wholesale food procurement. We bring together suppliers and retail businesses, providing a convenient tool for managing purchases.",
-    "p2": "The platform lets you quickly access the current product assortment, build orders, and track deliveries.",
-    "p3": "Our service is aimed at stores, restaurants, cafes, hotels, and other partners for whom stable deliveries and transparent terms of cooperation matter."
-   }
-  },
-  "contacts": {
-   "title": "Contacts",
-   "labels": {
-    "phone": "Phone:",
-    "email": "Email:",
-    "address": "Address:"
-   },
-   "warehouseTitle": "Warehouse {{n}}",
-   "warehouses": {
-    "w1": {
-     "address": "21/2 Petricani St., Chisinau, Moldova"
+  "products": {
+    "filter": {
+      "storage": "Storage",
+      "brand": "Brand",
+      "name": "Name"
     },
-    "w2": {
-     "address": "21/4 Petricani St., Chisinau, Moldova"
-    },
-    "w3": {
-     "address": "21 Petricani St., Chisinau, Moldova"
-    },
-    "w4": {
-     "address": "7 Uzinelor St., Chisinau, Moldova"
-    },
-    "w5": {
-     "address": "115 Ștefan cel Mare St., Balti, Moldova"
-    }
-   },
-   "getAccess": {
-    "title": "Get access",
-    "text": "To access the catalogue and prices, you need to register in the system.",
-    "button": "Sign up"
-   }
-  },
-  "footer": {
-   "subTitle": "Wholesale food procurement platform"
-  }
- },
- "auth": {
-  "fields": {
-   "email": "Email address",
-   "password": "Password",
-   "confirmPassword": "Confirm password",
-   "idno": "IDNO",
-   "firstName": "First name",
-   "lastName": "Last name"
-  },
-  "validation": {
-   "emailRequired": "Email required!",
-   "emailInvalid": "Email is invalid!",
-   "passwordRequired": "Password required!",
-   "passwordNotMatch": "Passwords do not match!",
-   "passwordNotStrong": "Password is not strong enough!"
-  },
-  "signIn": {
-   "title": "Sign in",
-   "submit": "Sign in",
-   "noAccount": "Don't have an account? Sign up"
-  },
-  "signUp": {
-   "title": "Sign up",
-   "submit": "Sign up",
-   "haveAccount": "Already have an account? Sign in",
-   "clientFound": "Found client: {{name}}, with IDNO: {{idno}}"
-  },
-  "checkEmail": {
-   "title": "Check your email",
-   "sent": "We sent a confirmation link to {{email}}. Follow the link to confirm your registration.",
-   "notSent": "We could not send the email to {{email}}. Please try resending it.",
-   "resend": "Resend the email",
-   "resendSuccess": "Email resent"
-  },
-  "confirmEmail": {
-   "title": "Email confirmation",
-   "confirming": "Confirming your email…",
-   "success": "Email confirmed. Please wait for an administrator to activate your account.",
-   "invalid": "The confirmation link is invalid or has expired.",
-   "resend": "Send a new link",
-   "resendEmailLabel": "Email address",
-   "resendSubmit": "Send"
-  }
- },
- "profile": {
-  "placeholder": "Profile section"
- },
- "products": {
-  "filter": {
-   "storage": "Storage",
-   "brand": "Brand",
-   "name": "Name"
-  },
-  "columns": {
-   "name": "Name",
-   "price": "Price",
+    "columns": {
+      "name": "Name",
+      "group": "Group",
+      "price": "Price",
    "barCode": "Bar-code",
    "package": "Package",
    "unit": "Unit"
   },
   "groups": {
-   "noGroupsFound": "No groups found"
-  },
-  "addToCart": {
-   "title": "Add to cart",
-   "prompt": "Please input the desired quantity"
+   "noGroupsFound": "No groups found",
+      "loading": "Loading…"
+    },
+    "addToCart": {
+      "title": "Add to cart",
+      "prompt": "Please input the desired quantity"
+    },
+    "table": {
+      "rowsPerPage": "Rows per page:",
+      "displayedRows": "{{from}}–{{to}} of {{count}}"
+    },
+    "table": {
+      "rowsPerPage": "Rows per page:",
+      "displayedRows": "{{from}}–{{to}} of {{count}}"
   }
  },
  "cart": {

@@ -22,8 +22,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -32,6 +33,13 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ImportClientsUseCase {
 
+    private static final String CLIENTS_DATA_FILE = "clients-data.xml";
+    /**
+     * Width of {@code client.idno}. The ERP export contains fiscal codes that overflow it; they are
+     * skipped rather than truncated, because a truncated fiscal code identifies a different company.
+     */
+    private static final int IDNO_MAX_LENGTH = 13;
+
     @Setter
     @Value("${dataFolderPath}")
     private String exchangeFolderPath;
@@ -39,40 +47,68 @@ public class ImportClientsUseCase {
     private final ClientRepository clientRepository;
 
     public void execute() {
-        final String clientFileName = "clients-data.xml";
+        Path filePath = Path.of(exchangeFolderPath).resolve(CLIENTS_DATA_FILE);
         try {
-            String filePath = exchangeFolderPath + clientFileName;
             ClientsDataDto clientsData = (ClientsDataDto) unmarshaller.unmarshal(getSource(filePath));
-            clientRepository.saveAll(toClients(clientsData.getClients()));
+            List<ClientEntity> clients = toClients(clientsData.getClients());
+            clientRepository.saveAll(clients);
             deleteFile(filePath);
-            log.info("Clients imported successfully");
+            log.info("Imported {} clients", clients.size());
         } catch (FileNotFoundException ex) {
-            log.warn("Skip clients import - no {} file found", clientFileName);
+            log.warn("Skip clients import - no {} file found", CLIENTS_DATA_FILE);
         } catch (Exception ex) {
             log.error("Error while importing clients: {}", ex.getMessage(), ex);
         }
     }
 
     @NonNull
-    private StreamSource getSource(String file) throws FileNotFoundException {
-        return new StreamSource(new FileInputStream(file));
+    private StreamSource getSource(Path file) throws FileNotFoundException {
+        return new StreamSource(new FileInputStream(file.toFile()));
     }
 
-    private void deleteFile(String filePath) {
+    private void deleteFile(Path filePath) {
         try {
-            Path path = Paths.get(filePath);
-            Files.deleteIfExists(path);
+            Files.deleteIfExists(filePath);
         } catch (IOException e) {
             log.error("Error while deleting file {}: {}", filePath, e.getMessage());
         }
     }
 
+    /**
+     * The ERP export is not clean enough to hand straight to a batch insert: some rows carry a fiscal
+     * code the {@code client.idno} column cannot hold, and the same code can appear more than once.
+     * Either one aborts the whole batch and loses every valid client, so both are dropped here, with
+     * the last occurrence of a repeated code winning.
+     */
     private List<ClientEntity> toClients(List<ErpClientDto> erpClients) {
-        return erpClients == null ?
-                null :
-                erpClients.stream()
-                        .map(this::toClient)
-                        .toList();
+        if (erpClients == null) {
+            return List.of();
+        }
+        Map<String, ErpClientDto> byIdno = new LinkedHashMap<>();
+        int skipped = 0;
+        for (ErpClientDto dto : erpClients) {
+            if (!hasStorableIdno(dto)) {
+                skipped++;
+                continue;
+            }
+            byIdno.put(dto.getIdno(), dto);
+        }
+        int repeated = erpClients.size() - skipped - byIdno.size();
+        if (skipped > 0) {
+            log.warn("Skipped {} clients with a blank idno or one longer than {} characters",
+                    skipped, IDNO_MAX_LENGTH);
+        }
+        if (repeated > 0) {
+            log.warn("Collapsed {} clients repeating an idno already present in the file", repeated);
+        }
+        return byIdno.values().stream()
+                .map(this::toClient)
+                .toList();
+    }
+
+    private boolean hasStorableIdno(ErpClientDto dto) {
+        String idno = dto.getIdno();
+        return idno != null && !idno.isBlank() && idno.length() <= IDNO_MAX_LENGTH;
     }
 
     private ClientEntity toClient(ErpClientDto dto) {
