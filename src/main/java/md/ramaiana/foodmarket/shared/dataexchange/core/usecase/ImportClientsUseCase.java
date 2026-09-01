@@ -118,6 +118,7 @@ public class ImportClientsUseCase {
                         dto.getName(),
                         dto.getIdno(),
                         dto.getEmail(),
+                        dto.getCode(),
                         it.getCreatedAt(),
                         it.getDeletedAt(),
                         toAddresses(dto.getAddresses()),
@@ -127,6 +128,7 @@ public class ImportClientsUseCase {
                         dto.getName(),
                         dto.getIdno(),
                         dto.getEmail(),
+                        dto.getCode(),
                         toAddresses(dto.getAddresses()),
                         toPhones(dto.getPhones())
                 ));

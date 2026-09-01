@@ -8,7 +8,7 @@ Ordered by severity. Re-verify before acting on any row; these were found by rea
 | # | where | what |
 |---|---|---|
 | 1 | ~~`domain/product/data/BalanceRepository.java`~~ | **FIXED.** `updateBalances` names its columns, and `src/test/resources/schema.sql` now carries `balances.id`, so `ErpImportFlowTest` runs the statement against the production column list. |
-| 2 | `domain/order/data/OrderEntity.java`, `OrderItemEntity.java` | Both declare a non-transient `UUID uuid` field with **no `uuid` column in either SQL file**. Any write to `order`/`order_product` should fail on an unknown column. No test exercises those tables, so this is entirely uncovered. |
+| 2 | ~~`domain/order/data/OrderEntity.java`, `OrderItemEntity.java`~~ | **FIXED.** Both `uuid` fields are removed — nothing in main, test or frontend read them — so writes no longer name a column that does not exist. `OrderCartFlowTest` drives the cart over HTTP against the real tables, which had no cover at all before. |
 | 3 | `src/main/resources/create_db.sql` | `app_user.email` has no unique index in prod (the test schema does). `AppUserRepository.findByEmail` returns `Optional` and will throw `IncorrectResultSizeDataAccessException` on the first duplicate registration. |
 | 4 | `create_db.sql` vs `src/test/resources/schema.sql` | Was 49 drifted columns; the auth/client blockers are now fixed — `app_user.state`/`deleted_at`, `app_user_role` (was `app_user_roles`), and `client.created_at`/`email` are all in the test schema, unblocking `AuthRegistrationFlowTest` and `ClientRepositoryTest`. Roughly 40 columns still drift, mostly `timestamptz`-vs-`TIMESTAMP` and missing constraints/indexes — full table in `schema.md`. |
 | 5 | ~~`shared/dataexchange/core/usecase/ImportProductsUseCase.java`~~ | **FIXED.** `toBrands` passed `BrandEntity(name, erpCode)` swapped, so `brand.erp_code` held the brand name and no product ever resolved a brand. Covered by `ErpImportFlowTest`. |
@@ -26,13 +26,13 @@ Ordered by severity. Re-verify before acting on any row; these were found by rea
 | 10 | `src/main/resources/application-local.yml` | Committed plaintext dev DB password, plus `DATA_FOLDER_PATH` pointing at one developer's home directory (`/home/dgrosu/Downloads/`). |
 | 11 | `config/SecurityConfig.java` | `setAllowedOriginPatterns("*")` together with `setAllowCredentials(true)` reflects **any** origin with credentials. There is an in-code WARNING comment acknowledging it. |
 | 12 | `domain/storage/presentation/controller/StorageController.java` | The only controller with no `AccessVoter`. Still behind `authenticated()` at the filter chain, so this is a defense-in-depth gap, not an open endpoint. |
-| 13 | across all voters | *(Partly resolved: `JwtGetAuthenticationUseCase` now rejects any non-ACTIVE user on every request, so suspension takes effect immediately instead of at token expiry.)* `Role.ADMIN`/`Role.USER` are assigned at registration and materialized as authorities, but **never checked** — no `hasRole`, no `@PreAuthorize`, no role rule in the filter chain. No voter inspects the resource being accessed either, so any authenticated user can read or mutate any other client's order by id. |
+| 13 | across all voters | *(Partly resolved: `JwtGetAuthenticationUseCase` now rejects any non-ACTIVE user on every request, so suspension takes effect immediately instead of at token expiry.)* `Role.ADMIN`/`Role.USER` are assigned at registration and materialized as authorities, but **never checked** — no `hasRole`, no `@PreAuthorize`, no role rule in the filter chain. No voter inspects the resource being accessed. *(Closed for orders: every order reaches an HTTP caller through `OrderLoader`, which matches it against the authenticated user's client and answers 404 for a foreign one; the cart endpoints carry no order id at all. Other domains are unchanged.)* |
 
 ## Performance
 
 | # | where | what |
 |---|---|---|
-| 14 | `OrderAddProductUseCase`, `OrderFindByIdUseCase`, `OrderSearchByPeriodUseCase` | `productRepository.findNameById(...)` is called once per order item inside a stream map. In `OrderSearchByPeriodUseCase` that is per item per order across a whole page. |
+| 14 | ~~`OrderAddProductUseCase`, `OrderFindByIdUseCase`, `OrderSearchByPeriodUseCase`~~ | **FIXED.** All three build their response through `OrderResponseAssembler`, which resolves every product name a page mentions with one `ProductRepositoryCustom.findNamesByIds` call. |
 | 15 | ~~`ProductGroupSearchUseCase.getGroupsHierarchy`~~ | **FIXED.** `findAllNonEmpty(storageId)` is read once in `execute` and passed down. It used to run once per group visited — roughly 10k full-catalogue scans per request against the real ERP data. |
 | 16 | `ProductSearchUseCase.addAllParentsToMap` | One `findById` per ancestor per product. |
 
@@ -41,7 +41,7 @@ Ordered by severity. Re-verify before acting on any row; these were found by rea
 | # | where | what |
 |---|---|---|
 | 17 | the three `Import*UseCaseTest` classes | *(Partly resolved: each now rewrites its fixture unconditionally instead of only when absent, so a run that left a stale file behind no longer poisons the next one, and none of the three boots a Spring context any more — they build the use case directly and are tagged `unit`.)* They still write into `src/test/resources/dataExchange/`, an uncommitted directory, so they remain coupled to a relative CWD. `ErpImportFlowTest` is the counterpart that runs the importers over real repositories, from committed fixtures in `src/test/resources/importFixtures/`. |
-| 18 | `src/test/resources/application.yml` | Scheduling is enabled app-wide, so `@SpringBootTest` runs fire the ERP importer against that folder every 3 seconds. |
+| 18 | `src/test/resources/application.yml` | Scheduling is enabled app-wide, so `@SpringBootTest` runs fire the ERP importers **and now the order exporter** against that folder every 3 seconds. *(Partly resolved: `dataFolderPath` points at `target/dataExchange/`, so a run can no longer write into the source tree, and the order tests set their own folder plus `dataLoadingDelay=3600000` the way `ErpImportFlowTest` does.)* |
 | 19 | `domain/storage/data/StorageRepositoryTest.java` | Cleans up with `delete()` in the test body instead of `@Transactional` rollback; a mid-test failure leaves rows behind. |
 | 20 | `.github/workflows/mavenTest.yml` | `actions/checkout@v2` and `actions/setup-java@v1`; the latter has no `distribution:` input, which modern JDK setup requires. Runs `mvn test` only — no `verify`, no frontend build, no coverage. |
 
@@ -49,9 +49,9 @@ Ordered by severity. Re-verify before acting on any row; these were found by rea
 
 | # | where | what |
 |---|---|---|
-| 21 | `store/actions/cartActions.js` | `addProductToCart` posts only `{orderId, productId, quantity}`, but `AddProductToOrderRequest` also declares `clientId`, `storageId`, and `priceType` with validation. |
-| 22 | `components/orders/Cart.js` | Passes a **productId** into the `{itemId}` slot of `DELETE /order/deleteProduct/{orderId}/{itemId}`, while the reducer filters by `product.productId`. |
-| 23 | `store/actions/cartActions.js` | `PLACE_ORDER_FAIL` is declared and handled in the reducer but never dispatched — the `placeOrder` catch only toasts, leaving `isPlacing` stuck `true`. |
+| 21 | ~~`store/actions/cartActions.js`~~ | **FIXED.** `addProductToCart` posts `{productId, storageId, priceType, quantity}`. `clientId` is gone from the request entirely — the server takes it from the token — and `orderId` with it, since the cart is resolved server-side. |
+| 22 | ~~`components/orders/Cart.js`~~ | **FIXED.** The endpoint is now `DELETE /order/deleteProduct/{productId}` and matches on the product, which is the stable key — `order_product.id` is regenerated on every save. `OrderItemResponse` carries `productId`, so the reducer's filter resolves too. |
+| 23 | ~~`store/actions/cartActions.js`~~ | **FIXED.** Every cart thunk dispatches its `*_FAIL` action in the catch, so no spinner is left stuck. |
 | 24 | `axios-instance.js` | No response interceptor, so an expired token produces a silent 401 with no auto-logout. Expiry is a client-side `setTimeout` only. |
 | 25 | `App.js` | `authCheckState()` is called during render rather than in an effect. |
 | 26 | `components/home/Stats.js` | Dead code — never imported. `App.test.js` is the stale CRA smoke test asserting "learn react" and will fail against the current `App`. |

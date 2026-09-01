@@ -1,7 +1,9 @@
 package md.ramaiana.foodmarket.domain.product.data;
 
 import jakarta.annotation.Nullable;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import lombok.NonNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -41,4 +43,16 @@ public interface ProductRepositoryCustom {
   @NonNull
   List<Integer> findGroupIdsInStock(@Nullable Integer storageId, @Nullable Integer groupId,
                                     @Nullable Integer brandId, @Nullable String nameLike);
+
+  /**
+   * Product names by id, for the given ids.
+   * <p>
+   * Rendering an order means putting a name on every line. Doing that with one
+   * {@code findNameById} per line costs a query per item per order across a whole page, so the whole
+   * page's names are read once instead.
+   *
+   * @return only the ids that resolve to a live product; an empty map for an empty input.
+   */
+  @NonNull
+  Map<Integer, String> findNamesByIds(@NonNull Collection<Integer> ids);
 }

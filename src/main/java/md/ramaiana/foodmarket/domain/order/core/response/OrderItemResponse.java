@@ -14,8 +14,14 @@ import md.ramaiana.foodmarket.domain.order.data.OrderItemEntity;
 @AllArgsConstructor
 public class OrderItemResponse {
 
-  @NonNull
+  /**
+   * The line's own id. Not a handle to address it by — it is regenerated whenever the order is
+   * saved; see {@link OrderItemEntity}. Callers use {@link #productId}.
+   */
   private Integer id;
+
+  @NonNull
+  private Integer productId;
 
   @NonNull
   private String productName;
@@ -30,6 +36,7 @@ public class OrderItemResponse {
 
   public OrderItemResponse(@NonNull OrderItemEntity orderItem, @NonNull String productName) {
     this.id = orderItem.getId();
+    this.productId = orderItem.getProductId();
     this.productName = productName;
     this.quantity = orderItem.getQuantity();
     this.price = orderItem.getPrice();

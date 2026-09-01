@@ -226,77 +226,96 @@
       "name": "Name",
       "group": "Group",
       "price": "Price",
-   "barCode": "Bar-code",
-   "package": "Package",
-   "unit": "Unit"
-  },
-  "groups": {
-   "noGroupsFound": "No groups found",
+      "barCode": "Bar-code",
+      "package": "Package",
+      "unit": "Unit"
+    },
+    "groups": {
+      "noGroupsFound": "No groups found",
       "loading": "Loading…"
     },
     "addToCart": {
       "title": "Add to cart",
-      "prompt": "Please input the desired quantity"
+      "prompt": "Please input the desired quantity",
+      "selectStorage": "Select a storage before adding to the cart.",
+      "storageLocked": "Your cart is for another storage. Empty it first, or switch back.",
+      "quantityTooSmall": "Quantity must be at least 1."
     },
     "table": {
       "rowsPerPage": "Rows per page:",
       "displayedRows": "{{from}}–{{to}} of {{count}}"
+    }
+  },
+  "cart": {
+    "title": "Shopping cart",
+    "backToCatalogue": "Back to catalogue",
+    "columns": {
+      "name": "Name",
+      "price": "Price",
+      "quantity": "Quantity",
+      "sum": "Sum"
     },
+    "total": "Total",
+    "placeOrder": "Place order",
+    "confirmRemove": "Remove selected product from cart?",
+    "confirmPlaceOrder": "You are about to place the new order. Please confirm!",
+    "empty": "Your cart is empty",
+    "clear": "Empty cart"
+  },
+  "orders": {
+    "title": "My orders",
+    "dateFrom": "From",
+    "dateTo": "To",
+    "empty": "No orders in this period",
+    "columns": {
+      "number": "No.",
+      "date": "Date",
+      "state": "State",
+      "positions": "Items",
+      "weight": "Weight",
+      "total": "Total"
+    },
+    "states": {
+      "NEW": "Cart",
+      "PLACED": "Placed",
+      "EXPORTED": "Sent",
+      "PROCESSED": "Processed",
+      "NOT_PROCESSED": "Rejected"
+    }
+  },
+  "admin": {
+    "title": "Admin dashboard",
     "table": {
       "rowsPerPage": "Rows per page:",
-      "displayedRows": "{{from}}–{{to}} of {{count}}"
+      "displayedRows": "{{from}}–{{to}} of {{count}}",
+      "noResults": "Nothing found"
+    },
+    "search": {
+      "byEmail": "Search by email"
+    },
+    "users": {
+      "columns": {
+        "email": "Email",
+        "state": "State",
+        "clientName": "Client",
+        "createdAt": "Registered",
+        "actions": "Actions"
+      },
+      "states": {
+        "PENDING_CONFIRMATION": "Awaiting email confirmation",
+        "CONFIRMED": "Email confirmed",
+        "ACTIVE": "Active",
+        "INACTIVE": "Inactive",
+        "SUSPENDED": "Suspended"
+      },
+      "filterByState": "State",
+      "emptyMessage": "No users found",
+      "activate": {
+        "action": "Activate",
+        "title": "Activate user",
+        "confirmText": "Activate user {{email}}? They will be able to sign in.",
+        "confirm": "Activate"
+      }
+    }
   }
- },
- "cart": {
-  "title": "Shopping cart",
-  "backToCatalogue": "Back to catalogue",
-  "columns": {
-   "name": "Name",
-   "price": "Price",
-   "quantity": "Quantity",
-   "sum": "Sum"
-  },
-  "total": "Total",
-  "placeOrder": "Place order",
-  "confirmRemove": "Remove selected product from cart?",
-  "confirmPlaceOrder": "You are about to place the new order. Please confirm!"
- },
- "orders": {
-  "placeholder": "Orders section"
- },
- "admin": {
-  "title": "Admin dashboard",
-  "table": {
-   "rowsPerPage": "Rows per page:",
-   "displayedRows": "{{from}}–{{to}} of {{count}}",
-   "noResults": "Nothing found"
-  },
-  "search": {
-   "byEmail": "Search by email"
-  },
-  "users": {
-   "columns": {
-    "email": "Email",
-    "state": "State",
-    "clientName": "Client",
-    "createdAt": "Registered",
-    "actions": "Actions"
-   },
-   "states": {
-    "PENDING_CONFIRMATION": "Awaiting email confirmation",
-    "CONFIRMED": "Email confirmed",
-    "ACTIVE": "Active",
-    "INACTIVE": "Inactive",
-    "SUSPENDED": "Suspended"
-   },
-   "filterByState": "State",
-   "emptyMessage": "No users found",
-   "activate": {
-    "action": "Activate",
-    "title": "Activate user",
-    "confirmText": "Activate user {{email}}? They will be able to sign in.",
-    "confirm": "Activate"
-   }
-  }
- }
 }

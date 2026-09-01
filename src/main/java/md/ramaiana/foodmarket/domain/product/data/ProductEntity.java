@@ -15,6 +15,7 @@ import org.springframework.data.relational.core.mapping.Table;
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -112,14 +113,22 @@ public class ProductEntity {
                 prices);
     }
 
-    public float getPrice(PriceType priceType) {
+    /**
+     * The price of this product at a storage, on a tier.
+     * <p>
+     * {@code prices} is keyed by (product, storage, type), so filtering on the type alone returns an
+     * arbitrary storage's price. Empty rather than zero when there is no such row: a product with no
+     * price on the tier being ordered must not silently land in a cart at nothing.
+     */
+    @NonNull
+    public Optional<Float> findPrice(@NonNull Integer storageId, @NonNull PriceType priceType) {
         return prices == null ?
-                0f :
+                Optional.empty() :
                 prices.stream()
                         .filter(p -> p.getType() == priceType)
+                        .filter(p -> p.getStorage() != null && storageId.equals(p.getStorage().getId()))
                         .findFirst()
-                        .orElse(new PriceEntity(0f))
-                        .getPrice();
+                        .map(PriceEntity::getPrice);
     }
 
     @Override

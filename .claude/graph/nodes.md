@@ -10,12 +10,12 @@ Schema: `| id | kind | dir | api | note |` — `dir` omits the prefix `src/main/
 | About | fe-component | frontend/src/components/home | renders company description text |  |
 | AbstractPasswordResetEndpointTest | service | src/test/java/md/ramaiana/foodmarket/domain/auth/presentation/controller | userInState(UserState);activeUser();requestResetAndCaptureToken(String);latestResetTokenFor(AppUserEntity);overwriteResetToken() | test; shared fixture for the two password-reset endpoints, spies EmailSendUseCase to capture the emailed token and to assert nothing was sent |
 | AbstractRegistrationEndpointTest | service | src/test/java/md/ramaiana/foodmarket/domain/auth/presentation/controller | uniqueEmail();registerAndCaptureToken(String);captureEmailedToken();latestTokenFor(String);overwriteToken() | test; shared fixture for the three registration endpoints, spies EmailSendUseCase to capture the emailed token |
-| AccessVoter | abstract | shared/util/abstraction/voter | getCurrentUser()->AppUserEntity;assertUserIsAuthenticated();assertUserIsAdmin() | assertUserIsAdmin() checks Role.ADMIN membership, throws ForbiddenException |
+| AccessVoter | abstract | shared/util/abstraction/voter | getCurrentUser()->AppUserEntity;assertUserIsAuthenticated();assertUserIsAdmin() | assertUserIsAdmin() checks Role.ADMIN membership, throws ForbiddenException; getCurrentUser delegates to CurrentUser |
 | AccessVoterTest | abstract | src/test/java/md/ramaiana/foodmarket/shared/util/abstraction/voter | 5 tests: assertUserIsAdmin (admin-pass, non-admin-reject, anonymous-reject, no-auth-reject), assertUserIsAuthenticated (pass) | test |
 | AccountActivatedMailUseCase | usecase | domain/auth/core/usecase | execute(AppUserEntity)->boolean | Propagation.NEVER; swallows MailException, logs at ERROR, returns whether it sent |
 | AccountActivatedMailUseCaseTest | usecase | src/test/java/md/ramaiana/foodmarket/domain/auth/core/usecase | 2 tests: sends in the recipient's own language, swallows MailException | test |
 | AccountActivatedVariables | request | domain/email/core/request | loginUrl:String;language:Language |  |
-| AddProductToOrderRequest | request | domain/order/core/request | orderId:int;storageId:Integer;productId:Integer;priceType:PriceType;quantity:float;clientId:Integer |  |
+| AddProductToOrderRequest | request | domain/order/core/request | storageId:Integer;productId:Integer;priceType:PriceType;quantity:float | no orderId/clientId: the cart is resolved from the authenticated user |
 | AddressType | enum | shared/enums | LEGAL;POINT;OFFICE |  |
 | AdminUserActivateTest | controller | src/test/java/md/ramaiana/foodmarket/domain/auth/presentation/controller | 5 tests: activates a CONFIRMED user, rejects every other state, forbids non-admin, 404s an unknown id, commits before the activation email is sent | test |
 | AdminUserSearchTest | controller | src/test/java/md/ramaiana/foodmarket/domain/auth/presentation/controller | 5 tests: admin gets a page, forbids non-admin, rejects anonymous, filters by state, rejects an unknown sort column | test |
@@ -41,13 +41,13 @@ Schema: `| id | kind | dir | api | note |` — `dir` omits the prefix `src/main/
 | authActions | fe-action | frontend/src/store/actions | LOGIN_START;LOGIN_SUCCESS;LOGIN_FAIL;LOGOUT;loginStart;loginSuccess;signUpStart;checkAuthTimeout;authCheckState;logout;handleError |  |
 | AuthChangePasswordTest | controller | src/test/java/md/ramaiana/foodmarket/domain/auth/presentation/controller | 5 tests: changes password (proved by logging in), wrong current password, reusing current password, blank new password, anonymous rejected | test |
 | AuthConfirmEmailTest | controller | src/test/java/md/ramaiana/foodmarket/domain/auth/presentation/controller | 7 tests: confirms pending, idempotent replay, unknown token, expired token, blank token, missing token, no-auth-required | test |
-| AuthController | controller | domain/auth/presentation/controller | login(LoginRequest)->AuthResponse;register(RegisterRequest)->RegistrationResponse;confirmEmail(RegistrationConfirmRequest)->RegistrationConfirmResponse;resendConfirmation(RegistrationConfirmationResendRequest)->RegistrationResponse | register/resendConfirmation delegate to request handlers; login and confirmEmail call their use cases directly (neither has an external-call side effect) |
+| AuthController | controller | domain/auth/presentation/controller | login(LoginRequest)->AuthResponse;register(RegisterRequest)->RegistrationResponse;confirmEmail(RegistrationConfirmRequest)->RegistrationConfirmResponse;resendConfirmation(RegistrationConfirmationResendRequest)->RegistrationResponse | register/confirmEmail/resendConfirmation delegate to request handlers, login still calls its use case directly |
 | AuthForgotPasswordTest | controller | src/test/java/md/ramaiana/foodmarket/domain/auth/presentation/controller | 9 tests: emails an active user, stores only a hash, unknown address answers identically and sends nothing, pending user, suspended user, cooldown, retires previous link, invalid email, no-auth-required | test; the enumeration guard is the point |
 | AuthLoginTest | controller | src/test/java/md/ramaiana/foodmarket/domain/auth/presentation/controller | 5 tests: token for active user, forbidden while pending, forbidden while awaiting approval, wrong password, invalid email | test |
 | AuthLoginUseCase | usecase | domain/auth/core/usecase | execute(LoginRequest)->AuthResponse |  |
 | AuthProfileTest | controller | src/test/java/md/ramaiana/foodmarket/domain/auth/presentation/controller | 9 tests: reads own account, anonymous rejected, persists language, unknown tag falls back to ru, persists names, blank name stored as null, name captured at registration, anonymous update, blank language | test |
 | authReducer | fe-reducer | frontend/src/store/reducers | token;userId;clientId;isLoading;error |  |
-| AuthRegisterRequestHandler | service | domain/auth/core/handler | handle(RegisterRequest)->RegistrationResponse;persist(RegisterRequest)->TransactionalEffectResult | persist() commits before handle() triggers the confirmation email |
+| AuthRegisterRequestHandler | service | domain/auth/core/handler | handle(RegisterRequest)->RegistrationResponse;persist(RegisterRequest)->PendingRegistration | persist() commits before handle() triggers the confirmation email |
 | AuthRegisterUseCase | usecase | domain/auth/core/usecase | preExecute(RegisterRequest);executeTransactionalEffect(RegisterRequest)->PendingRegistration;executeSideEffects(PendingRegistration)->boolean | three-phase, sequenced by AuthRegisterRequestHandler |
 | AuthRegisterUseCaseTest | usecase | src/test/java/md/ramaiana/foodmarket/domain/auth/core/usecase | 6 tests: preExecute duplicate/free email, transactional effect (no/zero/positive clientId), side effects delegate | test |
 | AuthRegistrationTest | controller | src/test/java/md/ramaiana/foodmarket/domain/auth/presentation/controller | 8 tests: registers pending user, stores only a token hash, commits before emailing, keeps user when mail fails, duplicate email, invalid email, blank password, no-auth-required | test |
@@ -68,16 +68,16 @@ Schema: `| id | kind | dir | api | note |` — `dir` omits the prefix `src/main/
 | BrandResponse | response | domain/brand/core/response | id:Integer;name:String |  |
 | BrandSearchUseCase | usecase | domain/brand/core/usecase | execute()->List<BrandResponse> |  |
 | Cart | fe-component | frontend/src/components/orders | Cart |  |
-| cartActions | fe-action | frontend/src/store/actions | ADD_TO_CART_START;ADD_TO_CART_SUCCESS;ADD_TO_CART_FAIL;SELECT_GOOD;CHANGE_QUANTITY;DELETE_FROM_CART_START;DELETE_FROM_CART_CANCELLED;DELETE_FROM_CART_END;SELECT_GOOD_TO_DELETE;PLACE_ORDER_START;PLACE_ORDER_SUCCESS;PLACE_ORDER_FAIL;OPEN_PLACE_ORDER_DIALOG;CLOSE_PLACE_ORDER_DIALOG;addProductToCart;deleteProductFromCart;placeOrder;selectProduct;changeQuantity;selectProductToDelete;cancelDeleteProduct;openPlaceOrderDialog;closePlaceOrderDialog | DEVIATION: addProductToCart omits required clientId/storageId/priceType |
-| cartReducer | fe-reducer | frontend/src/store/reducers | orderId;products;isAdding;isDeleting;isPlacing;placeOrderDialogOpen;error;selectedProduct;deleteProductId | cart state is not persisted across reload |
+| cartActions | fe-action | frontend/src/store/actions | FETCH_CART_START;FETCH_CART_SUCCESS;FETCH_CART_FAIL;ADD_TO_CART_START;ADD_TO_CART_SUCCESS;ADD_TO_CART_FAIL;SELECT_GOOD;CHANGE_QUANTITY;UPDATE_QUANTITY_START;UPDATE_QUANTITY_SUCCESS;UPDATE_QUANTITY_FAIL;DELETE_FROM_CART_START;DELETE_FROM_CART_CANCELLED;DELETE_FROM_CART_END;DELETE_FROM_CART_FAIL;SELECT_GOOD_TO_DELETE;CLEAR_CART_START;CLEAR_CART_SUCCESS;CLEAR_CART_FAIL;PLACE_ORDER_START;PLACE_ORDER_SUCCESS;PLACE_ORDER_FAIL;OPEN_PLACE_ORDER_DIALOG;CLOSE_PLACE_ORDER_DIALOG;DEFAULT_PRICE_TYPE;fetchCart;addProductToCart;updateCartProduct;deleteProductFromCart;clearCart;placeOrder;selectProduct;changeQuantity;selectProductToDelete;cancelDeleteProduct;openPlaceOrderDialog;closePlaceOrderDialog | DEFAULT_PRICE_TYPE is a LOCAL constant: there is no price-tier UI |
+| cartReducer | fe-reducer | frontend/src/store/reducers | orderId;storageId;priceType;products;isFetching;isAdding;isUpdating;isDeleting;isPlacing;placeOrderDialogOpen;error;selectedProduct;deleteProductId | replaced from the OrderResponse every mutation returns; the cart itself lives on the server |
 | CatalogDto | dto | shared/dataexchange/dto | groups:List<ErpGroupDto>;brands:List<ErpBrandDto>;products:List<ErpProductDto> |  |
 | ClientAccessVoter | voter | domain/client/presentation/voter | assertCanFindByIdno() | DEVIATION: asserts auth but SecurityConfig permits endpoint anonymously |
 | ClientAddressEntity | entity | domain/client/data | type:AddressType;fullAddress:String;description:String | DEVIATION: no @Id; embedded child of ClientEntity |
 | ClientController | controller | domain/client/presentation/controller | findByIdno(String)->ClientResponse |  |
-| ClientEntity | entity | domain/client/data | id:Integer;name:String;idno:String;email:String;createdAt:Instant;deletedAt:Instant;addresses:Set;phones:Set |  |
-| ClientFindByIdUseCase | usecase | domain/client/core/usecase | execute(AggregateReference)->ClientEntity | returns entity not DTO, unlike its sibling |
+| ClientEntity | entity | domain/client/data | id:Integer;name:String;idno:String;email:String;erpCode:String;createdAt:Instant;deletedAt:Instant;addresses:Set;phones:Set | erpCode is null until the next clients import fills it in |
 | ClientFindByIdnoUseCase | usecase | domain/client/core/usecase | execute(String)->ClientResponse | replaces ClientSearchUseCase now that /client/search is retired |
 | ClientFindByIdnoUseCaseTest | usecase | src/test/java/md/ramaiana/foodmarket/domain/client/core/usecase | 2 tests: found, not-found -> NotFoundException | test |
+| ClientFindByIdUseCase | usecase | domain/client/core/usecase | execute(AggregateReference)->ClientEntity | returns entity not DTO, unlike its sibling |
 | ClientPhoneEntity | entity | domain/client/data | number:String;name:String | DEVIATION: no @Id; embedded child of ClientEntity |
 | ClientRepository | repo | domain/client/data | findByIdnoAndDeletedAtIsNull |  |
 | ClientResponse | response | domain/client/core/response | id:Integer;name:String;idno:String |  |
@@ -86,6 +86,8 @@ Schema: `| id | kind | dir | api | note |` — `dir` omits the prefix `src/main/
 | Contacts | fe-component | frontend/src/components/home | renders contact details and CTA button |  |
 | ControllerAdviceConfig | config | config | 11 @ExceptionHandler methods -> JSON error body |  |
 | Copyright | fe-component | frontend/src/components/home | renders copyright line with link |  |
+| CurrentUser | util | shared/util | require()->AppUserEntity | static: AccessVoter subclasses are built directly in unit tests, with no context to inject into |
+| CurrentUserProvider | util | shared/util | getCurrentUser()->AppUserEntity;getCurrentClientId()->Integer | injectable view of CurrentUser, for use cases; getCurrentClientId throws BadRequest when the account has no client |
 | DataExchangeConfig | config | config | marshaller;unmarshaller |  |
 | EmailRecipient | request | domain/email/core/request | email:String;name:String |  |
 | EmailSendRequest | request | domain/email/core/request | recipient:EmailRecipient;variables:EmailTemplateVariables |  |
@@ -100,10 +102,13 @@ Schema: `| id | kind | dir | api | note |` — `dir` omits the prefix `src/main/
 | ErpBrandDto | dto | shared/dataexchange/dto | code:String;name:String |  |
 | ErpClientDto | dto | shared/dataexchange/dto | code:String;name:String;idno:String;addresses:List<ErpAddressDto>;phones:List<ErpPhoneDto>;email:String |  |
 | ErpGroupDto | dto | shared/dataexchange/dto | code:String;name:String;parentCode:String |  |
+| ErpOrderDto | dto | shared/dataexchange/dto | id:Integer;createdAt:String;placedAt:String;clientCode:String;clientIdno:String;storageCode:String;priceType:String;totalSum:float;totalWeight:float;items:List<ErpOrderItemDto> | id is the ERP's dedup key across re-exports |
+| ErpOrderItemDto | dto | shared/dataexchange/dto | productCode:String;quantity:float;price:float;sum:float;weight:float |  |
 | ErpPhoneDto | dto | shared/dataexchange/dto | number:String;name:String |  |
 | ErpPriceDto | dto | shared/dataexchange/dto | storageCode:String;type:PriceType;price:float |  |
 | ErpProductCodeDto | dto | shared/dataexchange/dto | name:String;value:String |  |
 | ErpProductDto | dto | shared/dataexchange/dto | code:String;name:String;groupCode:String;brandCode:String;packSize:float;unit:String;weight:float;codes:List<ErpProductCodeDto>;prices:List<ErpPriceDto> |  |
+| ExportOrdersUseCase | usecase | shared/dataexchange/core/usecase | execute()->void | writes orders-data-<ts>.xml atomically via a .tmp rename, then marks the batch EXPORTED; no @Transactional, so no transaction spans the file write |
 | Filter | fe-component | frontend/src/components/products | Filter |  |
 | FoodMarketApplication | app |  | main(String[]) | @SpringBootApplication @EnableScheduling |
 | FoodMarketApplicationTests | app | src/test/java/md/ramaiana/foodmarket | contextLoads() | test |
@@ -139,24 +144,33 @@ Schema: `| id | kind | dir | api | note |` — `dir` omits the prefix `src/main/
 | MockedAuthenticationController | abstract | src/test/java/md/ramaiana/foodmarket/shared/abstraction | authenticateAs(Role...);authenticateAsAnonymous();post(String,Object);get(String);get(String,Map) | test; base class giving controller tests a real signed JWT for a real AppUserEntity |
 | Navbar | fe-component | frontend/src/components/navigation | Navbar |  |
 | NotFoundException | exception | shared/exception/http |  |  |
-| OrderAccessVoter | voter | domain/order/presentation/voter | assertCanAddProduct();assertCanGetById();assertCanDelete();assertCanDeleteProduct();assertCanGetOrdersByPeriod();assertCanUpdate();assertCanPlaceOrder() | all 7 are identical assertUserIsAuthenticated delegates |
-| OrderAddProductUseCase | usecase | domain/order/core/usecase | execute(AddProductToOrderRequest)->OrderResponse | DEVIATION: ignores request.storageId when resolving price |
-| OrderController | controller | domain/order/presentation/controller | addProduct(AddProductToOrderRequest)->OrderResponse;getById(int)->OrderResponse;deleteById(int)->void;deleteProduct(int,int)->void;getOrdersByPeriod(OrderListRequest)->OrderListResponse;update(UpdateOrderRequest)->void;placeOrder(int)->void |  |
-| OrderDeleteProductUseCase | usecase | domain/order/core/usecase | execute(int,int)->void |  |
+| OrderAccessVoter | voter | domain/order/presentation/voter | assertCanGetCart();assertCanAddProduct();assertCanUpdateProduct();assertCanDeleteProduct();assertCanClearCart();assertCanPlaceOrder();assertCanGetById();assertCanGetOrdersByPeriod();assertCanDelete() | all 9 are identical assertUserIsAuthenticated delegates; per-order ownership is enforced in OrderLoader |
+| OrderAddProductUseCase | usecase | domain/order/core/usecase | execute(AddProductToOrderRequest)->OrderResponse | opens the cart if absent; merges into an existing line; rejects a storage or tier the cart is not on |
+| OrderCartClearUseCase | usecase | domain/order/core/usecase | execute()->void | soft-deletes the cart outright, so the next add may open one on another storage |
+| OrderCartFindUseCase | usecase | domain/order/core/usecase | execute()->OrderResponse | returns OrderResponse.emptyCart() when the client has no cart |
+| OrderCartFlowTest | controller | src/test/java/md/ramaiana/foodmarket/domain/order/presentation/controller | 17 tests: the cart over HTTP against real repositories | test; the only cover on the order/order_product tables |
+| OrderController | controller | domain/order/presentation/controller | getCart()->OrderResponse;addProduct(AddProductToOrderRequest)->OrderResponse;updateProduct(UpdateOrderProductRequest)->OrderResponse;deleteProduct(int)->OrderResponse;clearCart()->void;placeOrder()->OrderResponse;getById(int)->OrderResponse;getOrdersByPeriod(OrderListRequest)->OrderListResponse;deleteById(int)->void | cart endpoints take no orderId |
+| OrderDeleteProductUseCase | usecase | domain/order/core/usecase | execute(int)->OrderResponse | takes a productId, not a line id |
 | OrderDeleteUseCase | usecase | domain/order/core/usecase | execute(int)->void |  |
-| OrderEntity | entity | domain/order/data | uuid:UUID;id:Integer;clientId:Integer;totalSum:Float;createdAt:Instant;deletedAt:Instant;processedAt:Instant;processingResult:String;state:OrderState;items:Set;addItem();removeItem();updateTotalSum();getTotalWeightForProducts();markDeleted() | DEVIATION: mutable; uuid has no DB column; state maps to status |
-| OrderFindByIdUseCase | usecase | domain/order/core/usecase | execute(int)->OrderResponse | N+1: findNameById per item |
-| OrderItemEntity | entity | domain/order/data | uuid:UUID;id:Integer;productId:Integer;quantity:Float;price:Float;sum:Float;weight:Float;updateQuantity() | DEVIATION: mutable; no equals/hashCode despite Set; uuid has no column |
-| OrderItemResponse | response | domain/order/core/response | id:Integer;productName:String;quantity:float;price:float;sum:float;weight:float |  |
-| OrderListRequest | request | domain/order/core/request | dateFrom:Long;dateTo:Long;clientId:Integer;pageNo:Integer;pageSize:Integer;sortDirection:Sort.Direction;sortColumn:String |  |
-| OrderListResponse | response | domain/order/core/response | orders:List<OrderResponse>;currentPage:int;pageSize:int;totalPages:int |  |
-| OrderPlaceUseCase | usecase | domain/order/core/usecase | execute(int)->void |  |
-| OrderRepository | repo | domain/order/data | findByIdAndDeletedAtIsNull;findByClientIdAndDeletedAtIsNullAndCreatedAtBetween |  |
-| OrderResponse | response | domain/order/core/response | id:Integer;totalSum:float;clientId:Integer;state:OrderState;createdAt:long;totalWeight:float;items:List<OrderItemResponse> |  |
-| Orders | fe-component | frontend/src/components/orders | Orders | DEVIATION: placeholder stub rendering literal text |
-| OrderSearchByPeriodUseCase | usecase | domain/order/core/usecase | execute(OrderListRequest)->OrderListResponse | N+1: findNameById per item per order across the page |
-| OrderState | enum | shared/enums | NEW;PLACED;PROCESSED;NOT_PROCESSED |  |
-| OrderUpdateUseCase | usecase | domain/order/core/usecase | execute(UpdateOrderRequest)->void |  |
+| OrderEntity | entity | domain/order/data | id:Integer;clientId:Integer;storageId:Integer;priceType:PriceType;totalSum:Float;createdAt:Instant;placedAt:Instant;deletedAt:Instant;processedAt:Instant;processingResult:String;exportedAt:Instant;state:OrderState;items:Set;addProduct();setProductQuantity();removeProduct();findItem();clearItems();isEmpty();updateTotalSum();getTotalWeightForProducts();place();markDeleted() | DEVIATION: mutable; state maps to status |
+| OrderExportFlowTest | usecase | src/test/java/md/ramaiana/foodmarket/shared/dataexchange | 8 tests: export to file, mark exported, wire-format pin | test; round-trips the produced XML through the app's own Unmarshaller |
+| OrderExportRepository | repo | domain/order/data | findPendingOrders;findPendingItems;markExported | hand-written over NamedParameterJdbcTemplate, like BalanceRepository; markExported is a targeted UPDATE so saving the aggregate cannot churn order_product |
+| OrderFindByIdUseCase | usecase | domain/order/core/usecase | execute(int)->OrderResponse |  |
+| OrderItemEntity | entity | domain/order/data | id:Integer;productId:Integer;quantity:Float;price:Float;sum:Float;weight:Float;updateQuantity() | DEVIATION: mutable; no equals/hashCode despite Set. id is regenerated on every save, so callers address a line by productId |
+| OrderItemResponse | response | domain/order/core/response | id:Integer;productId:Integer;productName:String;quantity:float;price:float;sum:float;weight:float |  |
+| OrderListRequest | request | domain/order/core/request | dateFrom:Long;dateTo:Long;pageNo:Integer;pageSize:Integer;sortDirection:Sort.Direction;sortColumn:String | no clientId: read for the authenticated user's client |
+| OrderListResponse | response | domain/order/core/response | orders:List<OrderResponse>;currentPage:int;pageSize:int;totalPages:int;totalElements:long |  |
+| OrderLoader | usecase | domain/order/core/usecase | findCart()->Optional<OrderEntity>;requireCart()->OrderEntity;requireOwned(int)->OrderEntity;getCurrentClientId()->Integer | not a use case; the single place an order is fetched for an HTTP caller, so the ownership rule has one implementation. A foreign order is NotFound, not Forbidden |
+| OrderPlaceUseCase | usecase | domain/order/core/usecase | execute()->OrderResponse | rejects an empty cart |
+| OrderRepository | repo | domain/order/data | findByIdAndDeletedAtIsNull;findByClientIdAndStateAndDeletedAtIsNull;findByClientIdAndDeletedAtIsNullAndCreatedAtBetween |  |
+| OrderResponse | response | domain/order/core/response | id:Integer;totalSum:float;clientId:Integer;storageId:Integer;priceType:PriceType;state:OrderState;createdAt:long;totalWeight:float;items:List<OrderItemResponse>;emptyCart() | emptyCart() is the null-id response for a client with no cart |
+| OrderResponseAssembler | usecase | domain/order/core/usecase | assemble(OrderEntity)->OrderResponse;assembleAll(Collection)->List<OrderResponse> | not a use case; reads every product name a page mentions in one query |
+| OrderResponseAssemblerTest | usecase | src/test/java/md/ramaiana/foodmarket/domain/order/core/usecase | 4 tests: single lookup, deleted product, empty order, name ordering | test |
+| Orders | fe-component | frontend/src/components/orders | Orders | date-range order history over POST /order/getOrdersByPeriod; expandable rows for line items |
+| OrdersDataDto | dto | shared/dataexchange/dto | orders:List<ErpOrderDto> | root of orders-data-*.xml |
+| OrderSearchByPeriodUseCase | usecase | domain/order/core/usecase | execute(OrderListRequest)->OrderListResponse | sortColumn is whitelisted against SORTABLE_PROPERTIES |
+| OrderState | enum | shared/enums | NEW;PLACED;EXPORTED;PROCESSED;NOT_PROCESSED | PROCESSED/NOT_PROCESSED are reserved; nothing sets them |
+| OrderUpdateProductUseCase | usecase | domain/order/core/usecase | execute(UpdateOrderProductRequest)->OrderResponse | sets a line quantity outright |
 | PagedResponse | response | shared/response | items:List<T>;currentPage:int;pageSize:int;totalPages:int;totalElements:long | generic paging envelope shared by all /admin/*/search endpoints |
 | Partners | fe-component | frontend/src/components/home | renders partner logos grid |  |
 | PasswordChangeRequest | request | domain/auth/core/request | currentPassword:String;newPassword:String | record; no strength constraint, matching RegisterRequest |
@@ -178,7 +192,7 @@ Schema: `| id | kind | dir | api | note |` — `dir` omits the prefix `src/main/
 | PriceType | enum | shared/enums | LOCAL;RETAIL_ZONE1;RETAIL_ZONE2;RETAIL_ZONE3;SALE |  |
 | ProductAccessVoter | voter | domain/product/presentation/voter | assertCanListGroups();assertCanListProducts();assertCanSearch() |  |
 | ProductController | controller | domain/product/presentation/controller | listGroups(Integer,Integer)->List<ProductGroupResponse>;search(Integer,Integer,Integer,String,int,int,String,Sort.Direction)->PagedResponse<ProductResponse> | one paged product endpoint; every filter on it is optional |
-| ProductEntity | entity | domain/product/data | id:Integer;name:String;unit:String;inPackage:Float;erpCode:String;barCode:String;weight:Float;brandId:Integer;groupId:Integer;createdAt:Instant;deletedAt:Instant;updatedAt:Instant;prices:Set | inPackage maps to column "package"; equals/hashCode on id+erpCode |
+| ProductEntity | entity | domain/product/data | id:Integer;name:String;unit:String;inPackage:Float;erpCode:String;barCode:String;weight:Float;brandId:Integer;groupId:Integer;createdAt:Instant;deletedAt:Instant;updatedAt:Instant;prices:Set;findPrice() | inPackage maps to column "package"; equals/hashCode on id+erpCode; findPrice keys on storage AND tier |
 | ProductFindByErpCodeUseCase | usecase | domain/product/core/usecase | execute(String)->ProductEntity | DEVIATION: no @Transactional |
 | ProductGroupEntity | entity | domain/product/data | id:Integer;name:String;parentGroupId:Integer;childGroups:List;erpCode:String;createdAt:Instant;deletedAt:Instant;updatedAt:Instant;withName();withParentGroupId();idDeleted();addChildIfAbsent();hasChildren();hasParent() | DEVIATION: idDeleted() typo for isDeleted; equals/hashCode on id+erpCode |
 | ProductGroupRepository | repo | domain/product/data | findByParentGroupIdAndDeletedAtIsNull;findByParentGroupIdIsNullAndDeletedAtIsNull;existsByParentGroupId;findByErpCode;findAllNonEmpty |  |
@@ -188,8 +202,8 @@ Schema: `| id | kind | dir | api | note |` — `dir` omits the prefix `src/main/
 | ProductGroupSearchUseCase | usecase | domain/product/core/usecase | execute(Integer,Integer)->List<ProductGroupResponse> | returns ONE level; the whole-tree walk was ~10k queries |
 | ProductLoadUseCase | usecase | domain/product/core/usecase | execute(ProductReadResult)->void | DEVIATION: bare @Transactional |
 | ProductReadResult | dto | shared/dataexchange/core/data | groups:Map;products:Map;brands:Map;erpCodes:Map | erpCodes value is String[]{parentCode,brandCode} |
-| ProductRepository | repo | domain/product/data | findByIdAndDeletedAtIsNull;findNameById;findByErpCode | paged and grouped lookups come from ProductRepositoryCustom |
-| ProductRepositoryCustom | repo | domain/product/data | searchInStock;findGroupIdsInStock | hand-written fragment; @Query cannot return Page and Criteria cannot reach balances |
+| ProductRepository | repo | domain/product/data | findByIdAndDeletedAtIsNull;findNameById;findByErpCode | paged, grouped and bulk-name lookups come from ProductRepositoryCustom |
+| ProductRepositoryCustom | repo | domain/product/data | searchInStock;findGroupIdsInStock;findNamesByIds | hand-written fragment; @Query cannot return Page and Criteria cannot reach balances |
 | ProductRepositoryImpl | repo | domain/product/data | searchInStock;findGroupIdsInStock | NamedParameterJdbcTemplate + JdbcAggregateOperations; pages ids then loads aggregates so prices come back |
 | ProductResponse | response | domain/product/core/response | id:Integer;name:String;groupId:Integer;brandId:Integer;inPackage:Float;barCode:String;unit:String;weight:Float;prices:List<PriceResponse> |  |
 | Products | fe-component | frontend/src/components/products | Products |  |
@@ -225,7 +239,7 @@ Schema: `| id | kind | dir | api | note |` — `dir` omits the prefix `src/main/
 | RightMenu | fe-component | frontend/src/components/navigation | RightMenu |  |
 | Role | enum | shared/enums | ADMIN;USER | carries lowercase dbValue (still unread); checked by AccessVoter.assertUserIsAdmin() |
 | rootReducer | fe-reducer | frontend/src/store/reducers | combineReducers({authReducer,cartReducer}) | file is index.js |
-| ScheduleDataService | service | shared/schedule | runDataExchange()->void | exportOrders() is an empty TODO stub |
+| ScheduleDataService | service | shared/schedule | runDataExchange()->void | runs the three importers then ExportOrdersUseCase, each in its own try/catch |
 | SecureTokenGenerator | util | shared/util | generate()->String;hash(String)->String | only the hash is ever persisted; raw token exists only in memory and in the emailed link |
 | SecureTokenGeneratorTest | util | src/test/java/md/ramaiana/foodmarket/shared/util | 5 tests: url-safe length, uniqueness, hash stable, hash differs from input, hash differs per input | test |
 | SecurityConfig | config | config | securityFilterChain;authenticationManager;passwordEncoder;authenticationProvider;corsConfigurationSource |  |
@@ -241,7 +255,7 @@ Schema: `| id | kind | dir | api | note |` — `dir` omits the prefix `src/main/
 | StorageSearchUseCase | usecase | domain/storage/core/usecase | findByErpCode(String)->StorageEntity;findAll()->List<StorageResponse> | DEVIATION: two public methods, no execute(), no @Transactional |
 | TargetAudience | fe-component | frontend/src/components/home | renders target-audience cards grid |  |
 | UnauthorizedException | exception | shared/exception/http |  |  |
-| UpdateOrderRequest | request | domain/order/core/request | orderId:Integer;productId:Integer;quantity:float |  |
+| UpdateOrderProductRequest | request | domain/order/core/request | productId:Integer;quantity:float |  |
 | UseCase | annotation | shared/annotation |  | @Component meta-annotation marking use-case beans |
 | UserAccessVoter | voter | domain/auth/presentation/voter | assertCanSearch();assertCanActivate() | both delegate to assertUserIsAdmin() |
 | UserController | controller | domain/auth/presentation/controller | search(...)->PagedResponse<AppUserResponse>;activate(Integer)->AppUserResponse | admin-only |

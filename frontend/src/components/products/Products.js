@@ -19,7 +19,7 @@ import Groups from "./Groups";
 import Grid from "@material-ui/core/Grid";
 import ProductsList from "./ProductsList";
 import {handleError} from "../../store/actions/authActions";
-import {addProductToCart, changeQuantity, selectProduct} from "../../store/actions/cartActions";
+import {addProductToCart, changeQuantity, fetchCart, selectProduct} from "../../store/actions/cartActions";
 import {withTranslation} from "react-i18next";
 
 const ROWS_PER_PAGE_OPTIONS = [10, 25, 50];
@@ -237,10 +237,34 @@ class Products extends Component {
     }
 
     addToCart = () => {
-        const {selectedProduct, orderId} = this.props.cart;
-        if (selectedProduct) {
-            this.props.addProductToCart(selectedProduct.id, orderId, selectedProduct.quantity);
+        const {selectedProduct} = this.props.cart;
+        if (selectedProduct && !this.blockedFromAdding()) {
+            this.props.addProductToCart(selectedProduct.id, this.state.filter.storageId,
+                Number(selectedProduct.quantity));
         }
+    }
+
+    /**
+     * Why the selected product cannot be added right now, or null when it can.
+     *
+     * A line is priced per (product, storage, tier), so an order is tied to one storage: the
+     * catalogue's "all storages" view has no price to order at, and a cart already opened against
+     * another storage cannot take this one.
+     */
+    blockedFromAdding = () => {
+        const {filter} = this.state;
+        const {cart, t} = this.props;
+
+        if (filter.storageId === 0) {
+            return t('products.addToCart.selectStorage');
+        }
+        if (cart.storageId !== null && cart.storageId !== undefined && cart.storageId !== filter.storageId) {
+            return t('products.addToCart.storageLocked');
+        }
+        if (!(Number(cart.selectedProduct.quantity) >= 1)) {
+            return t('products.addToCart.quantityTooSmall');
+        }
+        return null;
     }
 
     changeSelectedProduct = (event) => {
@@ -251,6 +275,8 @@ class Products extends Component {
         this.fetchStorages();
         this.fetchBrands();
         this.fetchGroups();
+        // The cart lives on the server; this is what recovers it after a reload.
+        this.props.fetchCart();
     }
 
     render() {
@@ -262,6 +288,7 @@ class Products extends Component {
             loadingGroupIds, selectedGroupId, pageNo, pageSize, totalProducts,
             isFetchingGroups, isFetchingProducts
         } = this.state;
+        const addBlockedReason = cart.selectedProduct.id !== null ? this.blockedFromAdding() : null;
 
         return (
             <Grid container className={classes.root}>
@@ -319,14 +346,19 @@ class Products extends Component {
                         <TextField autoFocus
                                    fullWidth
                                    type="number"
+                                   inputProps={{min: 1}}
                                    value={cart.selectedProduct.quantity}
                                    onChange={this.changeSelectedProduct}
                                    disabled={cart.isAdding}
                         />
+                        {addBlockedReason &&
+                        <DialogContentText color="error">
+                            {addBlockedReason}
+                        </DialogContentText>}
                     </DialogContent>
                     <DialogActions>
                         <Button onClick={this.addToCart}
-                                disabled={cart.isAdding}
+                                disabled={cart.isAdding || addBlockedReason !== null}
                         >
                             {t('common.ok')}
                         </Button>
@@ -350,6 +382,7 @@ const mapStateToProps = state => ({
 
 export default withTranslation()(connect(mapStateToProps, {
     addProductToCart,
+    fetchCart,
     selectProduct,
     changeQuantity
 })(withStyles(styles)(Products)));

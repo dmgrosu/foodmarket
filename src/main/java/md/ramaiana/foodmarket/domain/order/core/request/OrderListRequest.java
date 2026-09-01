@@ -1,6 +1,5 @@
 package md.ramaiana.foodmarket.domain.order.core.request;
 
-import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -9,7 +8,9 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.domain.Sort;
 
 /**
- * Request for listing orders.
+ * Request for listing the caller's orders over a period.
+ * <p>
+ * Carries no client id: orders are read for the authenticated user's own client.
  */
 @Data
 @NoArgsConstructor
@@ -21,9 +22,6 @@ public class OrderListRequest {
 
   @NotNull
   private Long dateTo;
-
-  @Nullable
-  private Integer clientId;
 
   @NotNull
   @Min(value = 0, message = "Page number must be >= 0")

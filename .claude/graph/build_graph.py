@@ -386,8 +386,8 @@ def verify():
             problems.append("edges.md: unknown target node '%s'" % target)
 
     n_routes = len(graph_routes())
-    if n_routes != 23:
-        problems.append("routes.md: %d rows, expected 23" % n_routes)
+    if n_routes != 25:
+        problems.append("routes.md: %d rows, expected 25" % n_routes)
 
     for r in graph_routes():
         for repo in filter(None, r[7].split(",")):

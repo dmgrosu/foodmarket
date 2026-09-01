@@ -1,6 +1,5 @@
 package md.ramaiana.foodmarket.domain.order.data;
 
-import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -10,6 +9,11 @@ import org.springframework.data.relational.core.mapping.Table;
 
 /**
  * Order Item Entity.
+ * <p>
+ * {@code id} is not a stable handle: Spring Data JDBC deletes and re-inserts {@code @MappedCollection}
+ * children on every save of the owning {@link OrderEntity}, so it is regenerated whenever the order
+ * changes. Callers address a line by its {@code productId}, which is the line's natural key —
+ * {@link OrderEntity#addProduct} merges rather than appending, so a product appears at most once.
  */
 @Getter
 @Setter
@@ -17,7 +21,6 @@ import org.springframework.data.relational.core.mapping.Table;
 @Table("order_product")
 public class OrderItemEntity {
 
-  private UUID uuid = UUID.randomUUID();
   @Id
   private Integer id;
   @NonNull

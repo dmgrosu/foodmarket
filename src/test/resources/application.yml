@@ -13,7 +13,10 @@ jwt:
     secret: ffffffff
     validity: 3600000
 
-dataFolderPath: src/test/resources/dataExchange/
+# Scheduling is on app-wide in tests, so ScheduleDataService runs the importers AND the order
+# exporter on this folder every cycle. Pointed at target/ so a run cannot write files into the
+# source tree; tests that exercise the exchange set their own folder and lengthen the delay.
+dataFolderPath: target/dataExchange/
 # milliseconds
 dataLoadingDelay: 3000
 mailjet:

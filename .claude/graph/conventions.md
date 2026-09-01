@@ -54,6 +54,12 @@ third-party API) does not get a single `execute()`. It splits into three phases 
   `domain/auth/core/usecase/AuthRegisterUseCase.java` and its sibling `RegistrationConfirmationResendUseCase`.
   `MailjetAdapter` carries the same `Propagation.NEVER` at the class level for the same reason.
 
+A use case that reads, then calls out, then writes — `ExportOrdersUseCase` — needs no handler either: the
+handler's job is to sequence validate/write/external, and that is a different order. It keeps one
+`execute()` with **no** `@Transactional` at all and delegates each database step to a component that
+manages its own (`OrderExportRepository`), so the read commits before the file is written and the file
+is closed before the batch is marked. Same shape as the importers, which is why it lives beside them.
+
 A use case that is *only* a database write still gets a single `execute()`. A use case that is *only* an
 external call (e.g. `RegistrationConfirmationMailUseCase`) also gets a single `execute()`, annotated
 `Propagation.NEVER`, and is called directly from `executeSideEffects` — it does not need its own handler.
@@ -130,7 +136,9 @@ filter, before the transaction opened. See `domain/auth/.../ProfileFindUseCase` 
 
 ## Voter shape
 
-`@Component`, extends `shared/util/abstraction/voter/AccessVoter`, **one `assertCanX()` per controller handler**, names corresponding 1:1. Today every non-auth voter method is an identical `assertUserIsAuthenticated()` delegate — the per-endpoint granularity is scaffolding for logic that does not exist yet. No voter inspects the resource being accessed, and `AccessVoter.getCurrentUser()` returns `void`, so subclasses cannot do owner or role checks through it.
+`@Component`, extends `shared/util/abstraction/voter/AccessVoter`, **one `assertCanX()` per controller handler**, names corresponding 1:1. Today every non-auth voter method is an identical `assertUserIsAuthenticated()` delegate — the per-endpoint granularity is scaffolding for logic that does not exist yet.
+
+A voter cannot decide whether the caller may touch a *particular* row: it never sees the row, only the request. So resource ownership belongs one layer down, in whatever loads the resource — see `OrderLoader`, the single place an order is fetched for an HTTP caller, which resolves it against the authenticated user's client and reports a foreign one as 404 rather than 403. `AccessVoter.getCurrentUser()` returns the `AppUserEntity`, and `CurrentUserProvider` is the injectable form of the same lookup for use cases (controllers stay two lines, so identity cannot be passed in as an argument).
 
 ## Entity shape — Spring Data JDBC, not JPA
 
@@ -151,6 +159,25 @@ Paged search with an optional filter is a **custom fragment**: `<Repo>Custom` de
 Newer domains (`brand`, `storage`, `price`, `product`) use **`record`s** with an entity-copy compact constructor. Older ones (`auth`, `client`, `order`) use Lombok `@Data @NoArgsConstructor @AllArgsConstructor` classes. `LoginRequest` is a record while its sibling `RegisterRequest` is a class.
 
 **New DTOs should be records.** Validation goes on requests via `jakarta.validation` + `@Valid` at the controller. Only `auth` and `order` have `core/request` packages; other domains take query params directly.
+
+## ERP data exchange
+
+Inbound, the ERP drops `products-data.xml`, `balances-data.xml` and `clients-data.xml` into
+`dataFolderPath`; each `Import*UseCase` reads one and deletes it. Outbound, `ExportOrdersUseCase`
+writes placed orders into `orders-data-<yyyyMMddHHmmssSSS>.xml` and the ERP deletes it.
+
+Two rules make the outbound direction safe, and both are easy to undo by accident:
+
+- **Write the file, then mark the batch exported** — never the reverse. A batch marked exported but
+  never written is lost with nothing to show for it; a batch written but not marked is written again
+  next cycle, and the ERP drops the repeat on the `id` attribute each `<order>` carries.
+- **A unique file per batch, renamed into place.** The document is marshalled to `<name>.xml.tmp` and
+  then `ATOMIC_MOVE`d, so a reader globbing `orders-data-*.xml` can never open a half-written file,
+  and a new batch can never overwrite one the ERP has not collected.
+
+The XML DTOs are Lombok classes, not records, because JAXB binds through a no-arg constructor and
+fields. `OrderExportFlowTest` pins the element and attribute names: they are a contract with a system
+that has no compiler to catch a rename.
 
 ## Transactional email
 
@@ -194,10 +221,11 @@ than rolling their own `@WithMockUser` setup.
 | StorageSearchUseCase | one `execute()`, `@Transactional` | two public methods (`findByErpCode`, `findAll`), neither named execute, no `@Transactional` | serves both HTTP and the ERP importer |
 | StorageController | injects an `accessVoter` | injects no voter; no `storage/presentation/voter/` package exists | oversight; still behind `authenticated()` at the filter chain |
 | OrderEntity, OrderItemEntity | immutable, `@Getter` + final fields | mutable `@Getter @Setter @NoArgsConstructor` | predates the immutable style; carries TODOs to convert |
+| OrderLoader, OrderResponseAssembler | a `@UseCase` with one `execute` | plain `@Component`s in `core/usecase` with several methods | neither answers a request of its own. `OrderLoader` is the single place an order is fetched for an HTTP caller, so the ownership rule has one implementation; `OrderResponseAssembler` is the name lookup six use cases would otherwise repeat. Same shape as `ProductGroupNaming` |
+| ExportOrdersUseCase | noun-first, verb-last | verb-first | matches its `Import*UseCase` siblings in `shared/dataexchange`, not the domain rule |
 | ProductSearchCriteria | lives in `core/request` | lives in `core/usecase` | it is the use case's input record, never bound from HTTP |
 | ClientFindByIdUseCase | returns a `*Response` | returns `ClientEntity`, takes an `AggregateReference` | shaped for `AuthLoginUseCase`'s internal call, not for HTTP |
 | JwtCreateTokenUseCase | one public method | adds `getTokenValidityInSeconds()` | needed by the login response |
 | ProductFindByErpCodeUseCase, BalancesUpdateUseCase | `@Transactional` | none | ERP import path, called inside another transaction |
 | ProductLoadUseCase | `@Transactional(rollbackFor=Exception.class)` | bare `@Transactional` | narrower rollback than the rest of the write path |
-| ScheduleDataService.exportOrders() | implemented | empty TODO stub | the ERP export direction was never built |
 | JwtFilter | `@Component` | plain class, `new JwtFilter(...)` inside `SecurityConfig` | keeps it out of the general servlet filter chain |
